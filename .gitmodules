@@ -1,0 +1,3 @@
+[submodule "third_party/grpc-c"]
+	path = third_party/grpc-c
+	url = https://github.com/shadansari/grpc-c.git
