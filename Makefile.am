@@ -3,7 +3,10 @@ dist_doc_DATA = README.md INSTALL.md
 
 all: grpc-c
 
-protobuf-c:
+protobuf:
+	cd third_party/protobuf; ./autogen.sh; ./configure; make; sudo make install
+
+protobuf-c: protobuf
 	cd third_party/protobuf-c; ./autogen.sh; ./configure; make; sudo make install
 
 grpc:
