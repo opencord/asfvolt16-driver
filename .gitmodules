@@ -7,3 +7,7 @@
 [submodule "third_party/grpc-c"]
 	path = third_party/grpc-c
 	url = https://github.com/Juniper/grpc-c.git
+[submodule "third_party/protobuf-c"]
+	path = third_party/protobuf-c
+	url = https://github.com/shadansari/protobuf-c.git
+	branch = master
