@@ -16,22 +16,22 @@ steps to install grpc
    - place downloaded protobuf folder at grpc/thirdparty
    - place downloaded protobuf-c folder at grpc-c/thirdparty 
    - cd grpc/thirdparty/protobuf
-     ./autogen.sh
-     ./configure
-     make
-     sudo make install
+      - ./autogen.sh
+      - ./configure
+      - make
+      - sudo make install
    - cd grpc/
-     make 
-     sudo make install
+     - make 
+     - sudo make install
 
 steps to install grpc-c 
    - cd grpc-c/thirdparty/protobuf-c
-     ./autogen.sh
-     ./configure
-     export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/protobuf 
-     export LD_LIBRARY_PATH=/usr/local/lib
-     make
-     sudo make install
+     - ./autogen.sh
+     - ./configure
+     - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/protobuf 
+     - export LD_LIBRARY_PATH=/usr/local/lib
+     - make
+     - sudo make install
    
 Apply grpc-c patch 
    - cd grpc-c/ 
@@ -42,25 +42,25 @@ Apply grpc-c patch
          Download these two files from above link and replace at grpc-c/lib or merge these changes manually.)       
      Patch 2:
      Apply patch in service.c.patch and client.c.patch 
-     cp Makefile.am examples/
-     cp bal_server.c grpc-c/examples/
-     cp bal_stub.c grpc-c/examples/
-     cp bal_stub.h grpc-c/examples/
-     autoreconf --install
-     mkdir build && cd build
-     ../configure
-     make
-     sudo make install
+     - cp Makefile.am examples/
+     - cp bal_server.c grpc-c/examples/
+     - cp bal_stub.c grpc-c/examples/
+     - cp bal_stub.h grpc-c/examples/
+     - autoreconf --install
+     - mkdir build && cd build
+     - ../configure
+     - make
+     - sudo make install
    
 To obtain proto files - Have a repo sync of opencord code base
-     cp opencord/incubator/voltha/voltha/adapters/asfvolt16_olt/protos/* examples/
+     - cp opencord/incubator/voltha/voltha/adapters/asfvolt16_olt/protos/* examples/
 
-To autogenerate code from proto files
-     make autoGenrate
+To autogenerate code from proto files:
+     - make autoGenrate
        
-Build bal_server
-     make clean_all
-     make V=0 
+Build bal_server:
+     - make clean_all
+     - make V=0 
 
 The ultimate executable bal_server can be found under ~/grpc-c/build/examples/.libs/
 
