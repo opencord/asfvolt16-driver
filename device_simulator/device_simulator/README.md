@@ -1,4 +1,4 @@
-GRPC_C INTEGRATION WITH BAL
+GRPC_C DEVICE SIMULATOR
 
  This is a executable(bal_server), which will recevie asfvolt16 adapter grpc-c messages and call respective device stub.
  It will send recevied responses/asynchronous indications from Device stub to Adapter.
