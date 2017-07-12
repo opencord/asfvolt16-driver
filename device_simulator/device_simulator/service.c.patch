@@ -1,0 +1,20 @@
+*** grpc-c_orig/lib/service.c     2017-07-03 16:52:38.239488835 +0530
+--- grpc-c/lib/service.c	2017-07-12 15:34:43.408198001 +0530
+***************
+*** 1224,1230 ****
+  	return NULL;
+      }
+  
+!     snprintf_safe(buf, sizeof(buf), "%s%s", PATH_GRPC_C_DAEMON_SOCK, name);
+  
+      if (buf[0] == '\0') {
+  	return NULL;
+--- 1224,1231 ----
+  	return NULL;
+      }
+  
+!     /*snprintf_safe(buf, sizeof(buf), "%s%s", PATH_GRPC_C_DAEMON_SOCK, name);*/
+!     snprintf_safe(buf, sizeof(buf), "%s", name);
+  
+      if (buf[0] == '\0') {
+  	return NULL;

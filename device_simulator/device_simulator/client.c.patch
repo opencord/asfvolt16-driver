@@ -1,0 +1,37 @@
+*** grpc-c_orig/lib/client.c 2017-07-03 16:52:30.467488835 +0530
+--- grpc-c/lib/client.c	2017-07-12 15:34:28.904950001 +0530
+***************
+*** 134,141 ****
+      }
+  
+      bzero(buf, BUFSIZ);
+!     snprintf_safe(buf, sizeof(buf), "%s%s", PATH_GRPC_C_DAEMON_SOCK, 
+! 		  server_name);
+      if (buf[0] == '\0') {
+  	return NULL;
+      }
+--- 134,141 ----
+      }
+  
+      bzero(buf, BUFSIZ);
+!     /*snprintf_safe(buf, sizeof(buf), "%s%s", PATH_GRPC_C_DAEMON_SOCK, server_name);*/
+!     snprintf_safe(buf, sizeof(buf), "%s", server_name);
+      if (buf[0] == '\0') {
+  	return NULL;
+      }
+***************
+*** 1039,1049 ****
+--- 1039,1051 ----
+      gpr_timespec tout;
+      grpc_c_context_t *context;
+  
++ #if 0
+      if (context == NULL) {
+  	gpr_log(GPR_ERROR, "Invalid context pointer provided");
+  	rc = GRPC_C_FAIL;
+  	goto cleanup;
+      }
++ #endif
+  
+      context = gc_client_prepare_ops(client, mdarray, 1, input, NULL, 
+  				    client_streaming, server_streaming, NULL, 
