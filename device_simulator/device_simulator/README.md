@@ -42,7 +42,7 @@ Apply grpc-c patch
          Download these two files from above link and replace at grpc-c/lib or merge these changes manually.)       
      Patch 2:
      Apply patch in service.c.patch and client.c.patch 
-     - cp Makefile.am examples/
+     - cp Makefile.am grpc-c/examples/
      - cp bal_server.c grpc-c/examples/
      - cp bal_stub.c grpc-c/examples/
      - cp bal_stub.h grpc-c/examples/
@@ -52,7 +52,7 @@ Apply grpc-c patch
      - make
      - sudo make install
    
-To obtain proto files - Have a repo sync of opencord code base
+To obtain proto files - Have a repo sync of opencord code base:
      - cp opencord/incubator/voltha/voltha/adapters/asfvolt16_olt/protos/* examples/
 
 To autogenerate code from proto files:
