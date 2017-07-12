@@ -46,6 +46,7 @@ Apply grpc-c patch
      - cp bal_server.c grpc-c/examples/
      - cp bal_stub.c grpc-c/examples/
      - cp bal_stub.h grpc-c/examples/
+     Note: Update server IP in bal_server.c and voltha adaptor IP in bal_stub.c
      - autoreconf --install
      - mkdir build && cd build
      - ../configure
