@@ -60,43 +60,58 @@ void *stub_thread(void *v)
             break;
          case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
             {
-               BalOnuDiscoveryInfo onuDiscoveryInfo;
-               memset(&onuDiscoveryInfo, 0, sizeof(BalOnuDiscoveryInfo));
-               bal_onu_discovery_info__init(&onuDiscoveryInfo);
-               balIndCfg.balobjinfo->onudiscoveryinfo = &onuDiscoveryInfo;
                balIndCfg.balobjinfo->u_case = BAL_OBJ_IND__U_ONU_DISCOVERY_INFO;
-               BalSerialNumber serial_number;
-               memset(&serial_number, 0, sizeof(BalSerialNumber));
-               bal_serial_number__init(&serial_number);
-               balIndCfg.balobjinfo->onudiscoveryinfo->serial_number = &serial_number;
-               char vendor_id[20];
-               memset(&vendor_id, 0, 20);
-               strcpy(vendor_id,"4252434D");
-               balIndCfg.balobjinfo->onudiscoveryinfo->serial_number->vendor_id = vendor_id;
-               char vendor_specific[20];
-               memset(&vendor_specific, 0, 20);
-               strcpy(vendor_specific,"12345678");
-               balIndCfg.balobjinfo->onudiscoveryinfo->serial_number->vendor_specific = vendor_specific;
+               BalSubscriberTerminalCfg onudiscoveryinfo;
+               memset(&onudiscoveryinfo, 0, sizeof(BalSubscriberTerminalCfg));
+               bal_subscriber_terminal_cfg__init(&onudiscoveryinfo);
+               balIndCfg.balobjinfo->onudiscoveryinfo = &onudiscoveryinfo;
+
+               BalSubscriberTerminalKey subTermKey;
+               memset(&subTermKey, 0, sizeof(BalSubscriberTerminalKey));
+               bal_subscriber_terminal_key__init(&subTermKey);
+               balIndCfg.balobjinfo->onudiscoveryinfo->key = &subTermKey;
+               balIndCfg.balobjinfo->onudiscoveryinfo->key->has_sub_term_id = 1;
+               balIndCfg.balobjinfo->onudiscoveryinfo->key->sub_term_id = 65535;
+               balIndCfg.balobjinfo->onudiscoveryinfo->key->has_intf_id = 1;
+               balIndCfg.balobjinfo->onudiscoveryinfo->key->intf_id = 0;
+               
+               BalSubscriberTerminalCfgData subTermCfgData;
+               memset(&subTermCfgData, 0, sizeof(BalSubscriberTerminalCfgData));
+               bal_subscriber_terminal_cfg_data__init(&subTermCfgData);
+               balIndCfg.balobjinfo->onudiscoveryinfo->data = &subTermCfgData;
                if(BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE == prevObjType)
                {
-                  balIndCfg.balobjinfo->onudiscoveryinfo->has_admin_state = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->admin_state = BAL_STATE__BAL_STATE_DOWN;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->has_oper_status = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->oper_status = BAL_STATUS__BAL_STATUS_DOWN;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_admin_state = 1;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->admin_state = BAL_STATE__BAL_STATE_DOWN;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_oper_status = 1;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->oper_status = BAL_STATUS__BAL_STATUS_DOWN;
                   printf("\n***************************************************\n");
                   printf("Sending ONU discovery message\n");
                   printf("***************************************************\n");
                }
                else
                {
-                  balIndCfg.balobjinfo->onudiscoveryinfo->has_admin_state = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->admin_state = BAL_STATE__BAL_STATE_UP;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->has_oper_status = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->oper_status = BAL_STATUS__BAL_STATUS_UP;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_admin_state = 1;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->admin_state = BAL_STATE__BAL_STATE_UP;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_oper_status = 1;
+                  balIndCfg.balobjinfo->onudiscoveryinfo->data->oper_status = BAL_STATUS__BAL_STATUS_UP;
                   printf("***************************************************\n");
                   printf("ONU Activation Successful\n");
                   printf("***************************************************\n");
                }
+               BalSerialNumber serial_number;
+               memset(&serial_number, 0, sizeof(BalSerialNumber));
+               bal_serial_number__init(&serial_number);
+               balIndCfg.balobjinfo->onudiscoveryinfo->data->serial_number = &serial_number;
+               char vendor_id[20];
+               memset(&vendor_id, 0, 20);
+               strcpy(vendor_id,"4252434D");
+               balIndCfg.balobjinfo->onudiscoveryinfo->data->serial_number->vendor_id = vendor_id;
+               char vendor_specific[20];
+               memset(&vendor_specific, 0, 20);
+               strcpy(vendor_specific,"12345678");
+               balIndCfg.balobjinfo->onudiscoveryinfo->data->serial_number->vendor_specific = vendor_specific;
+
                prevObjType = front->obj_type;
             }
             break;
