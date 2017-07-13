@@ -46,7 +46,7 @@ Apply grpc-c patch
      - cp bal_server.c grpc-c/examples/
      - cp bal_stub.c grpc-c/examples/
      - cp bal_stub.h grpc-c/examples/
-         - Note: Update server IP in bal_server.c and voltha adaptor IP in bal_stub.c
+         - Note: Update voltha adaptor IP in bal_stub.c
      - autoreconf --install
      - mkdir build && cd build
      - ../configure
@@ -64,7 +64,7 @@ Build bal_server:
 
 The ultimate executable bal_server can be found under ~/grpc-c/build/examples/.libs/
 
-USAGE
+USAGE:
     ./bal_server "serverIP:port"
 
 CONTRIBUTING
