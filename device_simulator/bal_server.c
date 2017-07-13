@@ -242,7 +242,7 @@ int main (int argc, char **argv)
         /*
          * Create server object
          */
-        test_server = grpc_c_server_create("172.24.150.117:50060"); 
+        test_server = grpc_c_server_create(argv[1]); 
         if (test_server == NULL) {
                 printf("Failed to create server\n");
                 exit(1);
