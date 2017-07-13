@@ -65,7 +65,7 @@ Build bal_server:
 The ultimate executable bal_server can be found under ~/grpc-c/build/examples/.libs/
 
 USAGE
-    ./bal_server test
+    ./bal_server "serverIP:port"
 
 CONTRIBUTING
      <TBD>
