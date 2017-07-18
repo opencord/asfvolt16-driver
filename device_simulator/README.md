@@ -60,7 +60,8 @@ To autogenerate code from proto files:
      - make autoGenrate
        
 Build bal_server:
-     - make clean_all;make V=0 
+     - Note: Remove "-O2" from Makefile
+     - make clean_all;make 
 
 The ultimate executable bal_server can be found under ~/grpc-c/build/examples/.libs/
 
