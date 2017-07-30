@@ -31,8 +31,9 @@ $(shell find . -type f \( -name '*.h' -o -name '*.c' \) -a -exec sed -i -e 's/ba
 $(shell find . -type f \( -name '*.h' -o -name '*.c' \) -a -exec sed -i -e 's/bal_osmsg.proto.h/bal_osmsg.grpc-c.h/g' {} + )
 $(shell find . -type f \( -name '*.h' -o -name '*.c' \) -a -exec sed -i -e 's/bal_model_ids.proto.h/bal_model_ids.grpc-c.h/g' {} + )
 $(shell find . -type f \( -name '*.h' -o -name '*.c' \) -a -exec sed -i -e 's/bal.proto.h/bal.grpc-c.h/g' {} + )
-  
-autoGenrate:
+$(shell find . -type f \( -name '*.h' -o -name '*.c' \) -a -exec sed -i -e 's/bal_indications.proto.h/bal_indications.grpc-c.h/g' {} + )
+
+autogen:
 	protoc -I ${srcdir} --grpc-c_out=. --plugin=protoc-gen-grpc-c=../compiler/protoc-gen-grpc-c ${srcdir}/bal_errno.proto ${srcdir}/bal_model_ids.proto ${srcdir}/bal_msg_type.proto ${srcdir}/bal_osmsg.proto ${srcdir}/bal_indications.proto ${srcdir}/bal_model_types.proto ${srcdir}/bal_obj.proto ${srcdir}/bal.proto $(replace)
 
 LDADD = \
