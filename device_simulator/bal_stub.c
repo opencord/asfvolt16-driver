@@ -15,195 +15,235 @@
 
 void *stub_thread(void *v) 
 {
-   int status;
-   grpc_c_client_t *client = grpc_c_client_init("172.24.150.114:60001", "bal_client", NULL);
-   pthread_mutex_lock(&lock);
-   pthread_cond_wait(&cv, &lock);
-   while(NULL != shared_queue->front)
-   {
-      BalObjId prevObjType;
-      struct QNode *front = deQueue(shared_queue);
-      /* prepare and send rpc response */
-      BalIndications balIndCfg;
-      memset(&balIndCfg, 0, sizeof(BalIndications));
-      bal_indications__init(&balIndCfg);
-      BalObjInd bal_obj_ind;
-      memset(&bal_obj_ind, 0, sizeof(BalObjInd));
-      bal_obj_ind__init(&bal_obj_ind);
-      balIndCfg.u_case = BAL_INDICATIONS__U_BAL_OBJ_INFO;
-      balIndCfg.balobjinfo = &bal_obj_ind;
-      balIndCfg.balobjinfo->has_objtype = 1;
-      balIndCfg.balobjinfo->objtype = front->obj_type;
-      balIndCfg.balobjinfo->has_status = 1;
-      balIndCfg.balobjinfo->status = front->status;
-      char keystr;
-      balIndCfg.balobjinfo->keystr = &keystr;
-      switch(front->obj_type)
-      {
-         case BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL:
-            {
-               printf("***************************************************\n");
-               printf("Successful Indication sent for ACCESS_TERMINAL\n");
-               printf("***************************************************\n");
-               balIndCfg.balobjinfo->u_case = BAL_OBJ_IND__U__NOT_SET;
-               prevObjType = front->obj_type;
-            }
-            break;
-         case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
-            {
-               printf("***************************************************\n");
-               printf("Successful Indication sent for PON INTERFACE UP\n");
-               printf("***************************************************\n");
-               balIndCfg.balobjinfo->u_case = BAL_OBJ_IND__U__NOT_SET;
-               prevObjType = front->obj_type;
-            }
-            break;
-         case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
-            {
-               balIndCfg.balobjinfo->u_case = BAL_OBJ_IND__U_ONU_DISCOVERY_INFO;
-               BalSubscriberTerminalCfg onudiscoveryinfo;
-               memset(&onudiscoveryinfo, 0, sizeof(BalSubscriberTerminalCfg));
-               bal_subscriber_terminal_cfg__init(&onudiscoveryinfo);
-               balIndCfg.balobjinfo->onudiscoveryinfo = &onudiscoveryinfo;
+	int status;
+	grpc_c_client_t *client = grpc_c_client_init("172.24.150.167:60001", "bal_client", NULL);
+	pthread_mutex_lock(&lock);
+	pthread_cond_wait(&cv, &lock);
+	while(NULL != shared_queue->front)
+	{
+		BalObjId prevObjType;
+		char vendor_id[20];
+		char vendor_specific[20];
+		struct QNode *front = deQueue(shared_queue);
+		/* prepare and send rpc response */
+		BalIndications balIndCfg;
+		memset(&balIndCfg, 0, sizeof(BalIndications));
+		bal_indications__init(&balIndCfg);
+		balIndCfg.has_objtype = 1;
+		balIndCfg.objtype = front->obj_type;
+		balIndCfg.device_id = front->device_id;
+		printf("Device Id = %s\n", front->device_id);
+		switch(front->obj_type)
+		{
+			case BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL:
+				{
+					printf("***************************************************\n");
+					printf("Successful Indication sent for ACCESS_TERMINAL\n");
+					printf("***************************************************\n");
+					balIndCfg.u_case = BAL_INDICATIONS__U_ACCESS_TERM_IND;
+					prevObjType = front->obj_type;
+				}
+				break;
+			case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
+				{
+					printf("***************************************************\n");
+					printf("Successful Indication sent for PON INTERFACE UP\n");
+					printf("***************************************************\n");
+					balIndCfg.u_case = BAL_INDICATIONS__U_INTERFACE_IND;
+					prevObjType = front->obj_type;
+				}
+				break;
+			case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
+				{
+					BalSubscriberTerminalKey subTermKey;
+					memset(&subTermKey, 0, sizeof(BalSubscriberTerminalKey));
+					bal_subscriber_terminal_key__init(&subTermKey);
 
-               BalSubscriberTerminalKey subTermKey;
-               memset(&subTermKey, 0, sizeof(BalSubscriberTerminalKey));
-               bal_subscriber_terminal_key__init(&subTermKey);
-               balIndCfg.balobjinfo->onudiscoveryinfo->key = &subTermKey;
-               balIndCfg.balobjinfo->onudiscoveryinfo->key->has_sub_term_id = 1;
-               balIndCfg.balobjinfo->onudiscoveryinfo->key->sub_term_id = 65535;
-               balIndCfg.balobjinfo->onudiscoveryinfo->key->has_intf_id = 1;
-               balIndCfg.balobjinfo->onudiscoveryinfo->key->intf_id = 0;
-               
-               BalSubscriberTerminalCfgData subTermCfgData;
-               memset(&subTermCfgData, 0, sizeof(BalSubscriberTerminalCfgData));
-               bal_subscriber_terminal_cfg_data__init(&subTermCfgData);
-               balIndCfg.balobjinfo->onudiscoveryinfo->data = &subTermCfgData;
-               if(BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE == prevObjType)
-               {
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_admin_state = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->admin_state = BAL_STATE__BAL_STATE_DOWN;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_oper_status = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->oper_status = BAL_STATUS__BAL_STATUS_DOWN;
-                  printf("\n***************************************************\n");
-                  printf("Sending ONU discovery message\n");
-                  printf("***************************************************\n");
-               }
-               else
-               {
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_admin_state = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->admin_state = BAL_STATE__BAL_STATE_UP;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->has_oper_status = 1;
-                  balIndCfg.balobjinfo->onudiscoveryinfo->data->oper_status = BAL_STATUS__BAL_STATUS_UP;
-                  printf("***************************************************\n");
-                  printf("ONU Activation Successful\n");
-                  printf("***************************************************\n");
-               }
-               BalSerialNumber serial_number;
-               memset(&serial_number, 0, sizeof(BalSerialNumber));
-               bal_serial_number__init(&serial_number);
-               balIndCfg.balobjinfo->onudiscoveryinfo->data->serial_number = &serial_number;
-               char vendor_id[20];
-               memset(&vendor_id, 0, 20);
-               strcpy(vendor_id,"4252434D");
-               balIndCfg.balobjinfo->onudiscoveryinfo->data->serial_number->vendor_id = vendor_id;
-               char vendor_specific[20];
-               memset(&vendor_specific, 0, 20);
-               strcpy(vendor_specific,"12345678");
-               balIndCfg.balobjinfo->onudiscoveryinfo->data->serial_number->vendor_specific = vendor_specific;
+					BalSerialNumber serial_number;
+					memset(&serial_number, 0, sizeof(BalSerialNumber));
+					bal_serial_number__init(&serial_number);
 
-               prevObjType = front->obj_type;
-            }
-            break;
-         case BAL_OBJ_ID__BAL_OBJ_ID_PACKET:
-            {
-               balIndCfg.balobjinfo->u_case = BAL_OBJ_IND__U_PKT_DATA;
-            }
-            break;
-         default:
-            {
-               balIndCfg.balobjinfo->u_case = BAL_OBJ_IND__U__NOT_SET;
-               prevObjType = front->obj_type;
-            }
-            break;
-      }
-      BalErr *output;
-      status = bal_ind__bal_ind_info(client, NULL, &balIndCfg, &output, NULL, 0);
-      free(front);
-      pthread_mutex_unlock(&lock);
-      pthread_mutex_lock(&lock);
-      pthread_cond_wait(&cv, &lock);
-   }
-   return NULL;
+					char vendor_id[20];
+					memset(&vendor_id, 0, 20);
+					strcpy(vendor_id,"4252434D");
+					char vendor_specific[20];
+					memset(&vendor_specific, 0, 20);
+					strcpy(vendor_specific,"12345678");
+
+					if(BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE == prevObjType)
+					{
+						balIndCfg.u_case = BAL_INDICATIONS__U_TERMINAL_DISC;
+						BalSubscriberTerminalSubTermDisc terminal_disc;
+						memset(&terminal_disc, 0, sizeof(BalSubscriberTerminalSubTermDisc));
+						bal_subscriber_terminal_sub_term_disc__init(&terminal_disc);
+						balIndCfg.terminal_disc = &terminal_disc;
+
+						balIndCfg.terminal_disc->key = &subTermKey;
+						balIndCfg.terminal_disc->key->has_sub_term_id = 1;
+						balIndCfg.terminal_disc->key->sub_term_id = front->onu_id;
+						balIndCfg.terminal_disc->key->has_intf_id = 1;
+						balIndCfg.terminal_disc->key->intf_id = front->intf_id;
+
+						BalSubscriberTerminalSubTermDiscData subTermCfgData;
+						memset(&subTermCfgData, 0, sizeof(BalSubscriberTerminalSubTermDiscData));
+						bal_subscriber_terminal_sub_term_disc_data__init(&subTermCfgData);
+						balIndCfg.terminal_disc->data = &subTermCfgData;
+						balIndCfg.terminal_disc->data->serial_number = &serial_number;
+						balIndCfg.terminal_disc->data->serial_number->vendor_id = vendor_id;
+						printf("\n***************************************************\n");
+						printf("Sending ONU discovery message\n");
+						printf("***************************************************\n");
+					}
+					else
+					{
+						balIndCfg.u_case = BAL_INDICATIONS__U_TERMINAL_IND;
+						BalSubscriberTerminalInd terminal_ind;
+						memset(&terminal_ind, 0, sizeof(BalSubscriberTerminalInd));
+						bal_subscriber_terminal_ind__init(&terminal_ind);
+						balIndCfg.terminal_ind = &terminal_ind;
+
+						balIndCfg.terminal_ind->key = &subTermKey;
+						balIndCfg.terminal_ind->key->has_sub_term_id = 1;
+						balIndCfg.terminal_ind->key->sub_term_id = front->onu_id;
+						balIndCfg.terminal_ind->key->has_intf_id = 1;
+						balIndCfg.terminal_ind->key->intf_id = front->intf_id;
+
+						BalSubscriberTerminalIndData subTermCfgData;
+						memset(&subTermCfgData, 0, sizeof(BalSubscriberTerminalIndData));
+						bal_subscriber_terminal_ind_data__init(&subTermCfgData);
+						balIndCfg.terminal_ind->data = &subTermCfgData;
+						balIndCfg.terminal_ind->data->has_admin_state = 1;
+						balIndCfg.terminal_ind->data->admin_state = BAL_STATE__BAL_STATE_UP;
+						balIndCfg.terminal_ind->data->has_oper_status = 1;
+						balIndCfg.terminal_ind->data->oper_status = BAL_STATUS__BAL_STATUS_UP;
+						balIndCfg.terminal_ind->data->serial_number = &serial_number;
+						balIndCfg.terminal_ind->data->serial_number->vendor_id = vendor_id;
+						balIndCfg.terminal_ind->data->serial_number->vendor_specific = vendor_specific;
+						printf("***************************************************\n");
+						printf("ONU Activation Successful\n");
+						printf("***************************************************\n");
+					}
+					prevObjType = front->obj_type;
+				}
+				break;
+			case BAL_OBJ_ID__BAL_OBJ_ID_PACKET:
+				{
+					balIndCfg.u_case = BAL_INDICATIONS__U_BAL_OMCI_RESP;
+                                        BalPacketItuOmciChannelRx balomciresp;
+			                memset(&balomciresp, 0, sizeof(BalPacketItuOmciChannelRx));
+                                        bal_packet_itu_omci_channel_rx__init(&balomciresp);
+                                              
+                                        BalPacketKey balomcirespkey;
+			                memset(&balomcirespkey, 0, sizeof(BalPacketKey));
+                                        bal_packet_key__init(&balomcirespkey); 
+                                        balomciresp.key = &balomcirespkey;
+
+                                        BalDest balomcirespkeydest;
+			                memset(&balomcirespkeydest, 0, sizeof(BalDest));
+                                        bal_dest__init(&balomcirespkeydest);
+                                        balomciresp.key->packet_send_dest = &balomcirespkeydest;
+                                        balomciresp.key->packet_send_dest->has_type = 1;
+                                        balomciresp.key->packet_send_dest->type = BAL_DEST_TYPE__BAL_DEST_TYPE_ITU_OMCI_CHANNEL;
+                                        balomciresp.key->packet_send_dest->u_case = BAL_DEST__U_ITU_OMCI_CHANNEL;
+                                
+                                        BalItuOmciChannel itu_omci_channel;
+			                memset(&itu_omci_channel, 0, sizeof(BalItuOmciChannel));
+                                        bal_itu_omci_channel__init(&itu_omci_channel);
+                                        balomciresp.key->packet_send_dest->itu_omci_channel = &itu_omci_channel;
+                                        balomciresp.key->packet_send_dest->itu_omci_channel->has_sub_term_id = 1;
+                                        balomciresp.key->packet_send_dest->itu_omci_channel->sub_term_id = front->onu_id;
+                                        balomciresp.key->packet_send_dest->itu_omci_channel->has_int_id = 1;
+                                        balomciresp.key->packet_send_dest->itu_omci_channel->int_id = front->intf_id;
+				}
+				break;
+			default:
+				{
+					balIndCfg.u_case = BAL_INDICATIONS__U__NOT_SET;
+					prevObjType = front->obj_type;
+				}
+				break;
+		}
+		BalErr *output;
+		status = bal_ind__bal_ind_info(client, NULL, &balIndCfg, &output, NULL, 0);
+		free(front);
+		pthread_mutex_unlock(&lock);
+		pthread_mutex_lock(&lock);
+		pthread_cond_wait(&cv, &lock);
+	}
+	return NULL;
 }
 
 void create_stub_thread() 
 {
-   pthread_t threadId = 0;
+	pthread_t threadId = 0;
 
-   /* create shared queue */
-   shared_queue = createQueue();
+	/* create shared queue */
+	shared_queue = createQueue();
 
-   pthread_create(&threadId, NULL, stub_thread, NULL);      
+	pthread_create(&threadId, NULL, stub_thread, NULL);      
 
 }
 
 /* A utility function to create an empty queue */
 bal_queue *createQueue()
 {
-   shared_queue = (struct Queue*)malloc(sizeof(struct Queue));
-   shared_queue->front = shared_queue->rear = NULL;
-   return shared_queue;
+	shared_queue = (struct Queue*)malloc(sizeof(struct Queue));
+	shared_queue->front = shared_queue->rear = NULL;
+	return shared_queue;
 }
 
 /* A utility function to create a new linked list node */
-struct QNode* newNode(int objKey, int status)
+struct QNode* newNode(int objKey, int status, char *device_id)
 {
-   struct QNode *temp = (struct QNode*)malloc(sizeof(struct QNode));
-   temp->obj_type = objKey;
-   temp->status = status;
-   temp->next = NULL;
-   return temp; 
+	struct QNode *temp = (struct QNode*)malloc(sizeof(struct QNode));
+	temp->obj_type = objKey;
+	temp->status = status;
+	if(device_id != NULL)
+	{
+		memset(temp->device_id, 0, BAL_DEVICE_STR_LEN);
+		memcpy(temp->device_id, device_id, strlen(device_id));
+	}
+	temp->next = NULL;
+	return temp; 
 }
 
 /* The function to add data to shared_queue - Add end of the queue */
-void enQueue(int objKey, int status)
+void enQueue(int objKey, struct QNode *temp)
 {
-   /* Create a new LL node */
-   struct QNode *temp = newNode(objKey, status);
+	/* Create a new LL node */
 
-   /* If queue is empty, then new node is front and rear both */
-   if (shared_queue->rear == NULL)
-   {
-      shared_queue->front = shared_queue->rear = temp;
-      return;
-   }
+	/* If queue is empty, then new node is front and rear both */
+	if (shared_queue->rear == NULL)
+	{
+		shared_queue->front = shared_queue->rear = temp;
+		return;
+	}
 
-   /* Add the new node at the end of queue and change rear */
-   shared_queue->rear->next = temp;
-   shared_queue->rear = temp;
+	/* Add the new node at the end of queue and change rear */
+	shared_queue->rear->next = temp;
+	shared_queue->rear = temp;
 }
 
 /* Function to remove data from shared_queue - FIFO */
 struct QNode *deQueue()
 {
-   /* If queue is empty, return NULL */
-   if (shared_queue->front == NULL)
-   {
-      return NULL;
-   }
+	/* If queue is empty, return NULL */
+	if (shared_queue->front == NULL)
+	{
+		return NULL;
+	}
 
-   /* Store previous front and move front one node ahead */
-   struct QNode *temp = shared_queue->front;
-   shared_queue->front = shared_queue->front->next;
+	/* Store previous front and move front one node ahead */
+	struct QNode *temp = shared_queue->front;
+	shared_queue->front = shared_queue->front->next;
 
-   /* If front becomes NULL, then change rear also as NULL */
-   if (shared_queue->front == NULL)
-   {
-      shared_queue->rear = NULL;
-   }
+	/* If front becomes NULL, then change rear also as NULL */
+	if (shared_queue->front == NULL)
+	{
+		shared_queue->rear = NULL;
+	}
 
-   return temp;
+	return temp;
 }
 
 #endif
