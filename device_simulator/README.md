@@ -57,7 +57,7 @@ To obtain proto files - Have a repo sync of opencord code base:
      - cp opencord/incubator/voltha/voltha/adapters/asfvolt16_olt/protos/* examples/
 
 To autogenerate code from proto files:
-     - make autoGenrate
+     - make autogen
        
 Build bal_server:
      - Note: Remove "-O2" from Makefile
