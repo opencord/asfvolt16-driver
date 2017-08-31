@@ -14,6 +14,15 @@
 ** limitations under the License.
 */
 
+#include "bal_msg_type.grpc-c.h"
+#include "bal_osmsg.grpc-c.h"
+#include "bal_model_ids.grpc-c.h"
+#include "bal_obj.grpc-c.h"
+#include "bal_model_types.grpc-c.h"
+#include "bal_errno.grpc-c.h"
+#include "bal_indications.grpc-c.h"
+#include "bal.grpc-c.h"
+
 /* Global definations */
 pthread_cond_t cv;
 pthread_mutex_t lock;
@@ -24,6 +33,14 @@ pthread_mutex_t lock;
 #define BALSERVER        "bal_server"
 #define BAL_DEVICE_STR_LEN 20
 
+typedef struct BalCoreIpInfo
+{
+   char bal_core_arg1[4];
+   char bal_core_ip_port[24];
+   char bal_core_arg2[4];
+   char bal_shared_lib_ip_port[24];
+}balCoreIpInfo;
+
 /* A linked list (LL) node to store a queue entry */
 struct QNode
 {
@@ -32,6 +49,8 @@ struct QNode
 	int status;
 	int intf_id;
 	int onu_id;
+	char vendor_id[BAL_DEVICE_STR_LEN];
+	char vendor_specific[BAL_DEVICE_STR_LEN];
 	struct QNode *next;
 };
 
@@ -51,3 +70,5 @@ bal_queue *createQueue();
 struct QNode* newNode(int objKey, int status, char *device_id);
 void enQueue(int objKey, struct QNode *temp);
 struct QNode *deQueue();
+grpc_c_client_t *client;
+void stub_bal_init(BalInit *bal_init);

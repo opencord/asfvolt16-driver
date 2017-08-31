@@ -13,13 +13,19 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
-#include <config.h>
-#include <stdio.h>
 
-int
-main (void)
-{
-  puts ("Hello World!");
-  puts ("This is " PACKAGE_STRING ".");
-  return 0;
-}
+#include <stdio.h>
+#include <bal_api.h>
+
+#undef _SYS_QUEUE_H_
+
+/* Includes related to proto buf */
+#include "bal_msg_type.grpc-c.h"
+#include "bal_osmsg.grpc-c.h"
+#include "bal_model_ids.grpc-c.h"
+#include "bal_obj.grpc-c.h"
+#include "bal_model_types.grpc-c.h"
+#include "bal_errno.grpc-c.h"
+#include "bal_indications.grpc-c.h"
+#include "bal.grpc-c.h"
+#include "asfvolt16_driver.h"

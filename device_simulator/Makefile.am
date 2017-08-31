@@ -1,13 +1,13 @@
-bin_PROGRAMS = bal_server
+bin_PROGRAMS = voltha_bal_driver
 
-.PHONY = 
+.PHONY = brcm_lib
 
 HOSTPROG=yes
 
-DEFS += -DBAL_STUB
+DEFS += -UBAL_STUB
 
-bal_server_SOURCES = \
-    bal_server.c \
+voltha_bal_driver_SOURCES = \
+    voltha_bal_driver.c \
     bal_stub.c \
     grpc-c.h \
     bal_errno.grpc-c.h bal_indications.grpc-c.h bal_model_types.grpc-c.h \
@@ -46,16 +46,34 @@ LDADD = \
     -lz \
     -lpthread
 
-EXTRA_bal_server_DEPENDENCIES=
+EXTRA_voltha_bal_driver_DEPENDENCIES=$(EDGECORE_DRIV_LIB) $(BRCM_BAL_LIB)
 
-LIBS = -lrt -lm
+EDGECORE = /home/asfvolt/shared/OpenNetworkLinux/EdgeCore/driver-app
+BRCM_PATH = /home/asfvolt/shared/OpenNetworkLinux/bal_src_release_2.4.3.6/bal_release
+EDGECORE_DRIV_LIB=./libEdgecoreDriver.a
+BRCM_BAL_LIB=./libbal_api_dist.so
+
+LIBS = $(EDGECORE_DRIV_LIB) $(BRCM_BAL_LIB) -lrt -lm
 
 AM_CFLAGS = \
     -I. \
     -I${srcdir}/../lib/h/ \
     -I${srcdir}/../third_party/protobuf-c \
-    -I${srcdir}/../third_party/grpc/include 
+    -I${srcdir}/../third_party/grpc/include \
+    -I${EDGECORE}/.
 
-clean_all: clean
+$(BRCM_BAL_LIB):
+	@cp $(BRCM_PATH)/build/core/lib/libbal_api_dist.so .
 
-all:bal_server$(EXEEXT)
+$(EDGECORE_DRIV_LIB):
+	@cd $(EDGECORE);make 
+	@cp $(EDGECORE)/libEdgecoreDriver.a .
+
+edgecore_lib_clean:
+	@cd $(EDGECORE);make clean
+	@rm -f libEdgecoreDriver.a
+
+clean_all: edgecore_lib_clean clean
+
+all:voltha_bal_driver$(EXEEXT)
+
