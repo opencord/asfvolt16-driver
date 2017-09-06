@@ -13,7 +13,6 @@
 ** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
-
 #include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -32,6 +31,8 @@
 #include "asfvolt16_driver.h"
 #endif
 
+/* Where is BalHeartbeat?? Build massage for now till the proto for heartbeat is resolved*/
+typedef struct bal_heartbeat { unsigned char m[40]; } BalHeartbeat;
 /* Global varibles */
 balCoreIpInfo coreIpPortInfo;
 
@@ -92,11 +93,11 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
    ret_val = context->gcc_stream->write(context, &bal_err, 0);
    if (ret_val != GRPC_C_WRITE_OK) {
       if(ret_val == GRPC_C_WRITE_PENDING) {
-         printf("write is pending, sleep for 10 sec\n", ret_val);
+         printf("write is pending, sleep for 10 sec: %d\n", ret_val);
          sleep(10);
       }
       else {
-         printf("Failed to write\n", ret_val);
+         printf("Failed to write: %d\n", ret_val);
          exit(1);
       }
    }
@@ -280,11 +281,11 @@ void bal__bal_api_init_cb(grpc_c_context_t *context)
    ret_val = context->gcc_stream->write(context, &bal_err, 0);
    if (ret_val != GRPC_C_WRITE_OK) {
       if(ret_val == GRPC_C_WRITE_PENDING) {
-         printf("write is pending, sleep for 10 sec\n", ret_val);
+         printf("write is pending, sleep for 10 sec: %d\n", ret_val);
          sleep(10);
       }
       else {
-         printf("Failed to write\n", ret_val);
+         printf("Failed to write: %d\n", ret_val);
          exit(1);
       }
    }
