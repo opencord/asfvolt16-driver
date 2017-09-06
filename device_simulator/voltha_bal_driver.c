@@ -31,8 +31,6 @@
 #include "asfvolt16_driver.h"
 #endif
 
-/* Where is BalHeartbeat?? Build massage for now till the proto for heartbeat is resolved*/
-typedef struct bal_heartbeat { unsigned char m[40]; } BalHeartbeat;
 /* Global varibles */
 balCoreIpInfo coreIpPortInfo;
 
@@ -404,6 +402,8 @@ void bal_ind__bal_pkt_omci_channel_rx_ind_cb(grpc_c_context_t *context)
 void bal_ind__bal_pkt_ieee_oam_channel_rx_ind_cb(grpc_c_context_t *context)
 {
 }
+
+#if 0
 void bal__bal_api_heartbeat_cb(grpc_c_context_t *context)
 {
    BalHeartbeat *bal_hb;
@@ -444,6 +444,7 @@ void bal__bal_api_heartbeat_cb(grpc_c_context_t *context)
     }
    printf("\nSent HeartBeat Response to Adapter\n");
 }
+#endif
 
 /*
  * Takes socket path as argument
