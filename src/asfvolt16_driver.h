@@ -44,11 +44,11 @@ typedef struct BalCoreIpInfo
    char bal_shared_lib_ip_port[24]; 
 }balCoreIpInfo;
 
-#define ASFVOLT_LOG(log_type, args...) \
+#define ASFVOLT_LOG(log_type, format, args...) \
    if(log_type) \
    {\
       printf("File(%s): Line(%d): ", __FUNCTION__, __LINE__);\
-      printf(args);\
+      printf(format, ## args);\
    }
 
 

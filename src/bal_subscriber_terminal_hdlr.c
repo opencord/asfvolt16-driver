@@ -34,7 +34,7 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
     bcmbal_subscriber_terminal_key subs_terminal_key;
     bcmos_bool skip_onu = BCMOS_FALSE;
 
-    int idx;
+    size_t idx;
 
     subs_terminal_key.sub_term_id = onu_cfg->key->sub_term_id;
     subs_terminal_key.intf_id = onu_cfg->key->intf_id;
