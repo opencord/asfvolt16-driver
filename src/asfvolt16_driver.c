@@ -95,6 +95,12 @@ uint32_t bal_register_indication_cbs()
     cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler )bal_omci_data_indication_cb;
     bcmbal_subscribe_ind(0, &cb_cfg);
 
+    /* Bearer Channel Data */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_packet_data_indication_cb;
+    ind_subgroup = bcmbal_packet_auto_id_bearer_channel_rx;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
 #if 0
     /* Access Terminal Operational State Change */
     cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_acc_term_osc_indication_cb;
@@ -166,11 +172,6 @@ uint32_t bal_register_indication_cbs()
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
     
-    /* Bearer Channel Data */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_packet_data_indication_cb;
-    ind_subgroup = bcmbal_packet_auto_id_bearer_channel_rx;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
     
     /* OAM Channel Data - oam response indication */
     cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_oam_data_indication_cb;
@@ -186,7 +187,7 @@ uint32_t bal_register_indication_cbs()
 /********************************************************************
  *                                                                  *
  *     gRPC service RPC function implementation                     *
- *                                                                  *   
+ *                                                                  *
  ********************************************************************/
 
 /********************************************************************\
@@ -215,7 +216,7 @@ uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo)
     argv[2] = coreInfo->bal_core_ip_port;
     argv[3] = coreInfo->bal_core_arg2;
     argv[4] = coreInfo->bal_shared_lib_ip_port;
-    int argc = 5; 
+    int argc = 5;
     client = grpc_c_client_init(ip_and_port, "bal_client", NULL);
 
     /* Init BAL */
@@ -237,7 +238,7 @@ uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo)
     }
 #endif
 
-    /* Register the call back functions to handle any 
+    /* Register the call back functions to handle any
      * indications from the BAL */
     bcmbal_cb_cfg cb_cfg = {};
     uint16_t ind_subgroup;
@@ -282,7 +283,7 @@ uint32_t asfvolt16_bal_finish(void)
  *               1) Access Terminal Cfg                             *
  *               2) Interface(PON & NNI) Cfg                        *
  *               3) Subscriber Terminal (ONU) cfg                   *
- *               4) Flow Cfg                                        *             
+ *               4) Flow Cfg                                        *
  *               5) Group Cfg (In case of Multicast)                *
  ********************************************************************/
 uint32_t asfvolt16_bal_cfg_set(BalCfg *cfg)
@@ -349,7 +350,7 @@ uint32_t asfvolt16_bal_cfg_set(BalCfg *cfg)
  *               1) Access Terminal Cfg                             *
  *               2) Interface(PON & NNI) Cfg                        *
  *               3) Subscriber Terminal (ONU) cfg                   *
- *               4) Flow Cfg                                        *             
+ *               4) Flow Cfg                                        *
  *               5) Group Cfg (In case of Multicast)                *
  ********************************************************************/
 uint32_t asfvolt16_bal_cfg_clear(BalKey *key)
@@ -419,7 +420,7 @@ uint32_t asfvolt16_bal_cfg_clear(BalKey *key)
  *               1) Access Terminal Cfg                             *
  *               2) Interface(PON & NNI) Cfg                        *
  *               3) Subscriber Terminal (ONU) cfg                   *
- *               4) Flow Cfg                                        *             
+ *               4) Flow Cfg                                        *
  *               5) Group Cfg (In case of Multicast)                *
  ********************************************************************/
 uint32_t asfvolt16_bal_cfg_get(BalKey *key, BalCfg *cfg)

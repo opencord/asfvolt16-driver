@@ -18,7 +18,7 @@
 
 /*static bcmos_mutex bal_ind_lock; - Need to define bcm independent mutex*/
 /********************************************************************\
- * Function    : bal_acc_term_indication_cb                         * 
+ * Function    : bal_acc_term_indication_cb                         *
  * Description : This function will handle the indications for      *
  *               Access Terminal Indication                         *
  *                                                                  *
@@ -27,7 +27,7 @@ bcmos_errno bal_acc_term_indication_cb(bcmbal_obj *obj)
 {
    bcmos_errno result = BCM_ERR_OK;
 
-   if(BCMBAL_OBJ_ID_ACCESS_TERMINAL != obj->obj_type || 
+   if(BCMBAL_OBJ_ID_ACCESS_TERMINAL != obj->obj_type ||
       bcmbal_access_terminal_auto_id_ind != obj->subgroup)
    {
       ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
@@ -49,7 +49,6 @@ bcmos_errno bal_acc_term_indication_cb(bcmbal_obj *obj)
       balIndCfg.device_id = voltha_device_id;
 
       bcmbal_access_terminal_ind *acc_term_ind = (bcmbal_access_terminal_ind *)obj;
-      
 
       BalAccessTerminalInd acessTermInd;
       memset(&acessTermInd, 0, sizeof(BalAccessTerminalInd));
@@ -61,61 +60,61 @@ bcmos_errno bal_acc_term_indication_cb(bcmbal_obj *obj)
       bal_obj__init(&hdr);
       balIndCfg.access_term_ind->hdr = &hdr;
 
-      BalAccessTerminalKey accessTermkey; 
+      BalAccessTerminalKey accessTermkey;
       memset(&accessTermkey, 0, sizeof(BalAccessTerminalKey));
       bal_access_terminal_key__init(&accessTermkey);
-      balIndCfg.access_term_ind->key = &accessTermkey; 
+      balIndCfg.access_term_ind->key = &accessTermkey;
 
-      balIndCfg.access_term_ind->key->has_access_term_id = BAL_GRPC_PRES; 
+      balIndCfg.access_term_ind->key->has_access_term_id = BAL_GRPC_PRES;
       balIndCfg.access_term_ind->key->access_term_id = acc_term_ind->key.access_term_id;
-      
+
       BalAccessTerminalIndData accessTermIndData;
       memset(&accessTermIndData, 0, sizeof(BalAccessTerminalIndData));
       bal_access_terminal_ind_data__init(&accessTermIndData);
-      balIndCfg.access_term_ind->data = &accessTermIndData; 
+      balIndCfg.access_term_ind->data = &accessTermIndData;
 
-      balIndCfg.access_term_ind->data->has_admin_state = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->admin_state = acc_term_ind->data.admin_state; 
-      balIndCfg.access_term_ind->data->has_oper_status = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->oper_status = acc_term_ind->data.oper_status; 
-      balIndCfg.access_term_ind->data->has_iwf_mode = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->iwf_mode = acc_term_ind->data.iwf_mode; 
+      balIndCfg.access_term_ind->data->has_admin_state = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->admin_state = acc_term_ind->data.admin_state;
+      balIndCfg.access_term_ind->data->has_oper_status = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->oper_status = acc_term_ind->data.oper_status;
+      balIndCfg.access_term_ind->data->has_iwf_mode = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->iwf_mode = acc_term_ind->data.iwf_mode;
 
       BalTopology balTop;
       memset(&balTop, 0, sizeof(BalTopology));
       bal_topology__init(&balTop);
-      balIndCfg.access_term_ind->data->topology = &balTop; 
+      balIndCfg.access_term_ind->data->topology = &balTop;
 
-      balIndCfg.access_term_ind->data->topology->has_num_of_nni_ports = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->topology->num_of_nni_ports = 
-                                            acc_term_ind->data.topology.num_of_nni_ports; 
-      balIndCfg.access_term_ind->data->topology->has_num_of_pon_ports = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->topology->num_of_pon_ports = 
-                                            acc_term_ind->data.topology.num_of_pon_ports; 
-      balIndCfg.access_term_ind->data->topology->has_num_of_mac_devs = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->topology->num_of_mac_devs = 
-                                             acc_term_ind->data.topology.num_of_mac_devs; 
-      balIndCfg.access_term_ind->data->topology->has_num_of_pons_per_mac_dev = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->topology->num_of_pons_per_mac_dev = 
-                                      acc_term_ind->data.topology.num_of_pons_per_mac_dev; 
-      balIndCfg.access_term_ind->data->topology->has_pon_family = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->topology->pon_family = 
-                                                   acc_term_ind->data.topology.pon_family; 
-      balIndCfg.access_term_ind->data->topology->has_pon_sub_family = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->topology->pon_sub_family = 
-                                                acc_term_ind->data.topology.pon_sub_family; 
+      balIndCfg.access_term_ind->data->topology->has_num_of_nni_ports = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->topology->num_of_nni_ports =
+                                            acc_term_ind->data.topology.num_of_nni_ports;
+      balIndCfg.access_term_ind->data->topology->has_num_of_pon_ports = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->topology->num_of_pon_ports =
+                                            acc_term_ind->data.topology.num_of_pon_ports;
+      balIndCfg.access_term_ind->data->topology->has_num_of_mac_devs = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->topology->num_of_mac_devs =
+                                             acc_term_ind->data.topology.num_of_mac_devs;
+      balIndCfg.access_term_ind->data->topology->has_num_of_pons_per_mac_dev = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->topology->num_of_pons_per_mac_dev =
+                                      acc_term_ind->data.topology.num_of_pons_per_mac_dev;
+      balIndCfg.access_term_ind->data->topology->has_pon_family = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->topology->pon_family =
+                                                   acc_term_ind->data.topology.pon_family;
+      balIndCfg.access_term_ind->data->topology->has_pon_sub_family = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->topology->pon_sub_family =
+                                                acc_term_ind->data.topology.pon_sub_family;
 
       BalSwVersion balsv;
       memset(&balsv, 0, sizeof(BalSwVersion));
       bal_sw_version__init(&balsv);
-      balIndCfg.access_term_ind->data->sw_version = &balsv; 
+      balIndCfg.access_term_ind->data->sw_version = &balsv;
 
-      balIndCfg.access_term_ind->data->sw_version->has_version_type = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->sw_version->version_type = 
-                                                acc_term_ind->data.sw_version.version_type; 
-      balIndCfg.access_term_ind->data->sw_version->has_major_rev = BAL_GRPC_PRES; 
-      balIndCfg.access_term_ind->data->sw_version->major_rev = 
-                                                   acc_term_ind->data.sw_version.major_rev; 
+      balIndCfg.access_term_ind->data->sw_version->has_version_type = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->sw_version->version_type =
+                                                acc_term_ind->data.sw_version.version_type;
+      balIndCfg.access_term_ind->data->sw_version->has_major_rev = BAL_GRPC_PRES;
+      balIndCfg.access_term_ind->data->sw_version->major_rev =
+                                                   acc_term_ind->data.sw_version.major_rev;
       balIndCfg.access_term_ind->data->sw_version->has_minor_rev = BAL_GRPC_PRES; 
       balIndCfg.access_term_ind->data->sw_version->minor_rev = 
                                                    acc_term_ind->data.sw_version.minor_rev; 
@@ -1487,6 +1486,8 @@ bcmos_errno bal_packet_data_indication_cb(bcmbal_obj *obj)
       /*bcmos_mutex_lock(&bal_ind_lock);-- Need to define bcm independent mutex*/
 
       BalIndications balIndCfg;
+      memset(&balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(&balIndCfg);
       balIndCfg.u_case = BAL_INDICATIONS__U_PKT_DATA;
       balIndCfg.has_objtype = BAL_GRPC_PRES;
       balIndCfg.objtype = obj->obj_type;
@@ -1596,6 +1597,7 @@ bcmos_errno bal_packet_data_indication_cb(bcmbal_obj *obj)
       balIndCfg.pktdata->data->flow_cookie = rx_channel->data.flow_cookie; 
       balIndCfg.pktdata->data->has_pkt = BAL_GRPC_PRES; 
       balIndCfg.pktdata->data->pkt.len = rx_channel->data.pkt.len;
+      balIndCfg.pktdata->data->pkt.data = (uint8_t *)malloc((balIndCfg.pktdata->data->pkt.len)*sizeof(uint8_t)); 
       memcpy(balIndCfg.pktdata->data->pkt.data,  rx_channel->data.pkt.val, balIndCfg.pktdata->data->pkt.len); 
 
       /*bcmos_mutex_unlock(&bal_ind_lock);-- Need to define bcm independent mutex*/

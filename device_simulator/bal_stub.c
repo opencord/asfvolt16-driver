@@ -31,7 +31,7 @@
 
 char *voltha_ip_and_port = NULL;
 
-void *stub_thread(void *v) 
+void *stub_thread(void *v)
 {
    int status;
    pthread_mutex_lock(&lock);
@@ -65,7 +65,7 @@ void *stub_thread(void *v)
                bal_access_terminal_key__init(&accTermKey);
                accTermKey.has_access_term_id = 1;
                accTermKey.access_term_id = 1;
-               
+
                BalAccessTerminalIndData data;
                memset(&data, 0, sizeof(BalAccessTerminalIndData));
                bal_access_terminal_ind_data__init(&data);
@@ -205,11 +205,12 @@ void *stub_thread(void *v)
                BalPacketItuOmciChannelRx balomciresp;
                memset(&balomciresp, 0, sizeof(BalPacketItuOmciChannelRx));
                bal_packet_itu_omci_channel_rx__init(&balomciresp);
-                                              
+
                BalPacketKey balomcirespkey;
                memset(&balomcirespkey, 0, sizeof(BalPacketKey));
-               bal_packet_key__init(&balomcirespkey); 
+               bal_packet_key__init(&balomcirespkey);
                balomciresp.key = &balomcirespkey;
+               balIndCfg.balomciresp = &balomciresp;
 
                BalDest balomcirespkeydest;
                memset(&balomcirespkeydest, 0, sizeof(BalDest));
@@ -245,14 +246,14 @@ void *stub_thread(void *v)
    return NULL;
 }
 
-void create_stub_thread() 
+void create_stub_thread()
 {
    pthread_t threadId = 0;
 
    /* create shared queue */
    shared_queue = createQueue();
 
-   pthread_create(&threadId, NULL, stub_thread, NULL);      
+   pthread_create(&threadId, NULL, stub_thread, NULL);
 
 }
 
@@ -276,7 +277,7 @@ struct QNode* newNode(int objKey, int status, char *device_id)
       memcpy(temp->device_id, device_id, strlen(device_id));
    }
    temp->next = NULL;
-   return temp; 
+   return temp;
 }
 
 /* The function to add data to shared_queue - Add end of the queue */
@@ -320,7 +321,45 @@ struct QNode *deQueue()
 
 void stub_bal_init(BalInit *bal_init)
 {
-    client = grpc_c_client_init(bal_init->voltha_adapter_ip_port, "bal_client", NULL);
+    char *ip_and_port = NULL;
+    ip_and_port = bal_init->voltha_adapter_ip_port;
+    client = grpc_c_client_init(ip_and_port, "bal_client", NULL);
+}
+
+void stub_bal_stats_get(BalInterfaceStatData *statData)
+{
+    printf("Bal Stub - Get Stats In BalStubs : Got all the statistics\n");
+    statData->has_rx_bytes = 1;
+    statData->has_rx_packets=1;
+    statData->has_rx_ucast_packets=1;
+    statData->has_rx_mcast_packets=1;
+    statData->has_rx_bcast_packets=1;
+    statData->has_rx_error_packets=1;
+    statData->has_rx_unknown_protos=1;
+    statData->has_tx_bytes = 1;
+    statData->has_tx_packets=1;
+    statData->has_tx_ucast_packets=1;
+    statData->has_tx_mcast_packets=1;
+    statData->has_tx_bcast_packets=1;
+    statData->has_tx_error_packets=1;
+    statData->has_rx_crc_errors=1;
+    statData->has_bip_errors=1;
+
+    statData->rx_bytes = 1000;          /**< RFC 2233 */
+    statData->rx_packets = 100;        /**< RFC 1213 ucast + none-ucast */
+    statData->rx_ucast_packets = 5;  /**< RFC 2233 */
+    statData->rx_mcast_packets = 10;  /**< RFC 2233 */
+    statData->rx_bcast_packets = 15;  /**< RFC 2233 */
+    statData->rx_error_packets = 20;  /**< RFC 1213 */
+    statData->rx_unknown_protos = 45; /**< RFC 1213 */
+    statData->tx_bytes = 2000;          /**< RFC 2233 */
+    statData->tx_packets = 190;        /**< RFC 1213 ucast + none-ucast */
+    statData->tx_ucast_packets = 30;  /**< RFC 2233 */
+    statData->tx_mcast_packets = 50;  /**< RFC 2233 */
+    statData->tx_bcast_packets = 80;  /**< RFC 2233 */
+    statData->tx_error_packets = 40;  /**< RFC 1213 */
+    statData->rx_crc_errors = 5;     /**< Received packets with CRC error. */
+    statData->bip_errors = 15;
 }
 
 #endif
