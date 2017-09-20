@@ -16,6 +16,8 @@
 
 #include "bal_stats_hdlr.h"
 
+#define BAL_STAT_PRES   1
+
 /********************************************************************\
  * Function : asfvolt16_bal_stats_get                               *
  * Description : Function to get stats based on                     *
@@ -24,67 +26,67 @@
  ********************************************************************/
 uint32_t asfvolt16_bal_stats_get(BalIntfType intf_type, uint32_t intf_id, BalInterfaceStatData *statData)
 {
-	bcmbal_interface_stat interface_stats;
+   bcmbal_interface_stat interface_stats;
 
-	bcmos_errno err = BCM_ERR_OK;
+   bcmos_errno err = BCM_ERR_OK;
 
-	if(intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_NNI || intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_PON||
-		intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_EPON_1G_PATH ||
-		intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_EPON_10G_PATH)
-	{
-		err = BCM_ERR_PARM;
-	}
+   ASFVOLT_LOG(ASFVOLT_DEBUG, "Get Stats from OLT intf_type %d\n",intf_type);
 
-	if(err == BCM_ERR_OK)
-	{
-		bcmbal_interface_key key = { .intf_id = intf_id,
-								.intf_type = intf_type };
+   if(intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_NNI && intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_PON &&
+	intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_EPON_1G_PATH &&
+	intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_EPON_10G_PATH)
+   {
+      return BCM_ERR_PARM;
+   }
 
-		/* Prepare to retrieve stat on NNI interface 0 */
-		BCMBAL_STAT_INIT(&interface_stats, interface, key);
+   bcmbal_interface_key key = { .intf_id = intf_id, .intf_type = intf_type };
 
-		/* Retrieve the Upstream packet and byte counts */
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_bytes);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_ucast_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_mcast_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_bcast_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_error_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_unknown_protos);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, tx_bytes);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, tx_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, tx_ucast_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, tx_mcast_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, tx_bcast_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, tx_error_packets);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, rx_crc_errors);
-		BCMBAL_STAT_PROP_GET(&interface_stats, interface, bip_errors);
-   
-		/* Read the NNI stats.
-			* NOTE: When a CLEAR is specified during a NNI stats GET operation,
-			* all of the NNI stats are cleared, even the ones that are not retrieved.
-			*/
-		err = bcmbal_stat_get(DEFAULT_ATERM_ID, &interface_stats.hdr, BCMOS_TRUE);
+   /* Prepare to retrieve stat on NNI interface 0 */
+   BCMBAL_STAT_INIT(&interface_stats, interface, key);
 
-		if(err == BCM_ERR_OK)
-		{
-			statData->rx_bytes = interface_stats.data.rx_bytes;
-        	statData->rx_packets = interface_stats.data.rx_packets;
-        	statData->rx_ucast_packets = interface_stats.data.rx_ucast_packets;        
-        	statData->rx_mcast_packets = interface_stats.data.rx_mcast_packets;
-        	statData->rx_bcast_packets = interface_stats.data.rx_bcast_packets;
-        	statData->rx_error_packets = interface_stats.data.rx_error_packets;
-        	statData->rx_unknown_protos = interface_stats.data.rx_unknown_protos;
-        	statData->tx_bytes = interface_stats.data.tx_bytes;
-        	statData->tx_packets = interface_stats.data.tx_packets;
-        	statData->tx_ucast_packets = interface_stats.data.tx_ucast_packets;
-        	statData->tx_mcast_packets = interface_stats.data.tx_mcast_packets;
-        	statData->tx_bcast_packets = interface_stats.data.tx_bcast_packets;
-        	statData->tx_error_packets = interface_stats.data.tx_error_packets;
-        	statData->rx_crc_errors = interface_stats.data.rx_crc_errors;
-        	statData->bip_errors = interface_stats.data.bip_errors;
-		}
-	}
+   /* Retrieve the Upstream packet and byte counts */
+   BCMBAL_STAT_PROP_GET(&interface_stats, interface, all_properties);
+   ASFVOLT_LOG(ASFVOLT_DEBUG, "Retrieve the Upstream packet and byte count success\n");
 
-	return err;
+   /* Read the NNI stats.
+    * NOTE: When a CLEAR is specified during a NNI stats GET operation,
+    * all of the NNI stats are cleared, even the ones that are not retrieved.
+    */
+   err = bcmbal_stat_get(DEFAULT_ATERM_ID, &interface_stats.hdr, BCMOS_TRUE);
+
+   if(err == BCM_ERR_OK)
+   {
+      statData->has_rx_bytes = BAL_STAT_PRES;
+      statData->rx_bytes = interface_stats.data.rx_bytes;
+      statData->has_rx_packets = BAL_STAT_PRES;
+      statData->rx_packets = interface_stats.data.rx_packets;
+      statData->has_rx_ucast_packets = BAL_STAT_PRES;
+      statData->rx_ucast_packets = interface_stats.data.rx_ucast_packets;
+      statData->has_rx_mcast_packets = BAL_STAT_PRES;
+      statData->rx_mcast_packets = interface_stats.data.rx_mcast_packets;
+      statData->has_rx_bcast_packets = BAL_STAT_PRES;
+      statData->rx_bcast_packets = interface_stats.data.rx_bcast_packets;
+      statData->has_rx_error_packets = BAL_STAT_PRES;
+      statData->rx_error_packets = interface_stats.data.rx_error_packets;
+      statData->has_rx_unknown_protos = BAL_STAT_PRES;
+      statData->rx_unknown_protos = interface_stats.data.rx_unknown_protos;
+      statData->has_tx_bytes = BAL_STAT_PRES;
+      statData->tx_bytes = interface_stats.data.tx_bytes;
+      statData->has_tx_packets = BAL_STAT_PRES;
+      statData->tx_packets = interface_stats.data.tx_packets;
+      statData->has_tx_ucast_packets = BAL_STAT_PRES;
+      statData->tx_ucast_packets = interface_stats.data.tx_ucast_packets;
+      statData->has_tx_mcast_packets = BAL_STAT_PRES;
+      statData->tx_mcast_packets = interface_stats.data.tx_mcast_packets;
+      statData->has_tx_bcast_packets = BAL_STAT_PRES;
+      statData->tx_bcast_packets = interface_stats.data.tx_bcast_packets;
+      statData->has_tx_error_packets = BAL_STAT_PRES;
+      statData->tx_error_packets = interface_stats.data.tx_error_packets;
+      statData->has_rx_crc_errors = BAL_STAT_PRES;
+      statData->rx_crc_errors = interface_stats.data.rx_crc_errors;
+      statData->has_bip_errors = BAL_STAT_PRES;
+      statData->bip_errors = interface_stats.data.bip_errors;
+   }
+
+   return err;
 }

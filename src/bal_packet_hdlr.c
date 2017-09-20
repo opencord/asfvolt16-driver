@@ -30,6 +30,8 @@
 
 #include "asfvolt16_driver.h"
 #include "bal_packet_hdlr.h"
+static bcmos_mutex bal_ind_lock;
+
 
 /********************************************************************\
  * Function    : bal_access_terminal_cfg_req                        *
@@ -38,28 +40,61 @@
  ********************************************************************/
 uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
 {
+   bcmos_mutex_lock(&bal_ind_lock);
    bcmos_errno err = BCM_ERR_OK;
+   bcmbal_access_term_id aterm_id = 0; /* Assume a single access_terminal instance */
+   bcmbal_u8_list_u32_max_2048 buf; /* A structure with a msg pointer and length value */
    switch(packet->key->packet_send_dest->type)
    {
       case BAL_DEST_TYPE__BAL_DEST_TYPE_NNI:
          {
-            ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Send packet msg to NNI not yet implemented\n");
+            bcmbal_dest proxy_pkt_dest = { .type = BCMBAL_DEST_TYPE_NNI,
+               .u.nni.intf_id = packet->key->packet_send_dest->nni->intf_id };
+            buf.len = packet->data->pkt.len;
+            buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
+            memcpy(buf.val,(uint8_t *)packet->data->pkt.data,buf.len);
+	    ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Packet of length %d bytes with dest type as %d\n",buf.len,packet->key->packet_send_dest->type);
+            err = bcmbal_pkt_send(aterm_id,
+                  proxy_pkt_dest,
+                  (const char *)(buf.val),
+                  buf.len);
+            free(buf.val);
          }
          break;
       case BAL_DEST_TYPE__BAL_DEST_TYPE_SUB_TERM:
          {
-            ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Send packet msg to ONU not yet implemented\n");
+            bcmbal_dest proxy_pkt_dest = { .type = BCMBAL_DEST_TYPE_SUB_TERM,
+               .u.sub_term.sub_term_id = packet->key->packet_send_dest->sub_term->sub_term_id,
+               .u.sub_term.intf_id = packet->key->packet_send_dest->sub_term->intf_id };
+            buf.len = packet->data->pkt.len;
+            buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
+            memcpy(buf.val,(uint8_t *)packet->data->pkt.data,buf.len);
+	    ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Packet of length %d bytes with dest type as %d\n",buf.len,packet->key->packet_send_dest->type);
+            err = bcmbal_pkt_send(aterm_id,
+                  proxy_pkt_dest,
+                  (const char *)(buf.val),
+                  buf.len);
+            free(buf.val);
          }
          break;
       case BAL_DEST_TYPE__BAL_DEST_TYPE_SVC_PORT:
          {
-            ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Send packet msg to PON not yet implemented\n");
+            bcmbal_dest proxy_pkt_dest = { .type = BCMBAL_DEST_TYPE_SVC_PORT,
+               .u.svc_port.svc_port_id = packet->key->packet_send_dest->svc_port->svc_port_id,
+               .u.svc_port.intf_id = packet->key->packet_send_dest->svc_port->intf_id };
+            buf.len = packet->data->pkt.len;
+            buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
+	    ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Packet of length %d bytes with dest type as %d\n",buf.len,packet->key->packet_send_dest->type);
+            memcpy(buf.val,(uint8_t *)packet->data->pkt.data,buf.len);
+            err = bcmbal_pkt_send(aterm_id,
+                  proxy_pkt_dest,
+                  (const char *)(buf.val),
+                  buf.len);
+            free(buf.val);
          }
          break;
       case BAL_DEST_TYPE__BAL_DEST_TYPE_ITU_OMCI_CHANNEL:
          {
-            bcmbal_access_term_id aterm_id = 0; /* Assume a single access_terminal instance */
-            bcmbal_u8_list_u32_max_2048 buf; /* A structure with a msg pointer and length value */
             /* The destination of the OMCI packet is a registered ONU on the OLT PON interface */
             bcmbal_dest proxy_pkt_dest = { .type = BCMBAL_DEST_TYPE_ITU_OMCI_CHANNEL,
                .u.itu_omci_channel.sub_term_id = packet->key->packet_send_dest->itu_omci_channel->sub_term_id,
@@ -82,7 +117,7 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
             }
             buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
             memcpy(buf.val,(uint8_t *)arraySend,buf.len);
-            ASFVOLT_LOG(ASFVOLT_DEBUG,"\nAfter converting it into hex\n");
+            ASFVOLT_LOG(ASFVOLT_DEBUG,"\nAfter converting it into hex ");
             for(idx2=0; idx2<buf.len; idx2++)
             {
                printf("%02x", buf.val[idx2]);
@@ -96,7 +131,7 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
                   buf.len,
                   packet->key->packet_send_dest->itu_omci_channel->sub_term_id,
                   packet->key->packet_send_dest->itu_omci_channel->intf_id);
-            bcmos_free(buf.val); 
+            free(buf.val);
          }
          break;
       case BAL_DEST_TYPE__BAL_DEST_TYPE_IEEE_OAM_CHANNEL:
@@ -114,5 +149,6 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
    {
       /* recover from any error encountered while sending */
    }
+   bcmos_mutex_unlock(&bal_ind_lock);
    return err;
 }

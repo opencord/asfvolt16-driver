@@ -47,6 +47,13 @@ uint32_t bal_register_indication_cbs()
 
     cb_cfg.module = BCMOS_MODULE_ID_NONE;
 
+    /* Access Terminal Operational State Change */
+    cb_cfg.obj_type = BCMBAL_OBJ_ID_ACCESS_TERMINAL;
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_acc_term_osc_indication_cb;
+    ind_subgroup = bcmbal_access_terminal_auto_id_oper_status_change;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
     /* Register to get indications for interface objects
      */
     cb_cfg.obj_type = BCMBAL_OBJ_ID_INTERFACE;
@@ -63,6 +70,12 @@ uint32_t bal_register_indication_cbs()
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
+    /* Interface Operational State Change */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_interface_osc_indication_cb;
+    ind_subgroup = bcmbal_interface_auto_id_oper_status_change;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
     /* Register to get indications for subscriber terminal objects
      */
     cb_cfg.obj_type = BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL;
@@ -70,6 +83,12 @@ uint32_t bal_register_indication_cbs()
     /* Subscriber Terminal Alarm */
     cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_alarm_indication_cb;
     ind_subgroup = bcmbal_subscriber_terminal_auto_id_sub_term_alarm;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal dgi */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_dgi_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_dgi;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
@@ -82,6 +101,12 @@ uint32_t bal_register_indication_cbs()
     /* Subscriber Terminal Indication */
     cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_indication_cb;
     ind_subgroup = bcmbal_subscriber_terminal_auto_id_ind;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal Operational State Change */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_osc_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_oper_status_change;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
@@ -100,14 +125,13 @@ uint32_t bal_register_indication_cbs()
     ind_subgroup = bcmbal_packet_auto_id_bearer_channel_rx;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
 #if 0
-    /* Access Terminal Operational State Change */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_acc_term_osc_indication_cb;
-    ind_subgroup = bcmbal_access_terminal_auto_id_oper_status_change;
+    /* OAM Channel Data - oam response indication */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_oam_data_indication_cb;
+    ind_subgroup = bcmbal_packet_auto_id_ieee_oam_channel_rx;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
+#endif
     /* Register to get indication callbacks for flow objects
      */
     cb_cfg.obj_type = BCMBAL_OBJ_ID_FLOW;
@@ -124,38 +148,6 @@ uint32_t bal_register_indication_cbs()
     cb_cfg.p_subgroup = &ind_subgroup;
     err = bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
-    /* Register to get indication callbacks for group objects
-     */
-    cb_cfg.obj_type = BCMBAL_OBJ_ID_GROUP;
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_group_indication_cb;
-    ind_subgroup = bcmbal_group_auto_id_ind;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-    
-    /* Interface Operational State Change */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_interface_osc_indication_cb;
-    ind_subgroup = bcmbal_interface_auto_id_oper_status_change;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Interface los */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_interface_los_indication_cb;
-    ind_subgroup = bcmbal_interface_auto_id_los;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Subscriber Terminal Operational State Change */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_osc_indication_cb;
-    ind_subgroup = bcmbal_subscriber_terminal_auto_id_oper_status_change;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Subscriber Terminal dgi */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_dgi_indication_cb;
-    ind_subgroup = bcmbal_subscriber_terminal_auto_id_dgi;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
     /* Register to get indication callbacks for tm queue objects
      */
     cb_cfg.obj_type = BCMBAL_OBJ_ID_TM_QUEUE;
@@ -171,15 +163,14 @@ uint32_t bal_register_indication_cbs()
     ind_subgroup = bcmbal_tm_sched_auto_id_ind;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-    
-    
-    /* OAM Channel Data - oam response indication */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_oam_data_indication_cb;
-    ind_subgroup = bcmbal_packet_auto_id_ieee_oam_channel_rx;
+
+    /* Register to get indication callbacks for group objects
+     */
+    cb_cfg.obj_type = BCMBAL_OBJ_ID_GROUP;
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_group_indication_cb;
+    ind_subgroup = bcmbal_group_auto_id_ind;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-    
-#endif
     return err;
 }
 

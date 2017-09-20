@@ -51,7 +51,7 @@ void bal__bal_api_heartbeat_cb(grpc_c_context_t *context)
 {
    BalHeartbeat *bal_hb;
    BalErr bal_err;
-
+   int ret_val;
    /*
     * Read incoming message into set_cfg
     */
@@ -69,11 +69,18 @@ void bal__bal_api_heartbeat_cb(grpc_c_context_t *context)
    /*
     * Write reply back to the client
     */
-    if (!context->gcc_stream->write(context, &bal_err, 0)) {
-    } else {
-              printf("Failed to write\n");
-	      exit(1);
-    }
+   ret_val = context->gcc_stream->write(context, &bal_err, 0);
+   if (ret_val != GRPC_C_WRITE_OK) {
+      if(ret_val == GRPC_C_WRITE_PENDING) {
+         printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+         sleep(5);
+      }
+      else {
+         printf("Failed to write %d \n", ret_val);
+         printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+         sleep(5);
+      }
+   }
 
     grpc_c_status_t status;
     status.gcs_code = 0;
@@ -97,6 +104,8 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
 {
    BalReboot *read_device;
    BalErr bal_err;
+   int ret_val;
+
    /*
     * Read incoming message into get_cfg
     */
@@ -122,10 +131,17 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
    /*
     * Write reply back to the client
     */
-   if (!context->gcc_stream->write(context, &bal_err, 0)) {
-   } else {
-      printf("Bal Server - Reboot Failed to write\n");
-      exit(1);
+   ret_val = context->gcc_stream->write(context, &bal_err, 0);
+   if (ret_val != GRPC_C_WRITE_OK) {
+      if(ret_val == GRPC_C_WRITE_PENDING) {
+         printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+         sleep(5);
+      }
+      else {
+         printf("Failed to write %d \n", ret_val);
+         printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+         sleep(5);
+      }
    }
 
    grpc_c_status_t status;
@@ -146,6 +162,7 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
 void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
 {
     BalInterfaceKey *read_stats;
+    int ret_val;
 
     /*
     * Read incoming message into get_cfg
@@ -180,8 +197,18 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     if (!context->gcc_stream->write(context, &get_stats, 0)) {
 	   printf("Successfully Written Stats\n");
     } else {
-       printf("Stats Failed to write\n");
-	   exit(1);
+	    if (ret_val != GRPC_C_WRITE_OK) {
+		    if(ret_val == GRPC_C_WRITE_PENDING) {
+			    printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+			    sleep(5);
+		    }
+		    else {
+			    printf("Failed to write %d \n", ret_val);
+			    printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+			    sleep(5);
+		    }
+	    }
+
     }
 
     grpc_c_status_t status;
@@ -195,8 +222,8 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
         exit(1);
     }
 
-    sleep(1);
     printf("============ Returning from Stats Function============\n");
+    sleep(1);
 }
 
 /*
@@ -249,13 +276,13 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
    ret_val = context->gcc_stream->write(context, &bal_err, 0);
    if (ret_val != GRPC_C_WRITE_OK) {
       if(ret_val == GRPC_C_WRITE_PENDING) {
-         printf("write is pending, sleep for 10 sec %d \n", ret_val);
-         sleep(10);
+         printf("write(%d) is pending, sleep for 5 sec \n", ret_val);
+         sleep(5);
       }
       else {
          printf("Failed to write %d \n", ret_val);
-         printf("write is pending, sleep for 10 sec: %d\n", ret_val);
-         sleep(10);
+         printf("write(%d) is pending, sleep for 5 sec \n", ret_val);
+         sleep(5);
       }
    }
 
@@ -338,7 +365,7 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
                 break;
              default:
                 {
-                   ("\n*****************************************************\n");
+                   printf("\n*****************************************************\n");
                    printf("Dest type invalid\n");
                    printf("*****************************************************\n");
                 }
@@ -348,7 +375,7 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
        break;
     default:
        {
-          ("\n*****************************************************\n");
+          printf("\n*****************************************************\n");
           printf("Received Invalid msg type === %d \n", set_cfg->hdr->obj_type);
           printf("*****************************************************\n");
                     pthread_mutex_unlock(&lock);
@@ -431,7 +458,7 @@ void bal__bal_api_init_cb(grpc_c_context_t *context)
     */
 
 
-   ("\n*****************************************************\n");
+   printf("\n*****************************************************\n");
    printf("Received API Init msg\n");
    printf("*****************************************************\n");
 
@@ -445,13 +472,13 @@ void bal__bal_api_init_cb(grpc_c_context_t *context)
    ret_val = context->gcc_stream->write(context, &bal_err, 0);
    if (ret_val != GRPC_C_WRITE_OK) {
       if(ret_val == GRPC_C_WRITE_PENDING) {
-         printf("write is pending, sleep for 10 sec %d \n", ret_val);
-         sleep(10);
+         printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+         sleep(5);
       }
       else {
          printf("Failed to write %d \n", ret_val);
-         printf("write is pending, sleep for 10 sec: %d\n", ret_val);
-         sleep(10);
+         printf("write(%d) is pending, sleep for 5 sec\n", ret_val);
+         sleep(5);
       }
    }
 
