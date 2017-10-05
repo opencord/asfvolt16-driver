@@ -28,6 +28,8 @@ ASFVOLT_REPO_NAME=asfvolt16-driver
 : ${BALSRC_TOPDIR:=${ONL_TOPDIR}/${BALSRC_RELEASE}/bal_release}
 : ${ASFDRVR_PKGDIR:=${ONL_TOPDIR}/asfdrvr-package-dir}
 : ${ASFDVR_TARBALL_NAME:=asfvolt16-voltha-bal}
+: ${BUILD_FILENAME_TAG:=`date +%Y%m%d%H%M`}
+: ${ASFDVR_TARBALL_FNAME:=${ASFDVR_TARBALL_NAME}-${BUILD_FILENAME_TAG}.tgz}
 
 echo ONL_TOPDIR=${ONL_TOPDIR}
 echo BALSRC_RELEASE=${BALSRC_RELEASE}
@@ -35,8 +37,8 @@ echo BALREL_TOPDIR=${BALREL_TOPDIR}
 echo BALSRC_TOPDIR=${BALSRC_TOPDIR}
 echo ASFDRVR_PKGDIR=${ASFDRVR_PKGDIR}
 echo ASFDVR_TARBALL_NAME=${ASFDVR_TARBALL_NAME}
-
-ASFDVR_TARBALL_FNAME=${ASFDVR_TARBALL_NAME}.tgz
+echo BUILD_FILENAME_TAG=${BUILD_FILENAME_TAG}
+echo ASFDVR_TARBALL_FNAME=${ASFDVR_TARBALL_FNAME}
 
 # Note: removes existing directories: asfvolt16-driver, grpc, protobuf
 rm -rf ${ASFDRVR_PKGDIR}
@@ -45,7 +47,7 @@ rm -rf ${ASFDRVR_PKGDIR}
 mkdir -p ${ASFDRVR_PKGDIR}
 cd ${ASFDRVR_PKGDIR}
 
-#extrace ASFvOLT16 BAL/Maple built release tarball
+#extract ASFvOLT16 BAL/Maple built release tarball
 tar zxf ${BALREL_TOPDIR}/bcm68620_release/asfvolt16/release/release_asfvolt16_V*.tar.gz
 
 # voltha_bal_driver and grpc/protobufs live in /broadcom dir on ASFvOLT16 target

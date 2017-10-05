@@ -1,6 +1,6 @@
 GRPC_C DEVICE SIMULATOR
 
- This is an executable (voltha_bal_driver), which will receive asfvolt16 adapter grpc-c messages and call respective device stub.
+ This is a executable(bal_server), which will receive asfvolt16 adapter grpc-c messages and call respective device stub.
  It will send received responses/asynchronous indications from Device stub to Adapter.
 
 GETTING STARTED
@@ -43,7 +43,7 @@ Apply grpc-c patch
      Patch 2:
      Apply patch in service.c.patch and client.c.patch 
      - cp Makefile.am grpc-c/examples/
-     - cp voltha_bal_driver.c grpc-c/examples/
+     - cp bal_server.c grpc-c/examples/
      - cp bal_stub.c grpc-c/examples/
      - cp bal_stub.h grpc-c/examples/
          - Note: Update voltha adaptor IP in bal_stub.c
@@ -54,28 +54,19 @@ Apply grpc-c patch
      - sudo make install
    
 To obtain proto files - Have a repo sync of opencord code base:
-
      - cp opencord/incubator/voltha/voltha/adapters/asfvolt16_olt/protos/* examples/
 
 To autogenerate code from proto files:
-
      - make autogen
        
-Build voltha_bal_driver:
-
+Build bal_server:
      - Note: Remove "-O2" from Makefile
      - make clean_all;make 
 
-The ultimate executable voltha_bal_driver can be found under ~/grpc-c/build/examples/.libs/
+The ultimate executable bal_server can be found under ~/grpc-c/build/examples/.libs/
 
 USAGE:
-
-    ./voltha_bal_driver "serverIP:port1" -C "serverIP:port2" -A "serverIP:port3"
-    ./bal_core_dist -C "serverIP:port2" -A "serverIP:port3"
-
-NOTE:
-    'bal_core_dist' is a broadcom executable.
-    A bash helper script 'asfvolt-driver-build.sh' is available to automate most of the build steps
+    ./bal_server "serverIP:port"
 
 CONTRIBUTING
      <TBD>

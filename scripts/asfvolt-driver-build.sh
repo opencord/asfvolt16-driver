@@ -18,8 +18,8 @@
 #
 #cd /aux/OpenNetworkLinux
 set -e
-MAKE_JOBS=4
 ASFVOLT_REPO_NAME=asfvolt16-driver
+: ${MAKE_JOBS:=4}
 
 # override shell variables to match custom local build environment
 : ${ONL_TOPDIR:=`pwd`}
@@ -28,9 +28,10 @@ ASFVOLT_REPO_NAME=asfvolt16-driver
 : ${BALSRC_TOPDIR:=${ONL_TOPDIR}/${BALSRC_RELEASE}/bal_release}
 : ${ASFSRC_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/src}
 : ${DEVSIM_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/device_simulator}
-: ${PATCHF_TOPDIR:=${DEVSIM_TOPDIR}}
+: ${PATCHF_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/patches}
 
 echo ONL_TOPDIR=${ONL_TOPDIR}
+echo MAKE_JOBS=${MAKE_JOBS}
 echo BALSRC_RELEASE=${BALSRC_RELEASE}
 echo VOLTHA_TOPDIR=${VOLTHA_TOPDIR}
 echo BALSRC_TOPDIR=${BALSRC_TOPDIR}
@@ -44,15 +45,14 @@ GRPC_C_ARCH=be82ab1605717f33e2e0d3038996ea46d9efe25e
 PROTOBUF_ARCH=703cd8e11c8d34283d4c8bf869c61866e8211c9d
 PROTOBUF_C_ARCH=6a4f9a9a67c06769aaa9f65e8f89a56483271f5a
 
-# Note: removes existing directories: asfvolt16-driver, grpc, protobuf
-rm -rf ${ASFVOLT_REPO_NAME}
+# Note: removes existing directories: grpc, protobuf
 rm -rf grpc protobuf grpc-* protobuf-*
 
 #Clone asfvolt16-driver
 #    - The guide assumes that the asfvolt16-driver gerrit repo is cloned under the ONL toplevel directory:
 #    - git clone ssh://user@gerrit.opencord.org:29418/asfvolt16-driver ${HOME}/OpenNetworkLinux/asfvolt16-driver
 
-git clone https://gerrit.opencord.org/${ASFVOLT_REPO_NAME} ${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}
+#git clone https://gerrit.opencord.org/${ASFVOLT_REPO_NAME} ${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}
 
 #steps to install grpc
 #   - Download as zip "grpc", "grpc-c", "protobuf" and "protobuf-c" from "https://github.com/opennetworkinglab/asfvolt16-driver/tree/master/third_party"

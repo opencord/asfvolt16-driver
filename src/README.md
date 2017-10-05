@@ -1,102 +1,116 @@
-GRPC_C DEVICE SIMULATOR
+# ASFvOLT16 vOLTHA BAL DRIVER
 
-This is a executable(voltha_bal_driver), which will received asfvolt16 adapter grpc-c messages and call respective device stub.
-It will send recevied responses/asynchronous indications from Device stub to Adapter.
-
-GETTING STARTED
-
-prerequisites to install grpc
-   - sudo apt-get install build-essential libxml2-dev libgeos++-dev libpq-dev libbz2-dev libtool automake openssl libssl-dev golang-goprotobuf-dev
+This is an executable (voltha_bal_driver), which will receive asfvolt16_olt adapter grpc-c messages and call the respective BAL API.
+It will send received responses/asynchronous indications from BAL running in the ASFvOLT16 to the asfvolt16_olt adapter in VOLTHA. 
+This driver requires the Broadcom proprietary
+BAL/Maple SDK for the PON MAC and the Qumran switching SDK.  These components are available from Broadcom.
 
 
-INSTALLATION
+## GETTING STARTED
 
-Open Network Linux
-This guide assumes that Open Network Linux (ONL) is available at ${HOME}/OpenNetworkLinux. All the below steps need to be executed in the ONL build docker context. Refer to ONL build instructions (https://wiki.opencord.org/download/attachments/2556712/ONL_Build_Environment_Installation_Guide.pdf?api=v2).
+The following **proprietary** components are required to build the voltha_bal_driver.
 
-    - Download ONL source code with Kernel 3.7.10.
+| Component/Package  | Version        | Filename                        | From     | Contact|
+| -------------      |---------       | -----                           | ---------| ----|
+| BAL/Maple SDK      | 2.4.3.6        | SW-BCM68620_2_4_3_6.zip         | Broadcom | TBD
+| Qumran SDK         | 6.5.7          | sdk-all-6.5.7.tar.gz            | Broadcom | TBD
+| ASFvOLT16 BAL patch| 2017.09.29.1146| BAL_2.4.3.6-V201709291146.patch | Edgecore | TBD
+
+The following **open-source** components are required to build the voltha_bal_driver.
+
+| Component/Package    | Version        | Name            | From     | Git Repo|
+| -------------        |---------       | -----           | ---------| ----|
+| VOLTHA asfvolt16_olt adapter | voltha-1.1 | voltha          | Opencord | git clone https://gerrit.opencord.org/voltha
+| ASFvOLT16 Driver             | voltha-1.1 | asfvolt16-driver| Opencord | git clone https://gerrit.opencord.org/asfvolt16-driver
+
+## Open Network Linux
+This guide assumes that Open Network Linux (ONL) build environment for ASFvOLT16 has been installed
+and the build was successful. Refer to ONL build instructions
+[here](https://wiki.opencord.org/download/attachments/2556712/ONL_Build_Environment_Installation_Guide.pdf?api=v2).
+
+### Clone asfvolt16-driver repo
+
 ```
-    > git clone https://github.com/Lewis-Kang/OpenNetworkLinux.git -b kernel_3.7.10
+cd OpenNetworkLinux
+git clone https://gerrit.opencord.org/asfvolt16-driver
 ```
 
-    - Start ONL build docker workspace
+Build helper scripts are available in `asfvolt16-driver/scripts` to automate the steps for building BAL/Maple SDK and the `voltha_bal_driver`.
+
+| Helper Script      | Purpose |
+| -------------      |---------|
+| asfvolt-bal-prepare.sh    |Prepare BAL/Maple SDK build workspace (outside of docker)|
+| asfvolt-bal-buildall.sh   |Build BAL/Maple SDK|
+| asfvolt-driver-build.sh   |Build `voltha_bal_driver`|
+| asfvolt-driver-package.sh |Repackage BAL/Maple release with `voltha_bal_driver`|
+
+The helper scripts contain default shell variable values for component directory locations and file names for the build.
+
+### Prepare workspace for BAL
+
+Any of the following variables can be overridden to suit the local build environment.
+
 ```
-    > cd OpenNetworkLinux
+ONL_TOPDIR=/aux/OpenNetworkLinux
+BALSRC_RELEASE=bal_src_release
+BALSRC_ZIPNAME=SW-BCM68620_2_4_3_6.zip
+SWISDK_TARNAME=sdk-all-6.5.7
+PATCH_FILENAME=BAL_2.4.3.6-V201709291146.patch
+BROADCOM_DOWNLOAD_DIR=/home/user/broadcom/download
+EDGECORE_DOWNLOAD_DIR=/home/user/edgecore/download
+```
+
+Prepare the BAL/Maple build workspace from *outside* of the docker environment.  This allows access to network and device resources
+that may not be available in the docker.
+```
+    > cd ${ONL_TOPDIR}
+    > BROADCOM_DOWNLOAD_DIR=/aux/brcm_download EDGECORE_DOWNLOAD_DIR=/aux/brcm_download ./asfvolt16-driver/scripts/asfvolt-bal-prepare.sh
+```
+
+### Build BAL/Maple SDK
+
+All of the remaining steps are done *inside* the ONL build docker.  Start ONL build docker workspace:
+```
     > docker/tools/onlbuilder -8   # enter the docker workspace
+    > ./asfvolt16-driver/scripts/asfvolt-bal-buildall.sh
 ```
 
-Clone asfvolt16-driver
-    - The guide assumes that the asfvolt16-driver gerrit repo is cloned under the ONL toplevel directory:
-    - git clone ssh://user@gerrit.opencord.org:29418/asfvolt16-driver ${HOME}/OpenNetworkLinux/asfvolt16-driver
+### Build `voltha_bal_driver`
 
-steps to install grpc
-   - Download as zip "grpc", "grpc-c", "protobuf" and "protobuf-c" from "https://github.com/opennetworkinglab/asfvolt16-driver/tree/master/third_party"
-   - extract grpc at ${HOME}/OpenNetworkLinux/grpc
-   - extract grpc-c at ${HOME}/OpenNetworkLinux/grpc-c
-   - extract protobuf at ${HOME}/OpenNetworkLinux/grpc/thirdparty/protobuf
-   - extract protobuf-c folder at ${HOME}/OpenNetworkLinux/grpc-c/third_party/protobuf-c
-   - cd ${HOME}/OpenNetworkLinux/grpc/thirdparty/protobuf
-      - ./autogen.sh
-      - ./configure
-      - make
-      - sudo make install
-   - cd ${HOME}/OpenNetworkLinux/grpc
-     - export LD_LIBRARY_PATH=/usr/local/lib
-     - make
-     - sudo make install
+This step requires access to the voltha source tree so it can find the protobuf definitions used by the
+asfvolt16_olt adapter.  Be sure to use matching version of the voltha tree because asfvolt16_olt adapter
+and the voltha_bal_driver need to share the same grpc protobuf definitions.
 
-steps to install grpc-c
-   - cd ${HOME}/OpenNetworkLinux/grpc-c/third_party/protobuf-c
-     - ./autogen.sh
-     - ./configure
-     - export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/protobuf
-     - make
-     - sudo make install
-
-Apply grpc-c patch
-   - cd ${HOME}/OpenNetworkLinux/grpc-c/
-     Patch 1:
-     Apply patch in following link for grpc-c/lib - "https://github.com/Juniper/grpc-c/commit/353b40cd920cd749ed6cf71f8df17f1d5cf2c89d"
-     Note:
-        (This patch is having very few changes in two files(grpc-c/lib/client.c, grpc-c/lib/service.c. 
-         Download these two files from above link and replace at grpc-c/lib or merge these changes manually.)       
-     Patch 2:
-     Apply patch in service.c.patch and client.c.patch
-
-     - cd ${HOME}/OpenNetworkLinux
-     - cp asfvolt16-driver/device_simulator/Makefile.am grpc-c/examples/
-     - cp asfvolt16-driver/device_simulator/voltha_bal_driver.c grpc-c/examples/
-     - cp asfvolt16-driver/device_simulator/bal_stub.c grpc-c/examples/
-     - cp asfvolt16-driver/device_simulator/bal_stub.h grpc-c/examples/
-         - Note: Update voltha adaptor IP in bal_stub.c (Is this required? Not clear which variable needs to be updated).
-
-     - cd ${HOME}/OpenNetworkLinux/grpc-c
-     - autoreconf --install
-     - mkdir build && cd build
-     - ../configure
-     - make
-     - sudo make install
- 
-To obtain proto files - Have a repo sync of opencord voltha code base:
-     - git clone https://github.com/opencord/voltha.git ${HOME}/voltha
-     - cd ${HOME}/OpenNetworkLinux/grpc-c/
-     - cp ${HOME}/voltha/voltha/adapters/asfvolt16_olt/protos/* examples/
-
-To autogenerate code from proto files:
-     - cd ${HOME}/OpenNetworkLinux/grpc-c/build/examples
-     - make autogen
-
-Build voltha_bal_driver:
-     - cd ${HOME}/OpenNetworkLinux/grpc-c/build/examples
-     - Note: Remove "-O2" from Makefile
-     - Note: Set EDGECORE and BRCM_PATH in Makefile
 ```
-       EDGECORE = ${HOME}/OpenNetworkLinux/asfvolt16-driver/src/
-       BRCM_PATH = ${HOME}/OpenNetworkLinux/bal_src_release/bal_release
+ONL_TOPDIR=/aux/OpenNetworkLinux
+MAKE_JOBS=4
+BALSRC_RELEASE=bal_src_release
+VOLTHA_TOPDIR=/home/<user>/voltha/incubator/voltha
+BALSRC_TOPDIR=/aux/OpenNetworkLinux/bal_src_release/bal_release
+ASFSRC_TOPDIR=/aux/OpenNetworkLinux/asfvolt16-driver/src
+DEVSIM_TOPDIR=/aux/OpenNetworkLinux/asfvolt16-driver/device_simulator
+PATCHF_TOPDIR=/aux/OpenNetworkLinux/asfvolt16-driver/patches
 ```
-     - make clean_all;make
+From the ONL build docker workspace:
 
-The ultimate executable voltha_bal_driver can be found under ~/grpc-c/build/examples/.libs/
+```
+    > VOLTHA_TOPDIR=/home/<user>/voltha/incubator/voltha ./asfvolt16-driver/scripts/asfvolt-driver-build.sh
+```
+
+### Package `voltha_bal_driver` into BAL release tarball
+
+From the ONL build docker workspace:
+
+```
+    > ./asfvolt16-driver/scripts/asfvolt-driver-package.sh
+```
+
+The tarball containing the packaged voltha_bal_driver can be found in ${ASFDRVR_PKGDIR}:
+
+```
+    > ls ${ONL_TOPDIR}/asfdrvr-package-dir/
+asfvolt16-voltha-bal-201710051908.tgz  broadcom  opt
+```
 
 USAGE:
     ./voltha_bal_driver "serverIP:port1" -C "serverIP:port2" -A "serverIP:port3"
