@@ -79,6 +79,11 @@ void *stub_thread(void *v)
                access_term_ind.key = &accTermKey;
                balIndCfg.access_term_ind = &access_term_ind;
                status = bal_ind__bal_acc_term_ind(client, NULL, &balIndCfg, &output, NULL, 0);
+               if(GRPC_C_FAIL == status)
+               {
+                 printf("\n Failed To Send Access Terminal Indication: Please verify the VOLTHA IP Address configured\n");
+               }
+               is_stub_reboot = 1;
             }
             break;
          case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
@@ -89,6 +94,10 @@ void *stub_thread(void *v)
                balIndCfg.u_case = BAL_INDICATIONS__U_INTERFACE_IND;
                prevObjType = front->obj_type;
                status = bal_ind__bal_iface_ind(client, NULL, &balIndCfg, &output, NULL, 0);
+               if(GRPC_C_FAIL == status)
+               {
+                 printf("\n Failed To Send Interface Indication: Please verify the VOLTHA IP Address configured\n");
+               }
             }
             break;
          case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:

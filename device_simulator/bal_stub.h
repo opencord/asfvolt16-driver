@@ -26,12 +26,16 @@
 /* Global definations */
 pthread_cond_t cv;
 pthread_mutex_t lock;
+unsigned int is_stub_reboot;
 
 #define IND_USR_DAT_LEN  8
 #define IND_USR_DAT_VAL  "brcmOLT"
 #define BALCLIENT        "bal_client"
 #define BALSERVER        "bal_server"
 #define BAL_DEVICE_STR_LEN 20
+#define ASFVOLT_ERROR 1
+#define ASFVOLT_INFO  2
+#define ASFVOLT_DEBUG 3
 
 typedef struct BalCoreIpInfo
 {
@@ -62,10 +66,17 @@ typedef struct Queue
 	struct QNode *front, *rear;
 }bal_queue;
 
+#define ASFVOLT_LOG(log_type, format, args...) \
+   if(log_type) \
+   {\
+      printf("File(%s): Line(%d): ", __FUNCTION__, __LINE__);\
+      printf(format, ## args);\
+   }
+
 /* shared queue */
 bal_queue *shared_queue;
 
-void create_stub_thread(); 
+void create_stub_thread();
 bal_queue *createQueue();
 struct QNode* newNode(int objKey, int status, char *device_id);
 void enQueue(int objKey, struct QNode *temp);

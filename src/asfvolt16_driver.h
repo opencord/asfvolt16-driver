@@ -35,6 +35,7 @@
 #define MAX_OMCI_MSG_LENGTH 44
 
 char voltha_device_id[ASFVOLT_MAX_DEVICE_ID_SIZE];
+unsigned int is_reboot;
 
 typedef struct BalCoreIpInfo
 {

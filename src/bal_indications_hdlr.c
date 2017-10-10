@@ -132,6 +132,7 @@ bcmos_errno bal_acc_term_indication_cb(bcmbal_obj *obj)
 
       BalErr *output;
       result = bal_ind__bal_acc_term_ind(client, NULL, &balIndCfg, &output, NULL, 0);
+      is_reboot = BAL_REBOOT_STATUS__BAL_OLT_UP_AFTER_ACTIVATION;
    }
 
    return result;
