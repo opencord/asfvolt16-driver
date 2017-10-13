@@ -9,12 +9,16 @@ BAL/Maple SDK for the PON MAC and the Qumran switching SDK.  These components ar
 ## GETTING STARTED
 
 The following **proprietary** components are required to build the voltha_bal_driver.
+Contact Dave Baron at Broadcom for details on accessing these files.  dave.baronATbroadcomDOTcom Reference Case: CS3233745
 
-| Component/Package  | Version        | Filename                        | From     | Contact|
-| -------------      |---------       | -----                           | ---------| ----|
-| BAL/Maple SDK      | 2.4.3.6        | SW-BCM68620_2_4_3_6.zip         | Broadcom | TBD
-| Qumran SDK         | 6.5.7          | sdk-all-6.5.7.tar.gz            | Broadcom | TBD
-| ASFvOLT16 BAL patch| 2017.09.29.1146| BAL_2.4.3.6-V201709291146.patch | Edgecore | TBD
+| Component     | Version | Filename                        |
+| ------------- |-------- | -----                           |
+| BAL/Maple SDK | 2.4.3.6 | SW-BCM68620_2_4_3_6.zip         |
+| Qumran SDK    | 6.5.7   | sdk-all-6.5.7.tar.gz            |
+
+| Component          | Filename                           |MD5|
+| -------------      | -----                              |---|
+| ASFvOLT16 BAL patch| ACCTON_BAL_2.4.3.6-V201710131639.patch | b7d1bff32c5ed7b46cb48ba36ff9ad84 |
 
 The following **open-source** components are required to build the voltha_bal_driver.
 
@@ -55,7 +59,7 @@ ONL_TOPDIR=/aux/OpenNetworkLinux
 BALSRC_RELEASE=bal_src_release
 BALSRC_ZIPNAME=SW-BCM68620_2_4_3_6.zip
 SWISDK_TARNAME=sdk-all-6.5.7
-PATCH_FILENAME=BAL_2.4.3.6-V201709291146.patch
+PATCH_FILENAME=ACCTON_BAL_2.4.3.6-V201710131639.patch
 BROADCOM_DOWNLOAD_DIR=/home/user/broadcom/download
 EDGECORE_DOWNLOAD_DIR=/home/user/edgecore/download
 ```

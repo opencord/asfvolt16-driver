@@ -28,7 +28,7 @@ set -e
 : ${BROADCOM_DOWNLOAD_DIR:=${HOME}/broadcom/download}  # directory containing SW-BCM68620_2_4_x.zip
 : ${EDGECORE_DOWNLOAD_DIR:=${HOME}/edgecore/download}  # directory containing ASFvOLT16 patch file for BAL
 
-: ${PATCH_FILENAME:=BAL_2.4.3.6-V201709291146.patch}   # use latest know ASFvOLT16 patch file as default
+: ${PATCH_FILENAME:=ACCTON_BAL_2.4.3.6-V201710131639.patch}   # use latest known ASFvOLT16 patch file as default
 
 echo ONL_TOPDIR=${ONL_TOPDIR}
 echo BALSRC_RELEASE=${BALSRC_RELEASE}
