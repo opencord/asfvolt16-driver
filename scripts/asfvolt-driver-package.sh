@@ -26,6 +26,7 @@ ASFVOLT_REPO_NAME=asfvolt16-driver
 : ${BALSRC_RELEASE:=bal_src_release}
 : ${BALREL_TOPDIR:=${ONL_TOPDIR}/${BALSRC_RELEASE}}
 : ${BALSRC_TOPDIR:=${ONL_TOPDIR}/${BALSRC_RELEASE}/bal_release}
+: ${ASFSCR_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/scripts}
 : ${ASFDRVR_PKGDIR:=${ONL_TOPDIR}/asfdrvr-package-dir}
 : ${ASFDVR_TARBALL_NAME:=asfvolt16-voltha-bal}
 : ${BUILD_FILENAME_TAG:=`date +%Y%m%d%H%M`}
@@ -35,6 +36,7 @@ echo ONL_TOPDIR=${ONL_TOPDIR}
 echo BALSRC_RELEASE=${BALSRC_RELEASE}
 echo BALREL_TOPDIR=${BALREL_TOPDIR}
 echo BALSRC_TOPDIR=${BALSRC_TOPDIR}
+echo ASFSCR_TOPDIR=${ASFSCR_TOPDIR}
 echo ASFDRVR_PKGDIR=${ASFDRVR_PKGDIR}
 echo ASFDVR_TARBALL_NAME=${ASFDVR_TARBALL_NAME}
 echo BUILD_FILENAME_TAG=${BUILD_FILENAME_TAG}
@@ -73,6 +75,9 @@ rm *.0T
 
 # add voltha_bal_driver
 cp -pR ${ONL_TOPDIR}/grpc-c/build/examples/.libs/voltha_bal_driver .
+
+# add voltha driver startup scripts
+cp -p ${ASFSCR_TOPDIR}/voltha_init_sh voltha_init.sh
 
 #extract ASFvOLT16 BAL/Maple built release tarball
 cd ..

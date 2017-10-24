@@ -116,6 +116,38 @@ The tarball containing the packaged voltha_bal_driver can be found in ${ASFDRVR_
 asfvolt16-voltha-bal-201710051908.tgz  broadcom  opt
 ```
 
+### Install `voltha_bal_driver` BAL release tarball
+
+Transfer BAL release tarball to ASFvOLT16:
+
+```
+    > cp asfdrvr-package-dir/asfvolt16-voltha-bal-201710231906.tgz  root@<ASFvOLT16_IP>:.
+```
+
+Install release tarball on ASFvOLT16:
+
+```
+    > ssh root@<ASFvOLT16_IP>
+    Enter passphrase for key '/home/kimk/.ssh/id_rsa':
+    root@192.168.140.72's password: onl
+    Last login: Tue Oct 24 11:00:48 2017 from 192.168.140.32
+
+    root@localhost:~# ls
+    asfvolt16-voltha-bal-201710231906.tgz
+    root@localhost:~# cd /
+    root@localhost:/# mv /broadcom /broadcom.prev
+    root@localhost:/# mv /opt/bcm68620/ /opt/bcm68620.prev
+    root@localhost:/# tar zxf ~/asfvolt16-voltha-bal-201710231906.tgz
+    root@localhost:/# tail -5 /etc/rc.local # ensure rc.local has the following lines
+    # By default this script does nothing.
+
+    /opt/bcm68620/svk_init.sh
+    /broadcom/voltha_init.sh
+    exit 0
+
+    root@localhost:/# shutdown -r now
+```
+
 USAGE:
     ./voltha_bal_driver "serverIP:port1" -C "serverIP:port2" -A "serverIP:port3"
     ./bal_core_dist -C "serverIP:port2" -A "serverIP:port3"
