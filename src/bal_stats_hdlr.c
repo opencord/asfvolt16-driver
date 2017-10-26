@@ -24,7 +24,8 @@
  *               interface type(NNI/PON/EPON 1G/EPON 10G)           *
  *               port number                                        *
  ********************************************************************/
-uint32_t asfvolt16_bal_stats_get(BalIntfType intf_type, uint32_t intf_id, BalInterfaceStatData *statData)
+uint32_t asfvolt16_bal_stats_get(BalIntfType intf_type, uint32_t intf_id, BalInterfaceStatData *statData,
+                                 BalInterfaceKey *statKey)
 {
    bcmbal_interface_stat interface_stats;
 
@@ -56,6 +57,13 @@ uint32_t asfvolt16_bal_stats_get(BalIntfType intf_type, uint32_t intf_id, BalInt
 
    if(err == BCM_ERR_OK)
    {
+      /*interface key*/
+      statKey->has_intf_id = BAL_STAT_PRES;
+      statKey->intf_id = interface_stats.key.intf_id;
+      statKey->has_intf_type = BAL_STAT_PRES;
+      statKey->intf_type = interface_stats.key.intf_type;
+
+      /*interface stat data*/
       statData->has_rx_bytes = BAL_STAT_PRES;
       statData->rx_bytes = interface_stats.data.rx_bytes;
       statData->has_rx_packets = BAL_STAT_PRES;

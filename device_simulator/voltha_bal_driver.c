@@ -181,16 +181,21 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     memset(&stat_data, 0, sizeof(BalInterfaceStatData));
     bal_interface_stat_data__init(&stat_data);
 
+    BalInterfaceKey stat_key;
+    memset(&stat_key, 0, sizeof(BalInterfaceKey));
+    bal_interface_key__init(&stat_key);
+
 #ifndef BAL_STUB
     /* Interface Type, Interface ID
        stat_data - Statistics Data */
-    asfvolt16_bal_stats_get(read_stats->intf_type, read_stats->intf_id, &stat_data);
+    asfvolt16_bal_stats_get(read_stats->intf_type, read_stats->intf_id, &stat_data, &stat_key);
 #else
     stub_bal_stats_get(&stat_data);
     ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats In BalStubs : Got all the statistics\n");
 #endif
 
     get_stats.data = &stat_data;
+    get_stats.key = &stat_key;
 
     ret_val = context->gcc_stream->write(context, &get_stats, 0);
     is_grpc_write_pending(ret_val);
