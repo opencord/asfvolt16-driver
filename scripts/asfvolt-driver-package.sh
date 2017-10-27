@@ -78,6 +78,7 @@ cp -pR ${ONL_TOPDIR}/grpc-c/build/examples/.libs/voltha_bal_driver .
 
 # add voltha driver startup scripts
 cp -p ${ASFSCR_TOPDIR}/voltha_init_sh voltha_init.sh
+chmod 755 voltha_init.sh
 
 #extract ASFvOLT16 BAL/Maple built release tarball
 cd ..
