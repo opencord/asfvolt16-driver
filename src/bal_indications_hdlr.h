@@ -30,6 +30,7 @@
 #include "bal.grpc-c.h"
 
 #include "asfvolt16_driver.h"
+#include "bal_indications_queue.h"
 
 #define BAL_GRPC_PRES    1 
 

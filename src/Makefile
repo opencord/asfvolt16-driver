@@ -16,6 +16,7 @@ SRC=asfvolt16_driver.c \
 	bal_access_terminal_hdlr.c \
 	bal_flow_hdlr.c \
 	bal_group_hdlr.c \
+        bal_indications_queue.c \
 	bal_indications_hdlr.c \
 	bal_interface_hdlr.c \
 	bal_packet_hdlr.c \
