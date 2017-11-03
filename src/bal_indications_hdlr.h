@@ -32,7 +32,7 @@
 #include "asfvolt16_driver.h"
 #include "bal_indications_queue.h"
 
-#define BAL_GRPC_PRES    1 
+#define BAL_GRPC_PRES    1
 
 extern bcmos_errno bal_indication_cb(bcmbal_obj *obj);
 extern bcmos_errno bal_acc_term_osc_indication_cb(bcmbal_obj *obj);

@@ -19,7 +19,7 @@
 
 #include "bal_indications.grpc-c.h"
 
-#define MAX_QUEUE_SIZE 25
+#define MAX_QUEUE_SIZE 1000
 
 typedef struct node {
     struct node *next;

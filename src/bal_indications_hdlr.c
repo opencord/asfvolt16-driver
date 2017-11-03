@@ -141,7 +141,7 @@ bcmos_errno bal_acc_term_indication_cb(bcmbal_obj *obj)
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
-      
+
       pthread_mutex_lock(&bal_ind_queue_lock);
       add_bal_indication_node(bal_indication_node);
       pthread_mutex_unlock(&bal_ind_queue_lock);
@@ -491,6 +491,7 @@ bcmos_errno bal_flow_indication_cb(bcmbal_obj *obj)
 bcmos_errno bal_group_indication_cb(bcmbal_obj *obj)
 {
    bcmos_errno result = BCM_ERR_OK;
+   unsigned int i = 0;
 
    if(BCMBAL_OBJ_ID_GROUP != obj->obj_type ||
       bcmbal_group_auto_id_ind != obj->subgroup)
@@ -557,51 +558,54 @@ bcmos_errno bal_group_indication_cb(bcmbal_obj *obj)
       balIndCfg->group_ind->data->members->n_val = group_ind->data.members.len;
 
       BalGroupMemberInfo *balMemberInfo;
-      balMemberInfo = (BalGroupMemberInfo *)malloc(sizeof(BalGroupMemberInfo) * \
-                                         balIndCfg->group_ind->data->members->n_val);
-      memset(balMemberInfo, 0, sizeof(BalGroupMemberInfo) * \
-                                         balIndCfg->group_ind->data->members->n_val);
-      bal_group_member_info__init(balMemberInfo);
-      balIndCfg->group_ind->data->members->val = balMemberInfo;
-
-      balMemberInfo->has_intf_id = BAL_GRPC_PRES;
-      balMemberInfo->intf_id = group_ind->data.members.val->intf_id;
-      balMemberInfo->has_svc_port_id = BAL_GRPC_PRES;
-      balMemberInfo->svc_port_id = group_ind->data.members.val->svc_port_id;
-
       BalAction *balAction;
-      balAction = malloc(sizeof(BalAction));
-      memset(balAction, 0, sizeof(BalAction));
-      bal_action__init(balAction);
-      balMemberInfo->action = balAction;
-
-      balMemberInfo->action->has_presence_mask = BAL_GRPC_PRES;
-      balMemberInfo->action->presence_mask = group_ind->data.members.val->action.presence_mask;
-      balMemberInfo->action->has_cmds_bitmask = BAL_GRPC_PRES;
-      balMemberInfo->action->cmds_bitmask = group_ind->data.members.val->action.cmds_bitmask;
-      balMemberInfo->action->has_o_vid = BAL_GRPC_PRES;
-      balMemberInfo->action->o_vid = group_ind->data.members.val->action.o_vid;
-      balMemberInfo->action->has_o_pbits = BAL_GRPC_PRES;
-      balMemberInfo->action->o_pbits = group_ind->data.members.val->action.o_pbits;
-      balMemberInfo->action->has_o_tpid = BAL_GRPC_PRES;
-      balMemberInfo->action->o_tpid = group_ind->data.members.val->action.o_tpid;
-      balMemberInfo->action->has_i_vid = BAL_GRPC_PRES;
-      balMemberInfo->action->i_vid = group_ind->data.members.val->action.i_vid;
-      balMemberInfo->action->has_i_pbits = BAL_GRPC_PRES;
-      balMemberInfo->action->i_pbits = group_ind->data.members.val->action.i_pbits;
-      balMemberInfo->action->has_i_tpid = BAL_GRPC_PRES;
-      balMemberInfo->action->i_tpid = group_ind->data.members.val->action.i_tpid;
-
       BalTmQueueRef *balQueue;
-      balQueue = malloc(sizeof(BalTmQueueRef));
-      memset(balQueue, 0, sizeof(BalTmQueueRef));
-      bal_tm_queue_ref__init(balQueue);
-      balMemberInfo->queue = balQueue;
+      for (i = 0; i < balIndCfg->group_ind->data->members->n_val; i++)
+      {
+         balMemberInfo = malloc(sizeof(BalGroupMemberInfo));
+         memset(balMemberInfo, 0, sizeof(BalGroupMemberInfo));
+         bal_group_member_info__init(balMemberInfo);
 
-      balMemberInfo->queue->has_sched_id = BAL_GRPC_PRES;
-      balMemberInfo->queue->sched_id = group_ind->data.members.val->queue.sched_id;
-      balMemberInfo->queue->has_queue_id = BAL_GRPC_PRES;
-      balMemberInfo->queue->queue_id = group_ind->data.members.val->queue.queue_id;
+         balMemberInfo->has_intf_id = BAL_GRPC_PRES;
+         balMemberInfo->intf_id = group_ind->data.members.val->intf_id;
+         balMemberInfo->has_svc_port_id = BAL_GRPC_PRES;
+         balMemberInfo->svc_port_id = group_ind->data.members.val->svc_port_id;
+
+         balAction = malloc(sizeof(BalAction));
+         memset(balAction, 0, sizeof(BalAction));
+         bal_action__init(balAction);
+         balMemberInfo->action = balAction;
+
+         balMemberInfo->action->has_presence_mask = BAL_GRPC_PRES;
+         balMemberInfo->action->presence_mask = group_ind->data.members.val->action.presence_mask;
+         balMemberInfo->action->has_cmds_bitmask = BAL_GRPC_PRES;
+         balMemberInfo->action->cmds_bitmask = group_ind->data.members.val->action.cmds_bitmask;
+         balMemberInfo->action->has_o_vid = BAL_GRPC_PRES;
+         balMemberInfo->action->o_vid = group_ind->data.members.val->action.o_vid;
+         balMemberInfo->action->has_o_pbits = BAL_GRPC_PRES;
+         balMemberInfo->action->o_pbits = group_ind->data.members.val->action.o_pbits;
+         balMemberInfo->action->has_o_tpid = BAL_GRPC_PRES;
+         balMemberInfo->action->o_tpid = group_ind->data.members.val->action.o_tpid;
+         balMemberInfo->action->has_i_vid = BAL_GRPC_PRES;
+         balMemberInfo->action->i_vid = group_ind->data.members.val->action.i_vid;
+         balMemberInfo->action->has_i_pbits = BAL_GRPC_PRES;
+         balMemberInfo->action->i_pbits = group_ind->data.members.val->action.i_pbits;
+         balMemberInfo->action->has_i_tpid = BAL_GRPC_PRES;
+         balMemberInfo->action->i_tpid = group_ind->data.members.val->action.i_tpid;
+
+         balQueue = malloc(sizeof(BalTmQueueRef));
+         memset(balQueue, 0, sizeof(BalTmQueueRef));
+         bal_tm_queue_ref__init(balQueue);
+         balMemberInfo->queue = balQueue;
+
+         balMemberInfo->queue->has_sched_id = BAL_GRPC_PRES;
+         balMemberInfo->queue->sched_id = group_ind->data.members.val->queue.sched_id;
+         balMemberInfo->queue->has_queue_id = BAL_GRPC_PRES;
+         balMemberInfo->queue->queue_id = group_ind->data.members.val->queue.queue_id;
+
+         balIndCfg->group_ind->data->members->val[i] = balMemberInfo;
+      }
+
 
       BalIdList *balFlows;
       balFlows = malloc(sizeof(BalIdList));

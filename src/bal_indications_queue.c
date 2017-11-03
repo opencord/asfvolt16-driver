@@ -15,6 +15,9 @@
 */
 
 #include "bal_indications_queue.h"
+#include "asfvolt16_driver.h"
+
+long unsigned int indication_drop_count = 0;
 
 /*
  * Implements a circular queue whose size can grow upto MAX_QUEUE_SIZE defined.
@@ -50,8 +53,8 @@ void add_bal_indication_node(list_node *node) {
    /*'bal_ind_queue_head' should be thread safe there could be simultaneous
      write from BAL and adapter trying to read from the 'bal_ind_queue_head'.
      So, protect it under a mutex(bal_ind_queue_lock), before using this MACRO*/
-   if (num_of_nodes == 0 && 
-       bal_ind_queue_head == NULL && 
+   if (num_of_nodes == 0 &&
+       bal_ind_queue_head == NULL &&
        bal_ind_queue_tail == NULL ) {
       /*Case where the queue is empty*/
       bal_ind_queue_head = node;
@@ -60,27 +63,29 @@ void add_bal_indication_node(list_node *node) {
       bal_ind_queue_tail->next = node;
       ++num_of_nodes;
    }
-   else if (num_of_nodes == 1 && 
-            bal_ind_queue_head != NULL && 
+   else if (num_of_nodes == 1 &&
+            bal_ind_queue_head != NULL &&
             bal_ind_queue_tail != NULL ) {
       bal_ind_queue_head->next = node;
       bal_ind_queue_tail = node;
       bal_ind_queue_tail->next = bal_ind_queue_head;
       ++num_of_nodes;
    }
-   else if (num_of_nodes > 1 && 
-            num_of_nodes < MAX_QUEUE_SIZE && 
-            bal_ind_queue_head != NULL && 
+   else if (num_of_nodes > 1 &&
+            num_of_nodes < MAX_QUEUE_SIZE &&
+            bal_ind_queue_head != NULL &&
             bal_ind_queue_tail != NULL ) {
       bal_ind_queue_tail->next = node;
       bal_ind_queue_tail = node;
       bal_ind_queue_tail->next = bal_ind_queue_head;
       ++num_of_nodes;
    }
-   else if (num_of_nodes == MAX_QUEUE_SIZE && 
-            bal_ind_queue_head != NULL && 
+   else if (num_of_nodes == MAX_QUEUE_SIZE &&
+            bal_ind_queue_head != NULL &&
             bal_ind_queue_tail != NULL  ) {
       list_node *head_ref = bal_ind_queue_head;
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "Queue full, deleting a node. Drop cnt = %lu\n",\
+                                    ++indication_drop_count);
       bal_ind_queue_tail->next = node;
       bal_ind_queue_tail = node;
       bal_ind_queue_head = bal_ind_queue_head->next;

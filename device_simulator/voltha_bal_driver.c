@@ -96,7 +96,7 @@ void bal__bal_api_heartbeat_cb(grpc_c_context_t *context)
    /*
     * Write reply back to the client
     */
-   ret_val = context->gcc_stream->write(context, &bal_reboot, 0);
+   ret_val = context->gcc_stream->write(context, &bal_reboot, -1);
    is_grpc_write_pending(ret_val);
 
    grpc_c_status_t status;
@@ -142,7 +142,7 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
    /*
     * Write reply back to the client
     */
-   ret_val = context->gcc_stream->write(context, &bal_err, 0);
+   ret_val = context->gcc_stream->write(context, &bal_err, -1);
    is_grpc_write_pending(ret_val);
 
    grpc_c_status_t status;
@@ -204,7 +204,7 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     get_stats.data = &stat_data;
     get_stats.key = &stat_key;
 
-    ret_val = context->gcc_stream->write(context, &get_stats, 0);
+    ret_val = context->gcc_stream->write(context, &get_stats, -1);
     is_grpc_write_pending(ret_val);
 
     grpc_c_status_t status;
@@ -266,7 +266,7 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
     * Write reply back to the client
     */
 
-   ret_val = context->gcc_stream->write(context, &bal_err, 0);
+   ret_val = context->gcc_stream->write(context, &bal_err, -1);
    is_grpc_write_pending(ret_val);
 
    grpc_c_status_t status;
@@ -428,7 +428,7 @@ void bal__bal_api_init_cb(grpc_c_context_t *context)
    /*
     * Write reply back to the client
     */
-   ret_val = context->gcc_stream->write(context, &bal_err, 0);
+   ret_val = context->gcc_stream->write(context, &bal_err, -1);
    is_grpc_write_pending(ret_val);
 
    grpc_c_status_t status;
@@ -495,15 +495,15 @@ void bal_get_ind__free_mem_flow_ind(BalIndications *balIndCfg)
 
 void bal_get_ind__free_mem_group_ind(BalIndications *balIndCfg)
 {
-   int i = 0;
+   unsigned int i = 0;
    free(balIndCfg->group_ind->data->flows->val);
    free(balIndCfg->group_ind->data->flows);
    for (i = 0; i < balIndCfg->group_ind->data->members->n_val; i++)
    {
       free(balIndCfg->group_ind->data->members->val[i]->queue);
       free(balIndCfg->group_ind->data->members->val[i]->action);
+      free(balIndCfg->group_ind->data->members->val[i]);
    }
-   free(balIndCfg->group_ind->data->members->val);
    free(balIndCfg->group_ind->data->members);
    free(balIndCfg->group_ind->data);
    free(balIndCfg->group_ind->key);
@@ -525,7 +525,7 @@ void bal_get_ind__free_mem_interface_los(BalIndications *balIndCfg)
 {
    free(balIndCfg->interface_los->data);
    free(balIndCfg->interface_los->hdr);
-   free(balIndCfg->interface_los); 
+   free(balIndCfg->interface_los);
    free(balIndCfg);
 }
 
@@ -707,7 +707,7 @@ void bal_get_ind__free_mem(BalIndications *balIndCfg)
        case BAL_INDICATIONS__U_ACCESS_TERM_IND:
           bal_get_ind__free_mem_access_term_ind(balIndCfg);
           break;
- 
+
        case BAL_INDICATIONS__U_ACCESS_TERM_IND_OP_STATE:
           bal_get_ind__free_mem_access_term_ind_op_state(balIndCfg);
           break;
@@ -777,7 +777,7 @@ void bal_get_ind__free_mem(BalIndications *balIndCfg)
           break;
 
        default:
-          ASFVOLT_LOG(ASFVOLT_ERROR, "Unknown case %lu\n", balIndCfg->u_case);
+          ASFVOLT_LOG(ASFVOLT_ERROR, "Unknown case %u\n", balIndCfg->u_case);
           break;
     }
 }
@@ -803,7 +803,7 @@ void bal_get_ind__bal_get_ind_from_device_cb(grpc_c_context_t *context)
    pthread_mutex_lock(&bal_ind_queue_lock);
    node = get_bal_indication_node();
    pthread_mutex_unlock(&bal_ind_queue_lock);
-     
+
    if(node != NULL)
    {
       bal_indication = node->bal_indication;
@@ -823,7 +823,7 @@ void bal_get_ind__bal_get_ind_from_device_cb(grpc_c_context_t *context)
     * Write reply back to the client
     */
 
-   ret_val = context->gcc_stream->write(context, bal_indication, 0);
+   ret_val = context->gcc_stream->write(context, bal_indication, -1);
    is_grpc_write_pending(ret_val);
 
    grpc_c_status_t status;
@@ -836,7 +836,7 @@ void bal_get_ind__bal_get_ind_from_device_cb(grpc_c_context_t *context)
    {
       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status\n");
    }
-   
+
    /*Free memory for 'bal_indication' and 'node'*/
    if (bal_indication->ind_present)
    {

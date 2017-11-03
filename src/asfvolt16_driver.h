@@ -26,6 +26,8 @@
 #include "bal_errno.grpc-c.h"
 #include "bal.grpc-c.h"
 
+#include <stdio.h>
+
 #define ASFVOLT_ERROR 1
 #define ASFVOLT_INFO  2
 #define ASFVOLT_DEBUG 3
