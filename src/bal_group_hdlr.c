@@ -42,11 +42,11 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT): Group Id was not present \n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT): Group Id was not present");
        return BAL_ERRNO__BAL_ERR_NOENT;
     }
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Configuration of OLT(group cfg) starts\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Configuration of OLT(group cfg) starts");
 
     /* init the API struct */
     BCMBAL_CFG_INIT(&grp_cfg_obj, group, key);
@@ -54,15 +54,15 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
     /* decode API parameters from GRPC */
     if(tm_group_cfg->data->has_members_cmd)
     {
-        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, members_cmd, 
-                             tm_group_cfg->data->has_members_cmd, 
+        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, members_cmd,
+                             tm_group_cfg->data->has_members_cmd,
                              tm_group_cfg->data->members_cmd);
     }
 
     if(tm_group_cfg->data->has_cookie)
     {
-        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, cookie, 
-                             tm_group_cfg->data->has_cookie, 
+        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, cookie,
+                             tm_group_cfg->data->has_cookie,
                              tm_group_cfg->data->cookie);
     }
 
@@ -73,31 +73,31 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
     valFlows.val = (bcmbal_flow_id *)malloc((valFlows.len)*sizeof(bcmbal_flow_id));
     if(!valFlows.val)
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT): Memory Exhausted\n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT): Memory Exhausted");
        return BAL_ERRNO__BAL_ERR_NOMEM;
     }
-    memcpy((void *)valFlows.val, (const void *)balFlows->val, 
+    memcpy((void *)valFlows.val, (const void *)balFlows->val,
            (balFlows->n_val)*sizeof(bcmbal_flow_id));
-    ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, flows, BCMOS_TRUE, valFlows); 
+    ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, flows, BCMOS_TRUE, valFlows);
 
     if(tm_group_cfg->data->has_owner)
     {
-        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, owner, 
-                             tm_group_cfg->data->has_owner, 
+        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, owner,
+                             tm_group_cfg->data->has_owner,
                              tm_group_cfg->data->owner);
     }
 
-    BalGroupMemberInfoList *balMembers = 
+    BalGroupMemberInfoList *balMembers =
               (BalGroupMemberInfoList *)tm_group_cfg->data->members;
     bcmbal_group_member_info_list_u16 valMembers = {};
     /*if(balMembers->has_len)*/
     {
        valMembers.len = balMembers->n_val;
-       valMembers.val = 
+       valMembers.val =
         (bcmbal_group_member_info *)malloc((valMembers.len)*sizeof(bcmbal_group_member_info));
        if(!valMembers.val)
        {
-          ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT): Memory Exhausted\n");
+          ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT): Memory Exhausted");
           return BAL_ERRNO__BAL_ERR_NOMEM;
        }
        //check
@@ -106,17 +106,17 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
        {
           if(balMembers->val[grp_mem_idx]->has_intf_id)
           {
-             valMembers.val[grp_mem_idx].intf_id 
+             valMembers.val[grp_mem_idx].intf_id
                                   = balMembers->val[grp_mem_idx]->intf_id;
           }
           if(balMembers->val[grp_mem_idx]->has_svc_port_id)
           {
-             valMembers.val[grp_mem_idx].svc_port_id 
+             valMembers.val[grp_mem_idx].svc_port_id
                                = balMembers->val[grp_mem_idx]->svc_port_id;
           }
           if(balMembers->val[grp_mem_idx]->action->has_presence_mask)
           {
-             valMembers.val[grp_mem_idx].action.presence_mask 
+             valMembers.val[grp_mem_idx].action.presence_mask
                      = balMembers->val[grp_mem_idx]->action->presence_mask;
           }
           if(balMembers->val[grp_mem_idx]->action->has_cmds_bitmask)
@@ -165,18 +165,18 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
                      = balMembers->val[grp_mem_idx]->queue->queue_id;
           }
        }
-       ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, members, BCMOS_TRUE, valMembers); 
+       ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, members, BCMOS_TRUE, valMembers);
     }
 
     err = bcmbal_cfg_set(DEFAULT_ATERM_ID, &(grp_cfg_obj.hdr));
 
     if(BCM_ERR_OK != err)
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT)\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the group cfg(OLT)");
         return err;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "\nSet Group configuration sent to OLT for Group Id(%d)\n", 
+    ASFVOLT_LOG(ASFVOLT_INFO, "Set Group configuration sent to OLT for Group Id(%d)",
                                key.group_id);
     return err;
 }
@@ -187,7 +187,7 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
  * Description : get the OLT device group cfg                    *
  ********************************************************************/
 
-uint32_t bal_group_cfg_get(BalGroupKey *tm_group_cfg_key, 
+uint32_t bal_group_cfg_get(BalGroupKey *tm_group_cfg_key,
                            BalGroupCfg *tm_group_cfg)
 {
     bcmos_errno err = BCM_ERR_OK;
@@ -200,11 +200,11 @@ uint32_t bal_group_cfg_get(BalGroupKey *tm_group_cfg_key,
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the group cfg(OLT): Group Id was not present\n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the group cfg(OLT): Group Id was not present");
        return BAL_ERRNO__BAL_ERR_NOENT;
     }
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Get group cfg(for OLT) starts\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Get group cfg(for OLT) starts");
 
     /* init the API struct */
     BCMBAL_CFG_INIT(&grp_cfg_obj, group, key);
@@ -216,11 +216,11 @@ uint32_t bal_group_cfg_get(BalGroupKey *tm_group_cfg_key,
 
     if(BCM_ERR_OK != err)
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the group Cfg(OLT)\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the group Cfg(OLT)");
         return err;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "\nGet Group cfg sent to OLT for Group Id(%d)\n", 
+    ASFVOLT_LOG(ASFVOLT_INFO, "Get Group cfg sent to OLT for Group Id(%d)",
                                key.group_id);
     return err;
 }
@@ -242,11 +242,11 @@ uint32_t bal_group_cfg_clear(BalGroupKey *tm_group_cfg_key)
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the group cfg(OLT): Group Id was not present\n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the group cfg(OLT): Group Id was not present");
        return BAL_ERRNO__BAL_ERR_NOENT;
     }
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Clearing of OLT(group cfg) starts\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Clearing of OLT(group cfg) starts");
 
     /* init the API struct */
     BCMBAL_CFG_INIT(&grp_cfg_obj, group, key);
@@ -255,11 +255,11 @@ uint32_t bal_group_cfg_clear(BalGroupKey *tm_group_cfg_key)
 
     if(BCM_ERR_OK != err)
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the group Cfg(OLT)\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the group Cfg(OLT)");
         return err;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "\nClear Group cfg clear sent to OLT for Group Id(%d) \n", 
+    ASFVOLT_LOG(ASFVOLT_INFO, "Clear Group cfg clear sent to OLT for Group Id(%d)",
                                key.group_id);
     return err;
 }
@@ -272,11 +272,9 @@ uint32_t bal_group_cfg_clear(BalGroupKey *tm_group_cfg_key)
 bcmos_errno bal_group_cfg_indication_cb(bcmbal_obj *obj)
 {
     bcmos_errno result = BCM_ERR_OK;
-    ASFVOLT_LOG(ASFVOLT_INFO, "Processing API ('%s)\n' IND callback status is (%s)\n",
+    ASFVOLT_LOG(ASFVOLT_INFO, "Processing API ('%s)' IND callback status is (%s)",
 		    bcmbal_objtype_str(obj->obj_type),
 		    bcmos_strerror(obj->status));
-    
+
     return result;
 }
-
-

@@ -58,12 +58,12 @@ void is_grpc_write_pending(int return_value)
       if(return_value == GRPC_C_WRITE_PENDING)
       {
          /* TODO: Register call back with grpc-c which will give an indication whenever write was succussful */
-         ASFVOLT_LOG(ASFVOLT_INFO, "write(%d) is pending, sleep for 5 sec\n", return_value);
+         ASFVOLT_LOG(ASFVOLT_INFO, "write(%d) is pending, sleep for 5 sec", return_value);
          sleep(5);
       }
       else
       {
-         ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write %d \n", return_value);
+         ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write %d", return_value);
       }
    }
 
@@ -107,7 +107,7 @@ void bal__bal_api_heartbeat_cb(grpc_c_context_t *context)
      */
     if (context->gcc_stream->finish(context, &status))
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
     }
 }
 
@@ -128,8 +128,7 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
       context->gcc_stream->read(context, (void **)&read_device, 0);
    }
 
-   ASFVOLT_LOG(ASFVOLT_INFO, "Bal Server - Reboot : ======Entering Function Reboot ==============================\n");
-   ASFVOLT_LOG(ASFVOLT_INFO, "Bal Server - Reboot : Device ID is %s\n",read_device->device_id);
+   ASFVOLT_LOG(ASFVOLT_INFO, "Bal Server - Reboot : Device ID is %s",read_device->device_id);
 
    /*
     * send it to BAL
@@ -153,7 +152,7 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
     */
     if (context->gcc_stream->finish(context, &status))
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
     }
 
    ret_val = system("shutdown -r now");
@@ -177,8 +176,7 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
        context->gcc_stream->read(context, (void **)&read_stats, 0);
     }
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats :======Entering Function Get Stats ============\n");
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats :NNI port is %d\n",read_stats->intf_id);
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats :NNI port is %d",read_stats->intf_id);
 
     BalInterfaceStat get_stats;
     memset(&get_stats, 0, sizeof(BalInterfaceStat));
@@ -198,7 +196,7 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     asfvolt16_bal_stats_get(read_stats->intf_type, read_stats->intf_id, &stat_data, &stat_key);
 #else
     stub_bal_stats_get(&stat_data);
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats In BalStubs : Got all the statistics\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats In BalStubs : Got all the statistics");
 #endif
 
     get_stats.data = &stat_data;
@@ -215,7 +213,7 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     */
     if (context->gcc_stream->finish(context, &status))
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
     }
 }
 
@@ -277,7 +275,7 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
     */
    if (context->gcc_stream->finish(context, &status))
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status\n");
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
    }
 
 #ifdef BAL_STUB
@@ -291,25 +289,19 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
    {
       case BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL:
          {
-            ASFVOLT_LOG(ASFVOLT_INFO, "\n***************************************************\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received Access Terminal Configuration msg\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "***************************************************\n");
+            ASFVOLT_LOG(ASFVOLT_INFO, "Received Access Terminal Configuration msg");
          }
          break;
       case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
          {
-            ASFVOLT_LOG(ASFVOLT_INFO, "\n***************************************************\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received PON Interface Configuration msg\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "***************************************************\n");
+            ASFVOLT_LOG(ASFVOLT_INFO, "Received PON Interface Configuration msg");
             temp->intf_id = set_cfg->interface->key->intf_id;
-            ASFVOLT_LOG(ASFVOLT_INFO, "Pon ID = %d\n", temp->intf_id);
+            ASFVOLT_LOG(ASFVOLT_INFO, "Pon ID = %d", temp->intf_id);
          }
          break;
       case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
          {
-            ASFVOLT_LOG(ASFVOLT_INFO, "\n*****************************************************\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received ONU Activation msg\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "*****************************************************\n");
+            ASFVOLT_LOG(ASFVOLT_INFO, "Received ONU Activation msg");
             temp->intf_id = set_cfg->terminal->key->intf_id;
             temp->onu_id = set_cfg->terminal->key->sub_term_id;
             memset(temp->vendor_id, 0, BAL_DEVICE_STR_LEN);
@@ -324,9 +316,7 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
          break;
       case BAL_OBJ_ID__BAL_OBJ_ID_TM_SCHED:
          {
-            ASFVOLT_LOG(ASFVOLT_INFO, "\n*****************************************************\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received TM schedule msg\n");
-            ASFVOLT_LOG(ASFVOLT_INFO, "*****************************************************\n");
+            ASFVOLT_LOG(ASFVOLT_INFO, "Received TM schedule msg");
          }
          break;
     case BAL_OBJ_ID__BAL_OBJ_ID_PACKET:
@@ -335,18 +325,14 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
           {
              case BAL_DEST_TYPE__BAL_DEST_TYPE_ITU_OMCI_CHANNEL:
                 {
-                   ASFVOLT_LOG(ASFVOLT_INFO, "\n*****************************************************\n");
-                   ASFVOLT_LOG(ASFVOLT_INFO, "Received OMCI msg\n");
-                   ASFVOLT_LOG(ASFVOLT_INFO, "*****************************************************\n");
+                   ASFVOLT_LOG(ASFVOLT_INFO, "Received OMCI msg");
                    temp->intf_id = set_cfg->terminal->key->intf_id;
                    temp->onu_id = set_cfg->terminal->key->sub_term_id;
                 }
                 break;
              default:
                 {
-                   ASFVOLT_LOG(ASFVOLT_INFO, "\n*****************************************************\n");
-                   ASFVOLT_LOG(ASFVOLT_INFO, "Dest type invalid\n");
-                   ASFVOLT_LOG(ASFVOLT_INFO, "*****************************************************\n");
+                   ASFVOLT_LOG(ASFVOLT_INFO, "Dest type invalid");
                 }
                 break;
           }
@@ -354,9 +340,7 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
        break;
     default:
        {
-          ASFVOLT_LOG(ASFVOLT_INFO, "\n*****************************************************\n");
-          ASFVOLT_LOG(ASFVOLT_INFO, "Received Invalid msg type === %d \n", set_cfg->hdr->obj_type);
-          ASFVOLT_LOG(ASFVOLT_INFO, "*****************************************************\n");
+          ASFVOLT_LOG(ASFVOLT_INFO, "Received Invalid msg type === %d", set_cfg->hdr->obj_type);
           pthread_mutex_unlock(&lock);
           return;
        }
@@ -417,9 +401,7 @@ void bal__bal_api_init_cb(grpc_c_context_t *context)
     * send it to BAL
     */
 
-   ASFVOLT_LOG(ASFVOLT_INFO, "\n*****************************************************\n");
-   ASFVOLT_LOG(ASFVOLT_INFO, "Received API Init msg\n");
-   ASFVOLT_LOG(ASFVOLT_INFO, "*****************************************************\n");
+   ASFVOLT_LOG(ASFVOLT_INFO, "Received API Init msg");
 
    bal_err__init(&bal_err);
 
@@ -439,13 +421,13 @@ void bal__bal_api_init_cb(grpc_c_context_t *context)
     */
    if (context->gcc_stream->finish(context, &status))
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status\n");
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
    }
 
 #ifndef BAL_STUB
    asfvolt16_bal_init(bal_init, &coreIpPortInfo);
 #else
-   ASFVOLT_LOG(ASFVOLT_INFO, "\nRecevied IP Address == %s \n", bal_init->voltha_adapter_ip_port);
+   ASFVOLT_LOG(ASFVOLT_INFO, "Received IP Address == %s", bal_init->voltha_adapter_ip_port);
    stub_bal_init(bal_init);
 #endif
 
@@ -777,7 +759,7 @@ void bal_get_ind__free_mem(BalIndications *balIndCfg)
           break;
 
        default:
-          ASFVOLT_LOG(ASFVOLT_ERROR, "Unknown case %u\n", balIndCfg->u_case);
+          ASFVOLT_LOG(ASFVOLT_ERROR, "Unknown BAL indication %u", balIndCfg->u_case);
           break;
     }
 }
@@ -834,7 +816,7 @@ void bal_get_ind__bal_get_ind_from_device_cb(grpc_c_context_t *context)
     */
    if (context->gcc_stream->finish(context, &status))
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status\n");
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
    }
 
    /*Free memory for 'bal_indication' and 'node'*/
@@ -915,6 +897,24 @@ void bal_ind__bal_pkt_ieee_oam_channel_rx_ind_cb(grpc_c_context_t *context)
 {
 }
 
+/*
+**    ASFVOLT_HEX2LOG(ASFVOLT_DEBUG, "OMCI Response with %zd bytes is",
+**       balIndCfg.balomciresp->data->pkt.data, balIndCfg.balomciresp->data->pkt.len);
+*/
+#define SYSLOG_MAX_SIZE 1024
+void asfvolt_hexlog2(int prio, const char *_file_loc, int _file_line, const char *pFormat, void* pData, size_t len)
+{
+      unsigned char *inpPtr = pData;
+      char tempBuf[SYSLOG_MAX_SIZE];
+      size_t idx = 0;
+
+      idx += snprintf(tempBuf+idx, SYSLOG_MAX_SIZE-1, pFormat, len);
+      while (len-- > 0 && idx < SYSLOG_MAX_SIZE)
+      {
+         idx += snprintf(tempBuf+idx, SYSLOG_MAX_SIZE-idx, "%02x", *inpPtr++);
+      }
+      ASFVOLT_LOG_LOC(prio, _file_loc, _file_line, "%s", tempBuf);
+}
 
 /*
  * Takes socket path as argument
@@ -936,6 +936,14 @@ int main (int argc, char **argv)
    strcpy(coreIpPortInfo.bal_shared_lib_ip_port, argv[5]/*, strlen(argv[5])*/);
 
    signal(SIGINT, sigint_handler);
+
+   /*
+   ** syslog initialization
+   */
+   //setlogmask (LOG_UPTO (LOG_NOTICE));
+
+   openlog (ASFVOLT_SYSLOG_NAME, ASFVOLT_SYSLOG_MODE, LOG_LOCAL1);
+
    /*
     * Initialize grpc-c library to be used with vanilla gRPC
     */
@@ -948,14 +956,14 @@ int main (int argc, char **argv)
 
    if (test_server == NULL)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to create server\n");
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to create server");
       exit(1);
    }
 
    /*
     * Initialize greeter service
     */
-   ASFVOLT_LOG(ASFVOLT_INFO, "\nvoltha_bal_driver running.....\n");
+   ASFVOLT_LOG(ASFVOLT_INFO, "voltha_bal_driver running.....");
    bal__service_init(test_server);
    bal_get_ind__service_init(test_server);
 

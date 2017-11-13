@@ -33,7 +33,7 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_tm_sched_cfg tm_sched_obj;   /**< declare main API struct */
     bcmbal_tm_sched_key key = { };      /**< declare key */
-    
+
     if((tm_sched_cfg->key->has_dir) && (tm_sched_cfg->key->has_id))
     {
        key.dir = tm_sched_cfg->key->dir;
@@ -41,13 +41,13 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the tm schedule cfg(OLT): Missing Key values\
-                                   Recevied key values Sched-Dir(%d), Sched-Id(%d) \n", 
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the tm schedule cfg(OLT): Missing Key values "
+                                  "Received key values Sched-Dir(%d), Sched-Id(%d)",
                                    tm_sched_cfg->key->dir, tm_sched_cfg->key->id);
        return BAL_ERRNO__BAL_ERR_NOENT;
     }
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Configuration of OLT(tm Sched) starts\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Configuration of OLT(tm Sched) starts");
     /* init the API struct */
     BCMBAL_CFG_INIT(&tm_sched_obj, tm_sched, key);
 
@@ -124,8 +124,8 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
        ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, owner, BCMOS_TRUE, valtmScOwn);
     }
 
-    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sched_type, 
-                         tm_sched_cfg->data->has_sched_type, 
+    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sched_type,
+                         tm_sched_cfg->data->has_sched_type,
                          tm_sched_cfg->data->sched_type);
 
     /* scheduler parent */
@@ -137,22 +137,22 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
        if(schedPar->has_sched_id)
        {
           valSchedPar.sched_id = schedPar->sched_id;
-       } 
+       }
        if(schedPar->has_priority)
        {
           valSchedPar.priority = schedPar->priority;
-       } 
+       }
        if(schedPar->has_weight)
        {
           valSchedPar.weight = schedPar->weight;
-       } 
+       }
        ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sched_parent, BCMOS_TRUE, valSchedPar);
     }
-     
-    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sched_child_type, 
-                         tm_sched_cfg->data->has_sched_child_type, 
+
+    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sched_child_type,
+                         tm_sched_cfg->data->has_sched_child_type,
                          tm_sched_cfg->data->sched_child_type);
-   
+
     /* rating/shaping */
     BalTmShaping *balShaping = (BalTmShaping *)tm_sched_cfg->data->rate;
     bcmbal_tm_shaping val = {};
@@ -176,7 +176,7 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
 
     /* Extended itu dba parameters */
     BalExtendedItuDba *tItuDba = (BalExtendedItuDba *)tm_sched_cfg->data->ext_itu_dba;
-    bcmbal_extended_itu_dba valItuDda = {}; 
+    bcmbal_extended_itu_dba valItuDda = {};
     if (tItuDba != NULL && tItuDba->has_presence_mask)
     {
        valItuDda.presence_mask = tItuDba->presence_mask;
@@ -204,13 +204,13 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
     }
 
     /* Creation mode */
-    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, creation_mode, 
-                         tm_sched_cfg->data->has_creation_mode, 
+    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, creation_mode,
+                         tm_sched_cfg->data->has_creation_mode,
                          tm_sched_cfg->data->creation_mode);
 
     /* Extended epon dba parameters */
     BalExtendedEponDba *teponDba = (BalExtendedEponDba*)tm_sched_cfg->data->ext_epon_dba;
-    bcmbal_extended_epon_dba valeponDda = {}; 
+    bcmbal_extended_epon_dba valeponDda = {};
     if (teponDba != NULL && teponDba->has_presence_mask)
     {
        valeponDda.presence_mask = teponDba->presence_mask;
@@ -258,13 +258,13 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
        valQueues.val = (bcmbal_tm_queue_id *)malloc((valQueues.len)*sizeof(bcmbal_tm_queue_id));
        if(!valQueues.val)
        {
-          ASFVOLT_LOG(ASFVOLT_ERROR, 
-                     "Failed to configure the tm scheduler cfg(OLT): Memory Exhausted\n");
+          ASFVOLT_LOG(ASFVOLT_ERROR,
+                     "Failed to configure the tm scheduler cfg(OLT): Memory Exhausted");
           return BAL_ERRNO__BAL_ERR_NOMEM;
        }
-       memcpy((void *)valQueues.val, (const void *)balQueues->val, 
+       memcpy((void *)valQueues.val, (const void *)balQueues->val,
               (balQueues->n_val)*sizeof(uint32_t));
-       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, queues, BCMOS_TRUE, valQueues); 
+       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, queues, BCMOS_TRUE, valQueues);
     }
 
     /* Subsidiary schedulers */
@@ -276,29 +276,29 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
        valSubScheds.val = (uint32_t *)malloc((valSubScheds.len)*sizeof(uint32_t));
        if(!valSubScheds.val)
        {
-          ASFVOLT_LOG(ASFVOLT_ERROR, 
-                     "Failed to configure the tm scheduler cfg(OLT): Memory Exhausted\n");
+          ASFVOLT_LOG(ASFVOLT_ERROR,
+                     "Failed to configure the tm scheduler cfg(OLT): Memory Exhausted");
           return BAL_ERRNO__BAL_ERR_NOMEM;
        }
-       memcpy((void *)valSubScheds.val, (const void *)balSubScheds->val, 
+       memcpy((void *)valSubScheds.val, (const void *)balSubScheds->val,
               (balSubScheds->n_val)*sizeof(uint32_t));
-       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sub_scheds, BCMOS_TRUE, valSubScheds); 
+       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sub_scheds, BCMOS_TRUE, valSubScheds);
     }
 
-    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, num_priorities, 
-                         tm_sched_cfg->data->has_num_priorities, 
+    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, num_priorities,
+                         tm_sched_cfg->data->has_num_priorities,
                          tm_sched_cfg->data->num_priorities);
 
     err = bcmbal_cfg_set(DEFAULT_ATERM_ID, &(tm_sched_obj.hdr));
 
     if(BCM_ERR_OK != err)
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the tm scheduler Cfg(OLT)\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the tm scheduler Cfg(OLT)");
         return err;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "Set tm scheduler configuration sent to OLT. \
-                               Sched ID(%d) Sched Dir(%d)\n", key.id, key.dir);
+    ASFVOLT_LOG(ASFVOLT_INFO, "Set tm scheduler configuration sent to OLT. "
+                              "Sched ID(%d) Sched Dir(%d)", key.id, key.dir);
     return err;
 }
 
@@ -313,7 +313,7 @@ uint32_t bal_tm_sched_cfg_get(BalTmSchedKey *tm_sched_key, BalTmSchedCfg *tm_sch
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_tm_sched_cfg tm_sched_obj;   /**< declare main API struct */
     bcmbal_tm_sched_key key = { };      /**< declare key */
-    
+
     if((tm_sched_cfg->key->has_dir) && (tm_sched_cfg->key->has_id))
     {
        key.dir = tm_sched_cfg->key->dir;
@@ -321,14 +321,14 @@ uint32_t bal_tm_sched_cfg_get(BalTmSchedKey *tm_sched_key, BalTmSchedCfg *tm_sch
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the tm schedule cfg(OLT): Missing Key values\
-                                   Recevied key values Sched-Dir(%d), Sched-Id(%d) \n", 
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the tm schedule cfg(OLT): Missing Key values "
+                                  "Received key values Sched-Dir(%d), Sched-Id(%d)",
                                    tm_sched_cfg->key->dir, tm_sched_cfg->key->id);
        return BAL_ERRNO__BAL_ERR_NOENT;
     }
-    
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Gem tm scheduler cfg (for OLT) starts\n");
+
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Gem tm scheduler cfg (for OLT) starts");
 
     /* init the API struct */
     BCMBAL_CFG_INIT(&tm_sched_obj, tm_sched, key);
@@ -340,12 +340,12 @@ uint32_t bal_tm_sched_cfg_get(BalTmSchedKey *tm_sched_key, BalTmSchedCfg *tm_sch
 
     if(BCM_ERR_OK != err)
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the tm scheduler Cfg(OLT)\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the tm scheduler Cfg(OLT)");
         return err;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "Get tm scheduler cfg sent to OLT. \
-                               Sched ID(%d) Sched Dir(%d)\n", key.id, key.dir);
+    ASFVOLT_LOG(ASFVOLT_INFO, "Get tm scheduler cfg sent to OLT. "
+                              "Sched ID(%d) Sched Dir(%d)", key.id, key.dir);
     return err;
 }
 
@@ -360,7 +360,7 @@ uint32_t bal_tm_sched_cfg_clear(BalTmSchedKey *tm_sched_key)
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_tm_sched_cfg tm_sched_obj;   /**< declare main API struct */
     bcmbal_tm_sched_key key = { };      /**< declare key */
-    
+
     if((tm_sched_key->has_dir) && (tm_sched_key->has_id))
     {
        key.dir = tm_sched_key->dir;
@@ -368,13 +368,13 @@ uint32_t bal_tm_sched_cfg_clear(BalTmSchedKey *tm_sched_key)
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the tm schedule cfg(OLT): Missing Key values\
-                                   Recevied key values Sched-Dir(%d), Sched-Id(%d) \n", 
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the tm schedule cfg(OLT): Missing Key values "
+                                  "Received key values Sched-Dir(%d), Sched-Id(%d)",
                                    tm_sched_key->dir, tm_sched_key->id);
        return BAL_ERRNO__BAL_ERR_NOENT;
     }
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Clear tm scheduler cfg(for OLT) starts\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Clear tm scheduler cfg(for OLT) starts");
 
     /* init the API struct */
     BCMBAL_CFG_INIT(&tm_sched_obj, tm_sched, key);
@@ -383,12 +383,12 @@ uint32_t bal_tm_sched_cfg_clear(BalTmSchedKey *tm_sched_key)
 
     if(BCM_ERR_OK != err)
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the tm scheduler Cfg(OLT)\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to clear the tm scheduler Cfg(OLT)");
         return err;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "Clear tm scheduler clear sent to OLT. \
-                               Sched ID(%d) Sched Dir(%d)\n", key.id, key.dir);
+    ASFVOLT_LOG(ASFVOLT_INFO, "Clear tm scheduler clear sent to OLT. "
+                              "Sched ID(%d) Sched Dir(%d)", key.id, key.dir);
     return err;
 }
 
@@ -401,10 +401,10 @@ uint32_t bal_tm_sched_cfg_clear(BalTmSchedKey *tm_sched_key)
 bcmos_errno bal_tm_sched_cfg_indication_cb(bcmbal_obj *obj)
 {
     bcmos_errno result = BCM_ERR_OK;
-    ASFVOLT_LOG(ASFVOLT_INFO, "Processing API (%s) IND callback status is (%s)\n",
+    ASFVOLT_LOG(ASFVOLT_INFO, "Processing API (%s) IND callback status is (%s)",
 		    bcmbal_objtype_str(obj->obj_type),
 		    bcmos_strerror(obj->status));
-    
+
     return result;
 }
 

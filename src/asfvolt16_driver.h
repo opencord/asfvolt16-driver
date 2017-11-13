@@ -26,11 +26,13 @@
 #include "bal_errno.grpc-c.h"
 #include "bal.grpc-c.h"
 
-#include <stdio.h>
+#include <syslog.h>
 
-#define ASFVOLT_ERROR 1
-#define ASFVOLT_INFO  2
-#define ASFVOLT_DEBUG 3
+#define ASFVOLT_ERROR (LOG_ERR)
+#define ASFVOLT_INFO  (LOG_INFO)
+#define ASFVOLT_DEBUG (LOG_DEBUG)
+#define ASFVOLT_SYSLOG_NAME "volthad"  /* syslog service name */
+
 #define ASFVOLT_MAX_PKT_SIZE 500
 #define ASFVOLT_MAX_DEVICE_ID_SIZE 50
 #define MAX_CHAR_LENGTH  20
@@ -41,19 +43,38 @@ unsigned int is_reboot;
 
 typedef struct BalCoreIpInfo
 {
-   char bal_core_arg1[4]; 
-   char bal_core_ip_port[24]; 
-   char bal_core_arg2[4]; 
-   char bal_shared_lib_ip_port[24]; 
+   char bal_core_arg1[4];
+   char bal_core_ip_port[24];
+   char bal_core_arg2[4];
+   char bal_shared_lib_ip_port[24];
 }balCoreIpInfo;
+
+#if 0 /* change to 1 to enable function/line to stdout w/syslog message*/
+#include <stdio.h>
+
+#define ASFVOLT_SYSLOG_MODE (LOG_CONS | LOG_PID | LOG_NDELAY)
+#define DEBUG_LOG(format, args...) \
+    printf(ASFVOLT_SYSLOG_NAME ": %s:%d: ", __FILE__, __LINE__); \
+    printf(format, ## args); \
+    putchar('\n');
+#else
+#define ASFVOLT_SYSLOG_MODE (           LOG_PID | LOG_NDELAY)
+#define DEBUG_LOG(format, args...)
+#endif
 
 #define ASFVOLT_LOG(log_type, format, args...) \
    if(log_type) \
    {\
-      printf("File(%s): Line(%d): ", __FUNCTION__, __LINE__);\
-      printf(format, ## args);\
+      syslog(log_type, "%s:%d: " format, __FILE__, __LINE__, ##args);\
+      DEBUG_LOG(format, ## args);\
    }
 
+#define ASFVOLT_LOG_LOC(log_type, file, line, format, args...) \
+   if(log_type) \
+   {\
+      syslog(log_type, "%s:%d: " format, file, line, ##args);\
+      DEBUG_LOG(format, ## args);\
+   }
 
 #define ASFVOLT_CFG_PROP_SET(cfg, obj, param, pram_prst, param_val) \
    if(pram_prst)\
@@ -61,11 +82,16 @@ typedef struct BalCoreIpInfo
        BCMBAL_CFG_PROP_SET(&cfg, obj, param, param_val);\
    }
 
+#define ASFVOLT_HEX2LOG(prio, pFormat, pData, len) \
+   asfvolt_hexlog2(prio, __FILE__, __LINE__, pFormat, pData, len)
+
+
 /***************************************************************
 *                                                              *
 *              Function Declarations                           *
 *                                                              *
 ****************************************************************/
+extern void asfvolt_hexlog2(int prio, const char *_file_loc, int _file_line, const char *pFormat, void* pData, size_t len);
 extern uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo);
 extern uint32_t asfvolt16_bal_finish(void);
 extern uint32_t bal_register_indication_cbs(void);

@@ -39,7 +39,7 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
     subs_terminal_key.sub_term_id = onu_cfg->key->sub_term_id;
     subs_terminal_key.intf_id = onu_cfg->key->intf_id;
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "Bringing up the subscriber terminal: %d\n", onu_cfg->key->sub_term_id);
+    ASFVOLT_LOG(ASFVOLT_INFO, "Bringing up the subscriber terminal: %d", onu_cfg->key->sub_term_id);
 
     /*
      * Set the key in the subscriber terminal object
@@ -56,8 +56,8 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
 
        two_digit_buf[2] = 0;
 
-       ASFVOLT_LOG(ASFVOLT_DEBUG, "Before encoding,Vendor Id(%s),Vendor Specific Id(%s), Registration Id(%s)\n",
-		       onu_cfg->data->serial_number->vendor_id, 
+       ASFVOLT_LOG(ASFVOLT_DEBUG, "Before encoding,Vendor Id(%s),Vendor Specific Id(%s), Registration Id(%s)",
+		       onu_cfg->data->serial_number->vendor_id,
 		       onu_cfg->data->serial_number->vendor_specific,
 		       onu_cfg->data->registration_id);
 
@@ -69,8 +69,8 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
 		       onu_cfg->data->serial_number->vendor_id[2],
 		       onu_cfg->data->serial_number->vendor_id[3]);
        onu_cfg->data->serial_number->vendor_id = vendor_id;
-       ASFVOLT_LOG(ASFVOLT_DEBUG, "After encoding,Vendor Id(%s),Vendor Specific Id(%s), Registration Id(%s)\n",
-		       onu_cfg->data->serial_number->vendor_id, 
+       ASFVOLT_LOG(ASFVOLT_DEBUG, "After encoding,Vendor Id(%s),Vendor Specific Id(%s), Registration Id(%s)",
+		       onu_cfg->data->serial_number->vendor_id,
 		       onu_cfg->data->serial_number->vendor_specific,
 		       onu_cfg->data->registration_id);
 
@@ -112,7 +112,7 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
     if (!skip_onu)
     {
 
-       /*ASFVOLT_LOG(ASFVOLT_DEBUG, "Onu's(%d) Serial number %02x%02x%02x%2x%02x%02x%02x%02x\n", 
+       /*ASFVOLT_LOG(ASFVOLT_DEBUG, "Onu's(%d) Serial number %02x%02x%02x%2x%02x%02x%02x%02x",
              onu_cfg->key->sub_term_id,
              sub_term_obj.data->serial_number.vendor_id[0], sub_term_obj.data->serial_number.vendor_id[1],
              sub_term_obj.data->serial_number.vendor_id[2], sub_term_obj.data->serial_number.vendor_id[3],
@@ -121,16 +121,16 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
 
        err = bcmbal_cfg_set(DEFAULT_ATERM_ID, &(sub_term_obj.hdr));
 
-       ASFVOLT_LOG(ASFVOLT_DEBUG, 
-                   "\n   ....SENT SUBSCRIBER TERMINAL %s UP %d on interface %d...\n",
-                   (BCM_ERR_OK != err) ? "NOT" : "\b",
+       ASFVOLT_LOG(ASFVOLT_DEBUG,
+                   "....SENT SUBSCRIBER TERMINAL %sUP %d on interface %d...",
+                   (BCM_ERR_OK != err) ? "NOT " : "",
                    subs_terminal_key.sub_term_id,
                    subs_terminal_key.intf_id);
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_DEBUG, 
-                   "Skipping activation of subscriber terminal %d on interface %d\n",
+       ASFVOLT_LOG(ASFVOLT_DEBUG,
+                   "Skipping activation of subscriber terminal %d on interface %d",
                    subs_terminal_key.sub_term_id,
                    subs_terminal_key.intf_id);
        err = BAL_ERRNO__BAL_ERR_PARM;
@@ -161,7 +161,7 @@ bcmos_errno bal_subscriber_terminal_indication_cb(bcmbal_obj *obj)
        {
           ASFVOLT_LOG(ASFVOLT_INFO, "New ONU Discovered. serial number "
                 "%2X%2X%2X%2X%1X%1X%1X%1X%1X%1X%1X%1X "
-                "on PON %d\n",
+                "on PON %d",
                 p_serial_number->vendor_id[0],
                 p_serial_number->vendor_id[1],
                 p_serial_number->vendor_id[2],
@@ -182,7 +182,7 @@ bcmos_errno bal_subscriber_terminal_indication_cb(bcmbal_obj *obj)
        {
           ASFVOLT_LOG(ASFVOLT_INFO, "Event on existing ONU. serial number "
                 "%2X%2X%2X%2X%1X%1X%1X%1X%1X%1X%1X%1X "
-                "on PON %d\n",
+                "on PON %d",
                 p_serial_number->vendor_id[0],
                 p_serial_number->vendor_id[1],
                 p_serial_number->vendor_id[2],
@@ -202,10 +202,10 @@ bcmos_errno bal_subscriber_terminal_indication_cb(bcmbal_obj *obj)
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, 
-                   "Invalid object type %d for subscriber terminal indication\n",
+       ASFVOLT_LOG(ASFVOLT_ERROR,
+                   "Invalid object type %d for subscriber terminal indication",
                    obj->obj_type);
- 
+
     }
 
 #endif
@@ -222,11 +222,11 @@ uint32_t bal_subscriber_terminal_cfg_clear(BalSubscriberTerminalKey *terminal_ke
     bcmbal_subscriber_terminal_cfg cfg;
     bcmbal_subscriber_terminal_key key = { };
 
-    ASFVOLT_LOG(ASFVOLT_INFO, 
-                    "Processing subscriber terminal cfg clear: %d\n",
+    ASFVOLT_LOG(ASFVOLT_INFO,
+                    "Processing subscriber terminal cfg clear: %d",
                      terminal_key->sub_term_id);
 
-    if (terminal_key->has_sub_term_id && 
+    if (terminal_key->has_sub_term_id &&
                     terminal_key->has_intf_id)
     {
         key.sub_term_id = terminal_key->sub_term_id ;
@@ -234,23 +234,23 @@ uint32_t bal_subscriber_terminal_cfg_clear(BalSubscriberTerminalKey *terminal_ke
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, 
-                   "Invalid Key to handle subscriber terminal clear Req.subscriber_terminal_id(%d), Interface ID(%d)\n",
+       ASFVOLT_LOG(ASFVOLT_ERROR,
+                   "Invalid Key to handle subscriber terminal clear Req.subscriber_terminal_id(%d), Interface ID(%d)",
                    key.sub_term_id, key.intf_id);
- 
+
         return BAL_ERRNO__BAL_ERR_PARM;
     }
 
     err = bcmbal_cfg_clear(DEFAULT_ATERM_ID, &cfg.hdr);
     err = BAL_ERRNO__BAL_ERR_OK;
     return err;
-} 
+}
 
 /********************************************************************\
  * Function    : bal_subscriber_terminal_cfg_get                    *
  * Description : Get the subscriber terminal(ONU) configuration     *
  ********************************************************************/
-uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key, 
+uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
                                          BalSubscriberTerminalCfg *onu_cfg)
 {
 
@@ -259,11 +259,11 @@ uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
     bcmbal_subscriber_terminal_key key = { };   /**< declare key */
     uint8_t *list_mem;  /**< declare memory buffer for variable-sized lists */
 
-    ASFVOLT_LOG(ASFVOLT_INFO, 
-                    "Processing subscriber terminal cfg get: %d\n",
+    ASFVOLT_LOG(ASFVOLT_INFO,
+                    "Processing subscriber terminal cfg get: %d",
                      onu_cfg->key->sub_term_id);
 
-    if (terminal_key->has_sub_term_id && 
+    if (terminal_key->has_sub_term_id &&
                     terminal_key->has_intf_id)
     {
         key.sub_term_id = terminal_key->sub_term_id ;
@@ -271,10 +271,10 @@ uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
     }
     else
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, 
-                   "Invalid Key to handle subscriber terminal Cfg Get subscriber_terminal_id(%d), Interface ID(%d)\n",
+       ASFVOLT_LOG(ASFVOLT_ERROR,
+                   "Invalid Key to handle subscriber terminal Cfg Get subscriber_terminal_id(%d), Interface ID(%d)",
                    key.sub_term_id, key.intf_id);
- 
+
         return BAL_ERRNO__BAL_ERR_PARM;
     }
 
@@ -288,8 +288,8 @@ uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
     if (list_mem == NULL)
     {
 
-       ASFVOLT_LOG(ASFVOLT_ERROR, 
-                   "Memory allocation failed while handling subscriber terminal cfg get subscriber_terminal_id(%d), Interface ID(%d)\n",
+       ASFVOLT_LOG(ASFVOLT_ERROR,
+                   "Memory allocation failed while handling subscriber terminal cfg get subscriber_terminal_id(%d), Interface ID(%d)",
                    key.sub_term_id, key.intf_id);
         return BAL_ERRNO__BAL_ERR_NOMEM;
     }
@@ -301,13 +301,13 @@ uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
     err = bcmbal_cfg_get(DEFAULT_ATERM_ID, &cfg.hdr);
     if (err != BCM_ERR_OK)
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, 
-                   "Failed to get information from BAL subscriber_terminal_id(%d), Interface ID(%d)\n",
+       ASFVOLT_LOG(ASFVOLT_ERROR,
+                   "Failed to get information from BAL subscriber_terminal_id(%d), Interface ID(%d)",
                    key.sub_term_id, key.intf_id);
         return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, 
-                  "To-Do. Send subscriber terminal details to Adapter\n");
+    ASFVOLT_LOG(ASFVOLT_INFO,
+                  "To-Do. Send subscriber terminal details to Adapter");
     return BAL_ERRNO__BAL_ERR_OK;
 }

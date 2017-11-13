@@ -36,7 +36,7 @@ uint32_t bal_access_terminal_cfg_set(BalAccessTerminalCfg *access_term_cfg)
 
     key.access_term_id = access_term_cfg->key->access_term_id;
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Configuration of OLT starts\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Configuration of OLT starts");
 
     /* init the API struct */
     BCMBAL_CFG_INIT(&acc_term_obj, access_terminal, key);
@@ -48,11 +48,11 @@ uint32_t bal_access_terminal_cfg_set(BalAccessTerminalCfg *access_term_cfg)
 
     if(BCM_ERR_OK != err)
     {
-        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the access-terminal(OLT) to ADMIN-UP\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the access-terminal(OLT) to ADMIN-UP");
         return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "Access Terminal UP configuration sent to OLT\n");
+    ASFVOLT_LOG(ASFVOLT_INFO, "Access Terminal UP configuration sent to OLT");
     return BAL_ERRNO__BAL_ERR_OK;
 }
 
@@ -65,10 +65,10 @@ uint32_t bal_access_terminal_cfg_set(BalAccessTerminalCfg *access_term_cfg)
 bcmos_errno bal_access_term_indication_cb(bcmbal_obj *obj)
 {
     /*bcmos_errno result = BCM_ERR_OK;*/
-    ASFVOLT_LOG(ASFVOLT_INFO, "Processing API \'%s\' IND callback (status is %s)\n",
+    ASFVOLT_LOG(ASFVOLT_INFO, "Processing API \'%s\' IND callback (status is %s)",
 		    bcmbal_objtype_str(obj->obj_type),
 		    bcmos_strerror(obj->status));
-    
+
     return BAL_ERRNO__BAL_ERR_OK;
 }
 
@@ -83,7 +83,7 @@ uint32_t bal_access_terminal_cfg_clear(BalAccessTerminalKey *access_term_key)
     bcmbal_access_terminal_cfg cfg_clear;         /**< declare main API struct */
     bcmbal_access_terminal_key key = { };   /**< declare key */
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "processing the clear request on access terminal\n");
+    ASFVOLT_LOG(ASFVOLT_INFO, "processing the clear request on access terminal");
 
     key.access_term_id = access_term_key->access_term_id;
 
@@ -96,11 +96,11 @@ uint32_t bal_access_terminal_cfg_clear(BalAccessTerminalKey *access_term_key)
 
     if( err != BCM_ERR_OK)
     {
-       ASFVOLT_LOG(ASFVOLT_INFO, "Failed to clear the access terminal\n");
+       ASFVOLT_LOG(ASFVOLT_INFO, "Failed to clear the access terminal");
        return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "Successfully cleared the access terminal\n");
+    ASFVOLT_LOG(ASFVOLT_INFO, "Successfully cleared the access terminal");
     return BAL_ERRNO__BAL_ERR_OK;
 }
 
@@ -116,7 +116,7 @@ uint32_t bal_access_terminal_cfg_get (BalAccessTerminalKey *access_term_key,
     bcmbal_access_terminal_cfg cfg;         /**< declare main API struct */
     bcmbal_access_terminal_key key = { };   /**< declare key */
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "processing the get request on access terminal\n");
+    ASFVOLT_LOG(ASFVOLT_INFO, "processing the get request on access terminal");
     /* init the API struct */
     BCMBAL_CFG_INIT(&cfg, access_terminal, key);
 
@@ -126,12 +126,12 @@ uint32_t bal_access_terminal_cfg_get (BalAccessTerminalKey *access_term_key,
     err = bcmbal_cfg_get(DEFAULT_ATERM_ID, &cfg.hdr);
     if (err != BCM_ERR_OK)
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get access terminal configuration\n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get access terminal configuration");
        return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, 
-                  "To-Do. Send access terminal details to Adapter\n");
-   
+    ASFVOLT_LOG(ASFVOLT_INFO,
+                  "To-Do. Send access terminal details to Adapter");
+
     return BAL_ERRNO__BAL_ERR_OK;
 }

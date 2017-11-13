@@ -53,7 +53,7 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
             buf.len = packet->data->pkt.len;
             buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
             memcpy(buf.val,(uint8_t *)packet->data->pkt.data,buf.len);
-	    ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Packet of length %d bytes with dest type as %d\n",buf.len,packet->key->packet_send_dest->type);
+	    ASFVOLT_LOG(ASFVOLT_DEBUG, "Packet of length %d bytes with dest type as %d",buf.len,packet->key->packet_send_dest->type);
             err = bcmbal_pkt_send(aterm_id,
                   proxy_pkt_dest,
                   (const char *)(buf.val),
@@ -69,7 +69,7 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
             buf.len = packet->data->pkt.len;
             buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
             memcpy(buf.val,(uint8_t *)packet->data->pkt.data,buf.len);
-	    ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Packet of length %d bytes with dest type as %d\n",buf.len,packet->key->packet_send_dest->type);
+	    ASFVOLT_LOG(ASFVOLT_DEBUG, "Packet of length %d bytes with dest type as %d",buf.len,packet->key->packet_send_dest->type);
             err = bcmbal_pkt_send(aterm_id,
                   proxy_pkt_dest,
                   (const char *)(buf.val),
@@ -84,7 +84,7 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
                .u.svc_port.intf_id = packet->key->packet_send_dest->svc_port->intf_id };
             buf.len = packet->data->pkt.len;
             buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
-	    ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Packet of length %d bytes with dest type as %d\n",buf.len,packet->key->packet_send_dest->type);
+	    ASFVOLT_LOG(ASFVOLT_DEBUG, "Packet of length %d bytes with dest type as %d",buf.len,packet->key->packet_send_dest->type);
             memcpy(buf.val,(uint8_t *)packet->data->pkt.data,buf.len);
             err = bcmbal_pkt_send(aterm_id,
                   proxy_pkt_dest,
@@ -107,7 +107,7 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
             char str1[MAX_CHAR_LENGTH];
             char str2[MAX_CHAR_LENGTH];
             memset(&arraySend,0,buf.len);
-            ASFVOLT_LOG(ASFVOLT_DEBUG,"\nSending omci msg to ONU of length is %d\n",buf.len);
+            ASFVOLT_LOG(ASFVOLT_DEBUG,"Sending omci msg to ONU of length is %d",buf.len);
             for(idx1=0,idx2=0; idx1<((buf.len)*2); idx1++,idx2++)
             {
                sprintf(str1,"%c",packet->data->pkt.data[idx1]);
@@ -117,17 +117,12 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
             }
             buf.val = (uint8_t *)malloc((buf.len)*sizeof(uint8_t));
             memcpy(buf.val,(uint8_t *)arraySend,buf.len);
-            ASFVOLT_LOG(ASFVOLT_DEBUG,"\nAfter converting it into hex ");
-            for(idx2=0; idx2<buf.len; idx2++)
-            {
-               printf("%02x", buf.val[idx2]);
-            }
-            printf("\n");
+            ASFVOLT_HEX2LOG(ASFVOLT_DEBUG, "After converting %zd bytes to hex ", buf.val, buf.len);
             err = bcmbal_pkt_send(aterm_id,
                   proxy_pkt_dest,
                   (const char *)(buf.val),
                   buf.len);
-            ASFVOLT_LOG(ASFVOLT_DEBUG, "\n OMCI request msg of length(%d) sent to ONU(%d) through PON(%d)\n",
+            ASFVOLT_LOG(ASFVOLT_DEBUG, "OMCI request msg of length(%d) sent to ONU(%d) through PON(%d)",
                   buf.len,
                   packet->key->packet_send_dest->itu_omci_channel->sub_term_id,
                   packet->key->packet_send_dest->itu_omci_channel->intf_id);
@@ -136,12 +131,12 @@ uint32_t bal_packet_cfg_req(BalPacketCfg *packet)
          break;
       case BAL_DEST_TYPE__BAL_DEST_TYPE_IEEE_OAM_CHANNEL:
          {
-            ASFVOLT_LOG(ASFVOLT_DEBUG, "\n PLOAM msg not yet implemented\n");
+            ASFVOLT_LOG(ASFVOLT_DEBUG, "PLOAM msg not yet implemented");
          }
          break;
       default:
          {
-            ASFVOLT_LOG(ASFVOLT_DEBUG, "\n Invalid dest type\n");
+            ASFVOLT_LOG(ASFVOLT_DEBUG, "Invalid dest type");
          }
          break;
    }

@@ -31,6 +31,13 @@
 #include "bal_packet_hdlr.h"
 #include "bal_indications_hdlr.h"
 
+#if 0
+#include "bal_api_end.h"  /* Use when BAL -Wsign-compare is cleaned up */
+#else
+extern bcmos_errno bcmbal_apiend_init_all(int argc, char *argv[], void *, int);
+extern bcmos_errno bcmbal_apiend_finish(void);
+#endif
+
 bcmbal_access_term_id access_term_id = DEFAULT_ATERM_ID;
 
 /********************************************************************\
@@ -43,7 +50,7 @@ uint32_t bal_register_indication_cbs()
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_cb_cfg cb_cfg = {};
     uint16_t ind_subgroup;
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Subscription for other messages\n");
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Subscription for other messages");
 
     cb_cfg.module = BCMOS_MODULE_ID_NONE;
 
@@ -193,13 +200,13 @@ uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo)
     char *ip_and_port = NULL;
     if (NULL == bal_init)
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Recvied NULL balInit Structure from VOLTHA \n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Received NULL balInit Structure from VOLTHA");
        return BAL_ERRNO__BAL_ERR_PERM;
     }
     else
     {
        ip_and_port = bal_init->voltha_adapter_ip_port;
-       ASFVOLT_LOG(ASFVOLT_DEBUG,"\nRecevied Adapter IP and Port from VOLTHA is %s\n",ip_and_port);
+       ASFVOLT_LOG(ASFVOLT_DEBUG,"Received Adapter IP and Port from VOLTHA is %s",ip_and_port);
     }
     char *argv[6];
     /* Initialize BAL */
@@ -224,7 +231,7 @@ uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo)
     {
         /* Let logger task have enough time to drain its message queue. */
         usleep(1000000);
-        ASFVOLT_LOG(ASFVOLT_ERROR, "failed to Initialize the BAL\n");
+        ASFVOLT_LOG(ASFVOLT_ERROR, "failed to Initialize the BAL");
         return err;
     }
 #endif
@@ -247,7 +254,7 @@ uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo)
 
     if (err)
     {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "failed to register call back functions to BAL\n");
+      ASFVOLT_LOG(ASFVOLT_ERROR, "failed to register call back functions to BAL");
     }
 
     return err;
@@ -327,7 +334,7 @@ uint32_t asfvolt16_bal_cfg_set(BalCfg *cfg)
        }
        default:
        {
-          ASFVOLT_LOG(ASFVOLT_ERROR, "Invalid objet type for configuration\n");
+          ASFVOLT_LOG(ASFVOLT_ERROR, "Invalid object type for configuration");
           err = BAL_ERRNO__BAL_ERR_INVALID_OP;
           break;
        }
@@ -350,7 +357,7 @@ uint32_t asfvolt16_bal_cfg_clear(BalKey *key)
 
     if(!key->hdr->has_obj_type)
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "object type is not present for clear\n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "object type is not present for clear");
        return BAL_ERRNO__BAL_ERR_INVALID_OP;
     }
 
@@ -396,7 +403,7 @@ uint32_t asfvolt16_bal_cfg_clear(BalKey *key)
        }*/
        default:
        {
-          ASFVOLT_LOG(ASFVOLT_ERROR, "Invalid objet type to handle clear\n");
+          ASFVOLT_LOG(ASFVOLT_ERROR, "Invalid object type to handle clear");
           err = BAL_ERRNO__BAL_ERR_INVALID_OP;
           break;
        }
@@ -420,7 +427,7 @@ uint32_t asfvolt16_bal_cfg_get(BalKey *key, BalCfg *cfg)
 
     if(!key->hdr->has_obj_type)
     {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "object type is not present for get\n");
+       ASFVOLT_LOG(ASFVOLT_ERROR, "object type is not present for get");
        return BAL_ERRNO__BAL_ERR_INVALID_OP;
     }
 
@@ -467,7 +474,7 @@ uint32_t asfvolt16_bal_cfg_get(BalKey *key, BalCfg *cfg)
        }
        default:
        {
-          ASFVOLT_LOG(ASFVOLT_ERROR, "Invalid objet type to handle Get\n");
+          ASFVOLT_LOG(ASFVOLT_ERROR, "Invalid object type to handle Get");
           err = BAL_ERRNO__BAL_ERR_INVALID_OP;
           break;
        }

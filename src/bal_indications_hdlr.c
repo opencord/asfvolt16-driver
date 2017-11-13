@@ -36,13 +36,13 @@ bcmos_errno bal_acc_term_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_ACCESS_TERMINAL != obj->obj_type ||
       bcmbal_access_terminal_auto_id_ind != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
    else
    {
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       BalIndications *balIndCfg;
       balIndCfg = malloc(sizeof(BalIndications));
@@ -165,7 +165,7 @@ bcmos_errno bal_acc_term_osc_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_ACCESS_TERMINAL != obj->obj_type ||
       bcmbal_access_terminal_auto_id_oper_status_change != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -245,7 +245,7 @@ bcmos_errno bal_flow_osc_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_FLOW != obj->obj_type ||
       bcmbal_flow_auto_id_oper_status_change != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -330,7 +330,7 @@ bcmos_errno bal_flow_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_FLOW != obj->obj_type ||
       bcmbal_flow_auto_id_ind != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -496,7 +496,7 @@ bcmos_errno bal_group_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_GROUP != obj->obj_type ||
       bcmbal_group_auto_id_ind != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -643,7 +643,7 @@ bcmos_errno bal_interface_osc_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_INTERFACE != obj->obj_type ||
       bcmbal_interface_auto_id_oper_status_change != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -723,7 +723,7 @@ bcmos_errno bal_interface_los_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_INTERFACE != obj->obj_type ||
       bcmbal_interface_auto_id_los != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -799,7 +799,7 @@ bcmos_errno bal_interface_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_INTERFACE != obj->obj_type ||
       bcmbal_interface_auto_id_ind != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -904,7 +904,7 @@ bcmos_errno bal_sub_term_osc_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
       bcmbal_subscriber_terminal_auto_id_oper_status_change != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -987,13 +987,13 @@ bcmos_errno bal_sub_term_disc_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
       bcmbal_subscriber_terminal_auto_id_sub_term_disc != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
    else
    {
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       BalIndications *balIndCfg;
       balIndCfg = malloc(sizeof(BalIndications));
@@ -1045,23 +1045,19 @@ bcmos_errno bal_sub_term_disc_indication_cb(bcmbal_obj *obj)
 
       balIndCfg->terminal_disc->data->serial_number = serial_number;
 
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "Discovered ONU serial number "
-                "%2X%2X%2X%2X%1X%1X%1X%1X%1X%1X%1X%1X ",
+      ASFVOLT_LOG(ASFVOLT_INFO, "Discovered ONU serial number "
+                "%c%c%c%c%02X%02X%02X%02X",
                 sub_disc_ind->data.serial_number.vendor_id[0],
                 sub_disc_ind->data.serial_number.vendor_id[1],
                 sub_disc_ind->data.serial_number.vendor_id[2],
                 sub_disc_ind->data.serial_number.vendor_id[3],
-                sub_disc_ind->data.serial_number.vendor_specific[0]>>4 & 0x0f,
-                sub_disc_ind->data.serial_number.vendor_specific[0] & 0x0f,
-                sub_disc_ind->data.serial_number.vendor_specific[1]>>4 & 0x0f,
-                sub_disc_ind->data.serial_number.vendor_specific[1] & 0x0f,
-                sub_disc_ind->data.serial_number.vendor_specific[2]>>4 & 0x0f,
-                sub_disc_ind->data.serial_number.vendor_specific[2] & 0x0f,
-                sub_disc_ind->data.serial_number.vendor_specific[3]>>4 & 0x0f,
-                sub_disc_ind->data.serial_number.vendor_specific[3] & 0x0f);
+                sub_disc_ind->data.serial_number.vendor_specific[0],
+                sub_disc_ind->data.serial_number.vendor_specific[1],
+                sub_disc_ind->data.serial_number.vendor_specific[2],
+                sub_disc_ind->data.serial_number.vendor_specific[3]);
 
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:Before decoding:Vendor id is %s\n", sub_disc_ind->data.serial_number.vendor_id);
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:Before decoding:Vendor specific is %s\n", sub_disc_ind->data.serial_number.vendor_specific);
+      //ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:Before decoding:Vendor id is %s", sub_disc_ind->data.serial_number.vendor_id);
+      //ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:Before decoding:Vendor specific is %s", sub_disc_ind->data.serial_number.vendor_specific);
 
       char *vendor_id = malloc(sizeof(char)*MAX_CHAR_LENGTH);
       memset(vendor_id, 0, MAX_CHAR_LENGTH);
@@ -1071,7 +1067,7 @@ bcmos_errno bal_sub_term_disc_indication_cb(bcmbal_obj *obj)
 		      sub_disc_ind->data.serial_number.vendor_id[2],
 		      sub_disc_ind->data.serial_number.vendor_id[3]);
       balIndCfg->terminal_disc->data->serial_number->vendor_id = vendor_id;
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:After decoding:Vendor id is %s\n", balIndCfg->terminal_disc->data->serial_number->vendor_id);
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:After decoding:Vendor id is %s", balIndCfg->terminal_disc->data->serial_number->vendor_id);
       char *vendor_specific = malloc(sizeof(char)*MAX_CHAR_LENGTH);
       memset(vendor_specific, 0, MAX_CHAR_LENGTH);
       sprintf(vendor_specific,"%1X%1X%1X%1X%1X%1X%1X%1X",
@@ -1084,7 +1080,7 @@ bcmos_errno bal_sub_term_disc_indication_cb(bcmbal_obj *obj)
 		      sub_disc_ind->data.serial_number.vendor_specific[3]>>4 & 0x0f,
 		      sub_disc_ind->data.serial_number.vendor_specific[3] & 0x0f);
       balIndCfg->terminal_disc->data->serial_number->vendor_specific = vendor_specific;
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:After decoding:Vendor specific is %s\n", balIndCfg->terminal_disc->data->serial_number->vendor_specific);
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Discovery:After decoding:Vendor specific is %s", balIndCfg->terminal_disc->data->serial_number->vendor_specific);
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
@@ -1110,7 +1106,7 @@ bcmos_errno bal_sub_term_alarm_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
       bcmbal_subscriber_terminal_auto_id_sub_term_alarm != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -1198,7 +1194,7 @@ bcmos_errno bal_sub_term_dgi_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
       bcmbal_subscriber_terminal_auto_id_dgi != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -1274,7 +1270,7 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
       bcmbal_subscriber_terminal_auto_id_ind != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -1359,8 +1355,8 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
       bal_serial_number__init(serialNum);
       balIndCfg->terminal_ind->data->serial_number = serialNum;
 
-      ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:Before decoding:Vendor id is %s\n", sub_ind->data.serial_number.vendor_id);
-      ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:Before decoding:Vendor specific is %s\n", sub_ind->data.serial_number.vendor_specific);
+      //ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:Before decoding:Vendor id is %s", sub_ind->data.serial_number.vendor_id);
+      //ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:Before decoding:Vendor specific is %s", sub_ind->data.serial_number.vendor_specific);
 
       char *vendor_id = malloc(sizeof(char)*MAX_CHAR_LENGTH);
       memset(vendor_id, 0, MAX_CHAR_LENGTH);
@@ -1370,7 +1366,7 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
 		      sub_ind->data.serial_number.vendor_id[2],
 		      sub_ind->data.serial_number.vendor_id[3]);
       balIndCfg->terminal_ind->data->serial_number->vendor_id = vendor_id;
-      ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:After decoding:Vendor id is %s\n", balIndCfg->terminal_ind->data->serial_number->vendor_id);
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor id is %s", balIndCfg->terminal_ind->data->serial_number->vendor_id);
       char *vendor_specific = malloc(sizeof(char)*MAX_CHAR_LENGTH);
       memset(vendor_specific, 0, MAX_CHAR_LENGTH);
       sprintf(vendor_specific,"%1X%1X%1X%1X%1X%1X%1X%1X",
@@ -1383,7 +1379,7 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
 		      sub_ind->data.serial_number.vendor_specific[3]>>4 & 0x0f,
 		      sub_ind->data.serial_number.vendor_specific[3] & 0x0f);
       balIndCfg->terminal_ind->data->serial_number->vendor_specific = vendor_specific;
-      ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:After decoding:Vendor specific is %s\n", balIndCfg->terminal_ind->data->serial_number->vendor_specific);
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor specific is %s", balIndCfg->terminal_ind->data->serial_number->vendor_specific);
 
       BalIdList *balAggportList;
       balAggportList = malloc(sizeof(BalIdList));
@@ -1440,7 +1436,7 @@ bcmos_errno bal_tm_queue_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_TM_QUEUE != obj->obj_type ||
       bcmbal_tm_queue_auto_id_ind != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -1617,7 +1613,7 @@ bcmos_errno bal_tm_sched_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_TM_SCHED != obj->obj_type ||
       bcmbal_tm_sched_auto_id_ind != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -1684,7 +1680,7 @@ bcmos_errno bal_packet_data_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_PACKET != obj->obj_type ||
       bcmbal_packet_auto_id_bearer_channel_rx != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
@@ -1847,13 +1843,13 @@ bcmos_errno bal_omci_data_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_PACKET != obj->obj_type ||
       bcmbal_packet_auto_id_itu_omci_channel_rx != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }
    else
    {
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "Received OMCI response via BAL APIs\n");
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "Received OMCI response via BAL APIs");
       BalIndications *balIndCfg;
       balIndCfg = malloc(sizeof(BalIndications));
       memset(balIndCfg, 0, sizeof(BalIndications));
@@ -1928,7 +1924,7 @@ bcmos_errno bal_omci_data_indication_cb(bcmbal_obj *obj)
                                                                             BAL_GRPC_PRES;
             balIndCfg->balomciresp->key->packet_send_dest->itu_omci_channel->intf_id =
                                  omci_channel->key.packet_send_dest.u.itu_omci_channel.intf_id;
-            ASFVOLT_LOG(ASFVOLT_DEBUG, "OMCI Response for ONU id %d\n",
+            ASFVOLT_LOG(ASFVOLT_DEBUG, "OMCI Response for ONU id %d",
                  balIndCfg->balomciresp->key->packet_send_dest->itu_omci_channel->sub_term_id);
          }
          break;
@@ -1939,15 +1935,12 @@ bcmos_errno bal_omci_data_indication_cb(bcmbal_obj *obj)
          break;
       }
 
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "OMCI Response with %zd bytes is \n",balIndCfg->balomciresp->data->pkt.len);
-      uint16_t idx;
-      for(idx=0; idx<balIndCfg->balomciresp->data->pkt.len; idx++)
-      {
-	      printf("%02x", balIndCfg->balomciresp->data->pkt.data[idx]);
-      }
-      printf("\n");
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "OMCI Response for ONU id %d\n",
+      ASFVOLT_HEX2LOG(ASFVOLT_DEBUG, "OMCI Response with %zd bytes is ",
+         balIndCfg->balomciresp->data->pkt.data, balIndCfg->balomciresp->data->pkt.len);
+
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "OMCI Response for ONU id %d",
 		      balIndCfg->balomciresp->key->packet_send_dest->itu_omci_channel->sub_term_id);
+
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
 
@@ -1972,7 +1965,7 @@ bcmos_errno bal_oam_data_indication_cb(bcmbal_obj *obj)
    if(BCMBAL_OBJ_ID_PACKET != obj->obj_type ||
       bcmbal_packet_auto_id_ieee_oam_channel_rx != obj->subgroup)
    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API \'%s\' IND callback (status is %s)\n",
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
       result = BCM_ERR_INTERNAL;
    }

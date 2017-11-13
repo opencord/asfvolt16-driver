@@ -31,7 +31,7 @@ uint32_t asfvolt16_bal_stats_get(BalIntfType intf_type, uint32_t intf_id, BalInt
 
    bcmos_errno err = BCM_ERR_OK;
 
-   ASFVOLT_LOG(ASFVOLT_DEBUG, "Get Stats from OLT intf_type %d\n",intf_type);
+   ASFVOLT_LOG(ASFVOLT_DEBUG, "Get Stats from OLT intf_type %d",intf_type);
 
    if(intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_NNI && intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_PON &&
 	intf_type!=BAL_INTF_TYPE__BAL_INTF_TYPE_EPON_1G_PATH &&
@@ -47,7 +47,7 @@ uint32_t asfvolt16_bal_stats_get(BalIntfType intf_type, uint32_t intf_id, BalInt
 
    /* Retrieve the Upstream packet and byte counts */
    BCMBAL_STAT_PROP_GET(&interface_stats, interface, all_properties);
-   ASFVOLT_LOG(ASFVOLT_DEBUG, "Retrieve the Upstream packet and byte count success\n");
+   ASFVOLT_LOG(ASFVOLT_DEBUG, "Retrieve the Upstream packet and byte count success");
 
    /* Read the NNI stats.
     * NOTE: When a CLEAR is specified during a NNI stats GET operation,
