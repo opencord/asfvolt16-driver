@@ -107,7 +107,7 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
     }
 
     ASFVOLT_CFG_PROP_SET(sub_term_obj, subscriber_terminal, admin_state,
-                  BCMOS_TRUE, BCMBAL_STATE_UP);
+                  BCMOS_TRUE, onu_cfg->data->admin_state);
 
     if (!skip_onu)
     {

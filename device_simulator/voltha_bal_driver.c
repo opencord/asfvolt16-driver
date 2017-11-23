@@ -366,12 +366,40 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
 void bal__bal_cfg_clear_cb(grpc_c_context_t *context)
 {
    BalKey *clear_key;
+   BalErr bal_err;
+   int ret_val = 0;
 
    /*
     * Read incoming message into clear_key
     */
    if (context->gcc_payload) {
       context->gcc_stream->read(context, (void **)&clear_key, 0);
+   }
+
+   /*
+    * send it to BAL
+    */
+
+   bal_err__init(&bal_err);
+
+   bal_err.err= 0;
+
+   /*
+    * Write reply back to the client
+    */
+
+   ret_val = context->gcc_stream->write(context, &bal_err, 0);
+   is_grpc_write_pending(ret_val);
+
+   grpc_c_status_t status;
+   status.gcs_code = 0;
+
+   /*
+    * Finish response for RPC
+    */
+   if (context->gcc_stream->finish(context, &status))
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
    }
 
 #ifndef BAL_STUB
