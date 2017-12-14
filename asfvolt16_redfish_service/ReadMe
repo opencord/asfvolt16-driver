@@ -1,0 +1,62 @@
+#################Steps for Building Redfish service ##################
+
+   1. Setup ONL build environment
+      > git clone https://github.com/Lewis-Kang/OpenNetworkLinux.git -b kernel_3.7.10
+      > cd OpenNetworkLinux
+
+   2. Copy asfvolt16_redfish_service folder to OpenNetworkLinux directory
+      > cp -a asfvolt16_redfish_service OpenNetworkLinux/asfvolt16-driver
+
+   3. Enter into docker environment
+      > docker/tools/onlbuilder -8
+
+   4. Install the required packages for building Redfish service package using install_dependencies.sh script.
+      > sh asfvolt16-driver/asfvolt16_redfish_service/scripts/install_dependencies.sh
+
+   5. Execute build script
+      This will download IntelRSD and accton patch provided by Nick from the google drive and apply accton and calsoft patch and creates the binaries. For now rsd_org.tar.gz and the patch file is located in google drive. In future we may have to move this to github.
+      > sh asfvolt16-driver/asfvolt16_redfish_service/scripts/build_psme_prepare.sh
+
+   6. Packages will be created "$ONL_TOPDIR/asfvolt16-driver/asfvolt16_redfish_service/rsd_org/asfvolt16_rf_packages" and can be copied to OLT.
+      > ls "$ONL_TOPDIR/asfvolt16-driver/asfvolt16_redfish_service/rsd_org/asfvolt16_rf_packages"
+
+
+#################Steps for installing and running Redfish service in ASFVOLT16 OLT##################
+
+0. Connect console cable , network cable to olt console port and management port.
+
+1. Instll NOS image by ONIE
+
+2. Use root/onl to login to olt ONL linux shell environment.
+
+3. Config manage interface. (Depend on your network environment) 
+   > ifconfig ma1 192.168.1.99
+   > route add default gw 192.168.1.2
+
+4. use "scp" commond to upload *.deb image to OLT  (Depend on your network environment,you can use your own method to upload *.deb package in ONL)
+
+5. Install *.deb package in OLT
+   > sudo dpkg -i *.deb
+   > Please press enter to pass this prompt "Please select your platform (BDC-A or BDC-R):" appear.
+   > Please make sure that libgnutls-deb0-28 package is installed. 
+     ls -lah /usr/lib/x86_64-linux-gnu/libgnutls-deb0.so.28.41.7
+   > update-rc.d psme defaults   " To start psme at boot time"
+   > reboot
+
+6. startup psme service manually
+   > service psme start
+
+7. Check running daemon
+   > ps auxw
+
+   You can see following application is running.
+
+   root     15978  1.6  0.1 1005748 20736 ?       Sl   00:05   0:13 /usr/local/bin/psme-rest-server /etc/rmm/psme.conf
+   root     16036  0.3  0.0 1030696 13280 ?       Sl   00:05   0:03 /usr/local/bin/psme-chassis /etc/rmm/platform_info.conf
+
+8. Please refer to "asfvolt16_redfish_uri.doc" document and use curl command for testing the Redfish service
+   Eg: curl -X GET https://192.168.122.5:8888/redfish/v1/Systems/1 -k
+
+9. Uninstall *.deb before you install new *.deb
+   > sh remove.sh
+   It will stop psme service and remove *.deb

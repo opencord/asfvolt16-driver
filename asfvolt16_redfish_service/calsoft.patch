@@ -1,0 +1,1934 @@
+# Copyright 2017-present Open Networking Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+diff -ruN rsd_org/Documents/readme.md rsd_org_calsoft/Documents/readme.md
+--- rsd_org/Documents/readme.md	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/Documents/readme.md	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-Documents related to implementation of Intel® Rack Scale Design Reference Software
+Binary files rsd_org/Documents/SUSE_Caas_Implementation_Guide.pdf and rsd_org_calsoft/Documents/SUSE_Caas_Implementation_Guide.pdf differ
+diff -ruN rsd_org/.git/config rsd_org_calsoft/.git/config
+--- rsd_org/.git/config	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/config	1970-01-01 05:30:00.000000000 +0530
+@@ -1,11 +0,0 @@
+-[core]
+-	repositoryformatversion = 0
+-	filemode = true
+-	bare = false
+-	logallrefupdates = true
+-[remote "origin"]
+-	url = http://code.accton.com.tw/git/rsd.git
+-	fetch = +refs/heads/*:refs/remotes/origin/*
+-[branch "RSA-SW-Accton-2.1.3"]
+-	remote = origin
+-	merge = refs/heads/RSA-SW-Accton-2.1.3
+diff -ruN rsd_org/.git/description rsd_org_calsoft/.git/description
+--- rsd_org/.git/description	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/description	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-Unnamed repository; edit this file 'description' to name the repository.
+diff -ruN rsd_org/.git/HEAD rsd_org_calsoft/.git/HEAD
+--- rsd_org/.git/HEAD	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/HEAD	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-ref: refs/heads/RSA-SW-Accton-2.1.3
+diff -ruN rsd_org/.git/hooks/applypatch-msg.sample rsd_org_calsoft/.git/hooks/applypatch-msg.sample
+--- rsd_org/.git/hooks/applypatch-msg.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/applypatch-msg.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,15 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to check the commit log message taken by
+-# applypatch from an e-mail message.
+-#
+-# The hook should exit with non-zero status after issuing an
+-# appropriate message if it wants to stop the commit.  The hook is
+-# allowed to edit the commit message file.
+-#
+-# To enable this hook, rename this file to "applypatch-msg".
+-
+-. git-sh-setup
+-test -x "$GIT_DIR/hooks/commit-msg" &&
+-	exec "$GIT_DIR/hooks/commit-msg" ${1+"$@"}
+-:
+diff -ruN rsd_org/.git/hooks/commit-msg.sample rsd_org_calsoft/.git/hooks/commit-msg.sample
+--- rsd_org/.git/hooks/commit-msg.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/commit-msg.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,24 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to check the commit log message.
+-# Called by "git commit" with one argument, the name of the file
+-# that has the commit message.  The hook should exit with non-zero
+-# status after issuing an appropriate message if it wants to stop the
+-# commit.  The hook is allowed to edit the commit message file.
+-#
+-# To enable this hook, rename this file to "commit-msg".
+-
+-# Uncomment the below to add a Signed-off-by line to the message.
+-# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
+-# hook is more suited to it.
+-#
+-# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+-
+-# This example catches duplicate Signed-off-by lines.
+-
+-test "" = "$(grep '^Signed-off-by: ' "$1" |
+-	 sort | uniq -c | sed -e '/^[ 	]*1[ 	]/d')" || {
+-	echo >&2 Duplicate Signed-off-by lines.
+-	exit 1
+-}
+diff -ruN rsd_org/.git/hooks/post-update.sample rsd_org_calsoft/.git/hooks/post-update.sample
+--- rsd_org/.git/hooks/post-update.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/post-update.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,8 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to prepare a packed repository for use over
+-# dumb transports.
+-#
+-# To enable this hook, rename this file to "post-update".
+-
+-exec git update-server-info
+diff -ruN rsd_org/.git/hooks/pre-applypatch.sample rsd_org_calsoft/.git/hooks/pre-applypatch.sample
+--- rsd_org/.git/hooks/pre-applypatch.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/pre-applypatch.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,14 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to verify what is about to be committed
+-# by applypatch from an e-mail message.
+-#
+-# The hook should exit with non-zero status after issuing an
+-# appropriate message if it wants to stop the commit.
+-#
+-# To enable this hook, rename this file to "pre-applypatch".
+-
+-. git-sh-setup
+-test -x "$GIT_DIR/hooks/pre-commit" &&
+-	exec "$GIT_DIR/hooks/pre-commit" ${1+"$@"}
+-:
+diff -ruN rsd_org/.git/hooks/pre-commit.sample rsd_org_calsoft/.git/hooks/pre-commit.sample
+--- rsd_org/.git/hooks/pre-commit.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/pre-commit.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,49 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to verify what is about to be committed.
+-# Called by "git commit" with no arguments.  The hook should
+-# exit with non-zero status after issuing an appropriate message if
+-# it wants to stop the commit.
+-#
+-# To enable this hook, rename this file to "pre-commit".
+-
+-if git rev-parse --verify HEAD >/dev/null 2>&1
+-then
+-	against=HEAD
+-else
+-	# Initial commit: diff against an empty tree object
+-	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+-fi
+-
+-# If you want to allow non-ASCII filenames set this variable to true.
+-allownonascii=$(git config --bool hooks.allownonascii)
+-
+-# Redirect output to stderr.
+-exec 1>&2
+-
+-# Cross platform projects tend to avoid non-ASCII filenames; prevent
+-# them from being added to the repository. We exploit the fact that the
+-# printable range starts at the space character and ends with tilde.
+-if [ "$allownonascii" != "true" ] &&
+-	# Note that the use of brackets around a tr range is ok here, (it's
+-	# even required, for portability to Solaris 10's /usr/bin/tr), since
+-	# the square bracket bytes happen to fall in the designated range.
+-	test $(git diff --cached --name-only --diff-filter=A -z $against |
+-	  LC_ALL=C tr -d '[ -~]\0' | wc -c) != 0
+-then
+-	cat <<\EOF
+-Error: Attempt to add a non-ASCII file name.
+-
+-This can cause problems if you want to work with people on other platforms.
+-
+-To be portable it is advisable to rename the file.
+-
+-If you know what you are doing you can disable this check using:
+-
+-  git config hooks.allownonascii true
+-EOF
+-	exit 1
+-fi
+-
+-# If there are whitespace errors, print the offending file names and fail.
+-exec git diff-index --check --cached $against --
+diff -ruN rsd_org/.git/hooks/prepare-commit-msg.sample rsd_org_calsoft/.git/hooks/prepare-commit-msg.sample
+--- rsd_org/.git/hooks/prepare-commit-msg.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/prepare-commit-msg.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,36 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to prepare the commit log message.
+-# Called by "git commit" with the name of the file that has the
+-# commit message, followed by the description of the commit
+-# message's source.  The hook's purpose is to edit the commit
+-# message file.  If the hook fails with a non-zero status,
+-# the commit is aborted.
+-#
+-# To enable this hook, rename this file to "prepare-commit-msg".
+-
+-# This hook includes three examples.  The first comments out the
+-# "Conflicts:" part of a merge commit.
+-#
+-# The second includes the output of "git diff --name-status -r"
+-# into the message, just before the "git status" output.  It is
+-# commented because it doesn't cope with --amend or with squashed
+-# commits.
+-#
+-# The third example adds a Signed-off-by line to the message, that can
+-# still be edited.  This is rarely a good idea.
+-
+-case "$2,$3" in
+-  merge,)
+-    /usr/bin/perl -i.bak -ne 's/^/# /, s/^# #/#/ if /^Conflicts/ .. /#/; print' "$1" ;;
+-
+-# ,|template,)
+-#   /usr/bin/perl -i.bak -pe '
+-#      print "\n" . `git diff --cached --name-status -r`
+-#	 if /^#/ && $first++ == 0' "$1" ;;
+-
+-  *) ;;
+-esac
+-
+-# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+-# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+diff -ruN rsd_org/.git/hooks/pre-push.sample rsd_org_calsoft/.git/hooks/pre-push.sample
+--- rsd_org/.git/hooks/pre-push.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/pre-push.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,54 +0,0 @@
+-#!/bin/sh
+-
+-# An example hook script to verify what is about to be pushed.  Called by "git
+-# push" after it has checked the remote status, but before anything has been
+-# pushed.  If this script exits with a non-zero status nothing will be pushed.
+-#
+-# This hook is called with the following parameters:
+-#
+-# $1 -- Name of the remote to which the push is being done
+-# $2 -- URL to which the push is being done
+-#
+-# If pushing without using a named remote those arguments will be equal.
+-#
+-# Information about the commits which are being pushed is supplied as lines to
+-# the standard input in the form:
+-#
+-#   <local ref> <local sha1> <remote ref> <remote sha1>
+-#
+-# This sample shows how to prevent push of commits where the log message starts
+-# with "WIP" (work in progress).
+-
+-remote="$1"
+-url="$2"
+-
+-z40=0000000000000000000000000000000000000000
+-
+-IFS=' '
+-while read local_ref local_sha remote_ref remote_sha
+-do
+-	if [ "$local_sha" = $z40 ]
+-	then
+-		# Handle delete
+-		:
+-	else
+-		if [ "$remote_sha" = $z40 ]
+-		then
+-			# New branch, examine all commits
+-			range="$local_sha"
+-		else
+-			# Update to existing branch, examine new commits
+-			range="$remote_sha..$local_sha"
+-		fi
+-
+-		# Check for WIP commit
+-		commit=`git rev-list -n 1 --grep '^WIP' "$range"`
+-		if [ -n "$commit" ]
+-		then
+-			echo "Found WIP commit in $local_ref, not pushing"
+-			exit 1
+-		fi
+-	fi
+-done
+-
+-exit 0
+diff -ruN rsd_org/.git/hooks/pre-rebase.sample rsd_org_calsoft/.git/hooks/pre-rebase.sample
+--- rsd_org/.git/hooks/pre-rebase.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/pre-rebase.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,169 +0,0 @@
+-#!/bin/sh
+-#
+-# Copyright (c) 2006, 2008 Junio C Hamano
+-#
+-# The "pre-rebase" hook is run just before "git rebase" starts doing
+-# its job, and can prevent the command from running by exiting with
+-# non-zero status.
+-#
+-# The hook is called with the following parameters:
+-#
+-# $1 -- the upstream the series was forked from.
+-# $2 -- the branch being rebased (or empty when rebasing the current branch).
+-#
+-# This sample shows how to prevent topic branches that are already
+-# merged to 'next' branch from getting rebased, because allowing it
+-# would result in rebasing already published history.
+-
+-publish=next
+-basebranch="$1"
+-if test "$#" = 2
+-then
+-	topic="refs/heads/$2"
+-else
+-	topic=`git symbolic-ref HEAD` ||
+-	exit 0 ;# we do not interrupt rebasing detached HEAD
+-fi
+-
+-case "$topic" in
+-refs/heads/??/*)
+-	;;
+-*)
+-	exit 0 ;# we do not interrupt others.
+-	;;
+-esac
+-
+-# Now we are dealing with a topic branch being rebased
+-# on top of master.  Is it OK to rebase it?
+-
+-# Does the topic really exist?
+-git show-ref -q "$topic" || {
+-	echo >&2 "No such branch $topic"
+-	exit 1
+-}
+-
+-# Is topic fully merged to master?
+-not_in_master=`git rev-list --pretty=oneline ^master "$topic"`
+-if test -z "$not_in_master"
+-then
+-	echo >&2 "$topic is fully merged to master; better remove it."
+-	exit 1 ;# we could allow it, but there is no point.
+-fi
+-
+-# Is topic ever merged to next?  If so you should not be rebasing it.
+-only_next_1=`git rev-list ^master "^$topic" ${publish} | sort`
+-only_next_2=`git rev-list ^master           ${publish} | sort`
+-if test "$only_next_1" = "$only_next_2"
+-then
+-	not_in_topic=`git rev-list "^$topic" master`
+-	if test -z "$not_in_topic"
+-	then
+-		echo >&2 "$topic is already up-to-date with master"
+-		exit 1 ;# we could allow it, but there is no point.
+-	else
+-		exit 0
+-	fi
+-else
+-	not_in_next=`git rev-list --pretty=oneline ^${publish} "$topic"`
+-	/usr/bin/perl -e '
+-		my $topic = $ARGV[0];
+-		my $msg = "* $topic has commits already merged to public branch:\n";
+-		my (%not_in_next) = map {
+-			/^([0-9a-f]+) /;
+-			($1 => 1);
+-		} split(/\n/, $ARGV[1]);
+-		for my $elem (map {
+-				/^([0-9a-f]+) (.*)$/;
+-				[$1 => $2];
+-			} split(/\n/, $ARGV[2])) {
+-			if (!exists $not_in_next{$elem->[0]}) {
+-				if ($msg) {
+-					print STDERR $msg;
+-					undef $msg;
+-				}
+-				print STDERR " $elem->[1]\n";
+-			}
+-		}
+-	' "$topic" "$not_in_next" "$not_in_master"
+-	exit 1
+-fi
+-
+-<<\DOC_END
+-
+-This sample hook safeguards topic branches that have been
+-published from being rewound.
+-
+-The workflow assumed here is:
+-
+- * Once a topic branch forks from "master", "master" is never
+-   merged into it again (either directly or indirectly).
+-
+- * Once a topic branch is fully cooked and merged into "master",
+-   it is deleted.  If you need to build on top of it to correct
+-   earlier mistakes, a new topic branch is created by forking at
+-   the tip of the "master".  This is not strictly necessary, but
+-   it makes it easier to keep your history simple.
+-
+- * Whenever you need to test or publish your changes to topic
+-   branches, merge them into "next" branch.
+-
+-The script, being an example, hardcodes the publish branch name
+-to be "next", but it is trivial to make it configurable via
+-$GIT_DIR/config mechanism.
+-
+-With this workflow, you would want to know:
+-
+-(1) ... if a topic branch has ever been merged to "next".  Young
+-    topic branches can have stupid mistakes you would rather
+-    clean up before publishing, and things that have not been
+-    merged into other branches can be easily rebased without
+-    affecting other people.  But once it is published, you would
+-    not want to rewind it.
+-
+-(2) ... if a topic branch has been fully merged to "master".
+-    Then you can delete it.  More importantly, you should not
+-    build on top of it -- other people may already want to
+-    change things related to the topic as patches against your
+-    "master", so if you need further changes, it is better to
+-    fork the topic (perhaps with the same name) afresh from the
+-    tip of "master".
+-
+-Let's look at this example:
+-
+-		   o---o---o---o---o---o---o---o---o---o "next"
+-		  /       /           /           /
+-		 /   a---a---b A     /           /
+-		/   /               /           /
+-	       /   /   c---c---c---c B         /
+-	      /   /   /             \         /
+-	     /   /   /   b---b C     \       /
+-	    /   /   /   /             \     /
+-    ---o---o---o---o---o---o---o---o---o---o---o "master"
+-
+-
+-A, B and C are topic branches.
+-
+- * A has one fix since it was merged up to "next".
+-
+- * B has finished.  It has been fully merged up to "master" and "next",
+-   and is ready to be deleted.
+-
+- * C has not merged to "next" at all.
+-
+-We would want to allow C to be rebased, refuse A, and encourage
+-B to be deleted.
+-
+-To compute (1):
+-
+-	git rev-list ^master ^topic next
+-	git rev-list ^master        next
+-
+-	if these match, topic has not merged in next at all.
+-
+-To compute (2):
+-
+-	git rev-list master..topic
+-
+-	if this is empty, it is fully merged to "master".
+-
+-DOC_END
+diff -ruN rsd_org/.git/hooks/update.sample rsd_org_calsoft/.git/hooks/update.sample
+--- rsd_org/.git/hooks/update.sample	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/hooks/update.sample	1970-01-01 05:30:00.000000000 +0530
+@@ -1,128 +0,0 @@
+-#!/bin/sh
+-#
+-# An example hook script to blocks unannotated tags from entering.
+-# Called by "git receive-pack" with arguments: refname sha1-old sha1-new
+-#
+-# To enable this hook, rename this file to "update".
+-#
+-# Config
+-# ------
+-# hooks.allowunannotated
+-#   This boolean sets whether unannotated tags will be allowed into the
+-#   repository.  By default they won't be.
+-# hooks.allowdeletetag
+-#   This boolean sets whether deleting tags will be allowed in the
+-#   repository.  By default they won't be.
+-# hooks.allowmodifytag
+-#   This boolean sets whether a tag may be modified after creation. By default
+-#   it won't be.
+-# hooks.allowdeletebranch
+-#   This boolean sets whether deleting branches will be allowed in the
+-#   repository.  By default they won't be.
+-# hooks.denycreatebranch
+-#   This boolean sets whether remotely creating branches will be denied
+-#   in the repository.  By default this is allowed.
+-#
+-
+-# --- Command line
+-refname="$1"
+-oldrev="$2"
+-newrev="$3"
+-
+-# --- Safety check
+-if [ -z "$GIT_DIR" ]; then
+-	echo "Don't run this script from the command line." >&2
+-	echo " (if you want, you could supply GIT_DIR then run" >&2
+-	echo "  $0 <ref> <oldrev> <newrev>)" >&2
+-	exit 1
+-fi
+-
+-if [ -z "$refname" -o -z "$oldrev" -o -z "$newrev" ]; then
+-	echo "usage: $0 <ref> <oldrev> <newrev>" >&2
+-	exit 1
+-fi
+-
+-# --- Config
+-allowunannotated=$(git config --bool hooks.allowunannotated)
+-allowdeletebranch=$(git config --bool hooks.allowdeletebranch)
+-denycreatebranch=$(git config --bool hooks.denycreatebranch)
+-allowdeletetag=$(git config --bool hooks.allowdeletetag)
+-allowmodifytag=$(git config --bool hooks.allowmodifytag)
+-
+-# check for no description
+-projectdesc=$(sed -e '1q' "$GIT_DIR/description")
+-case "$projectdesc" in
+-"Unnamed repository"* | "")
+-	echo "*** Project description file hasn't been set" >&2
+-	exit 1
+-	;;
+-esac
+-
+-# --- Check types
+-# if $newrev is 0000...0000, it's a commit to delete a ref.
+-zero="0000000000000000000000000000000000000000"
+-if [ "$newrev" = "$zero" ]; then
+-	newrev_type=delete
+-else
+-	newrev_type=$(git cat-file -t $newrev)
+-fi
+-
+-case "$refname","$newrev_type" in
+-	refs/tags/*,commit)
+-		# un-annotated tag
+-		short_refname=${refname##refs/tags/}
+-		if [ "$allowunannotated" != "true" ]; then
+-			echo "*** The un-annotated tag, $short_refname, is not allowed in this repository" >&2
+-			echo "*** Use 'git tag [ -a | -s ]' for tags you want to propagate." >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/tags/*,delete)
+-		# delete tag
+-		if [ "$allowdeletetag" != "true" ]; then
+-			echo "*** Deleting a tag is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/tags/*,tag)
+-		# annotated tag
+-		if [ "$allowmodifytag" != "true" ] && git rev-parse $refname > /dev/null 2>&1
+-		then
+-			echo "*** Tag '$refname' already exists." >&2
+-			echo "*** Modifying a tag is not allowed in this repository." >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/heads/*,commit)
+-		# branch
+-		if [ "$oldrev" = "$zero" -a "$denycreatebranch" = "true" ]; then
+-			echo "*** Creating a branch is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/heads/*,delete)
+-		# delete branch
+-		if [ "$allowdeletebranch" != "true" ]; then
+-			echo "*** Deleting a branch is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	refs/remotes/*,commit)
+-		# tracking branch
+-		;;
+-	refs/remotes/*,delete)
+-		# delete tracking branch
+-		if [ "$allowdeletebranch" != "true" ]; then
+-			echo "*** Deleting a tracking branch is not allowed in this repository" >&2
+-			exit 1
+-		fi
+-		;;
+-	*)
+-		# Anything else (is there anything else?)
+-		echo "*** Update hook: unknown type of update to ref $refname of type $newrev_type" >&2
+-		exit 1
+-		;;
+-esac
+-
+-# --- Finished
+-exit 0
+diff -ruN rsd_org/.git/info/exclude rsd_org_calsoft/.git/info/exclude
+--- rsd_org/.git/info/exclude	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/info/exclude	1970-01-01 05:30:00.000000000 +0530
+@@ -1,6 +0,0 @@
+-# git ls-files --others --exclude-from=.git/info/exclude
+-# Lines that start with '#' are comments.
+-# For a project mostly in C, the following would be a good set of
+-# exclude patterns (uncomment them if you want to use them):
+-# *.[oa]
+-# *~
+diff -ruN rsd_org/.git/logs/HEAD rsd_org_calsoft/.git/logs/HEAD
+--- rsd_org/.git/logs/HEAD	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/logs/HEAD	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-0000000000000000000000000000000000000000 80947e58159a4f1d864c544ca4ed2d15307208f2 nick_huang <nick_huang@accton.com> 1502862611 +0000	clone: from http://code.accton.com.tw/git/rsd.git
+diff -ruN rsd_org/.git/logs/refs/heads/RSA-SW-Accton-2.1.3 rsd_org_calsoft/.git/logs/refs/heads/RSA-SW-Accton-2.1.3
+--- rsd_org/.git/logs/refs/heads/RSA-SW-Accton-2.1.3	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/logs/refs/heads/RSA-SW-Accton-2.1.3	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-0000000000000000000000000000000000000000 80947e58159a4f1d864c544ca4ed2d15307208f2 nick_huang <nick_huang@accton.com> 1502862611 +0000	clone: from http://code.accton.com.tw/git/rsd.git
+diff -ruN rsd_org/.git/logs/refs/remotes/origin/HEAD rsd_org_calsoft/.git/logs/refs/remotes/origin/HEAD
+--- rsd_org/.git/logs/refs/remotes/origin/HEAD	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/logs/refs/remotes/origin/HEAD	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-0000000000000000000000000000000000000000 0f0f9cb796b4acb506c84d7aa40c4404b7ade7cd nick_huang <nick_huang@accton.com> 1502862611 +0000	clone: from http://code.accton.com.tw/git/rsd.git
+diff -ruN rsd_org/.git/packed-refs rsd_org_calsoft/.git/packed-refs
+--- rsd_org/.git/packed-refs	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/packed-refs	1970-01-01 05:30:00.000000000 +0530
+@@ -1,4 +0,0 @@
+-# pack-refs with: peeled fully-peeled 
+-f4eaaa9ebc96c08d2771f1a088e82a7b81762142 refs/remotes/origin/RSA-SW-Accton
+-80947e58159a4f1d864c544ca4ed2d15307208f2 refs/remotes/origin/RSA-SW-Accton-2.1.3
+-0f0f9cb796b4acb506c84d7aa40c4404b7ade7cd refs/remotes/origin/master
+diff -ruN rsd_org/.git/refs/heads/RSA-SW-Accton-2.1.3 rsd_org_calsoft/.git/refs/heads/RSA-SW-Accton-2.1.3
+--- rsd_org/.git/refs/heads/RSA-SW-Accton-2.1.3	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/refs/heads/RSA-SW-Accton-2.1.3	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-80947e58159a4f1d864c544ca4ed2d15307208f2
+diff -ruN rsd_org/.git/refs/remotes/origin/HEAD rsd_org_calsoft/.git/refs/remotes/origin/HEAD
+--- rsd_org/.git/refs/remotes/origin/HEAD	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/.git/refs/remotes/origin/HEAD	1970-01-01 05:30:00.000000000 +0530
+@@ -1 +0,0 @@
+-ref: refs/remotes/origin/master
+diff -ruN rsd_org/PSME/agent/chassis/src/ipmb/watcher/thermal_sensor_task.cpp rsd_org_calsoft/PSME/agent/chassis/src/ipmb/watcher/thermal_sensor_task.cpp
+--- rsd_org/PSME/agent/chassis/src/ipmb/watcher/thermal_sensor_task.cpp	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/PSME/agent/chassis/src/ipmb/watcher/thermal_sensor_task.cpp	2017-12-15 17:52:20.975988851 +0530
+@@ -200,6 +200,11 @@
+            uint32_t i = 0;
+            char resultA[128];
+            int tmp1[8] = {0};
++           /* ACL Added Begin */
++           uint32_t j = 0, k = 0;
++           int fan[8] = {0}; 
++           int temp[8] = {0};
++           /* ACL Added End */
+ 
+ 	/*Get FAN info.*/
+ 	   for (const auto& key: manager_keys) {
+@@ -227,7 +232,16 @@
+ 	    i = 0;
+ 	    memset(resultA, 0x0, sizeof(resultA));
+ 	    exec_shell("psme.sh get psu_power_out", resultA);
+-           sscanf(resultA, " %d %d" ,  &tmp1[0] , &tmp1[1]);
++        sscanf(resultA, " %d %d" ,  &tmp1[0] , &tmp1[1]);
++        /* ACL Added Begin */
++        memset(resultA, 0x0, sizeof(resultA));
++        exec_shell("psme.sh get psu_temp_out", resultA);
++        sscanf(resultA, " %d %d" ,  &temp[0] , &temp[1]);
++        memset(resultA, 0x0, sizeof(resultA));
++        exec_shell("psme.sh get psu_fan_out", resultA);
++        sscanf(resultA, " %d %d" ,  &fan[0] , &fan[1]);
++        /* ACL Added End */
++            
+ 
+ 	    auto &psu_manager = agent_framework::module::ChassisComponents::get_instance()->get_psu_manager();
+ 
+@@ -240,6 +254,10 @@
+ 	        if (psu_->get_psu_id() == i+1) 
+ 		 {
+ 	            psu_->set_power_output(tmp1[i++]);
++                /* ACL Added Begin */
++	            psu_->set_temp_output(temp[j++]);
++	            psu_->set_fan_output(fan[k++]);
++                /* ACL Added Begin */
+             }
+             }
+ 
+diff -ruN rsd_org/PSME/agent/chassis/src/loader/chassis_loader.cpp rsd_org_calsoft/PSME/agent/chassis/src/loader/chassis_loader.cpp
+--- rsd_org/PSME/agent/chassis/src/loader/chassis_loader.cpp	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/PSME/agent/chassis/src/loader/chassis_loader.cpp	2017-12-15 17:52:26.894946981 +0530
+@@ -591,6 +591,17 @@
+ 	fru_info.set_model_number(json["model_number"].as_string());	        
+ 	fru_info.set_part_number(json["model_number"].as_string());	        
+ 	fru_info.set_serial_number(json["serial_number"].as_string());
++    /* ACL Added Begin */
++	fru_info.set_product_name(json["product_name"].as_string());
++	fru_info.set_mac_address(json["mac_address"].as_string());
++	fru_info.set_mac_range(json["mac_range"].as_string());
++	fru_info.set_manufacture_date(json["manufacture_date"].as_string());
++	fru_info.set_platform_name(json["platform_name"].as_string());
++	fru_info.set_label_revision(json["label_revision"].as_string());
++	fru_info.set_country_code(json["country_code"].as_string());
++	fru_info.set_diag_version(json["diag_version"].as_string());
++	fru_info.set_onie_version(json["onie_version"].as_string());
++    /* ACL Added End */
+ 	system.set_fru_info(std::move(fru_info));
+ 	CommonComponents::get_instance()->get_system_manager().add_entry(system);
+ }
+diff -ruN rsd_org/PSME/agent/network/acc_sw/C_PINFO rsd_org_calsoft/PSME/agent/network/acc_sw/C_PINFO
+--- rsd_org/PSME/agent/network/acc_sw/C_PINFO	2017-12-19 13:19:16.488042958 +0530
++++ rsd_org_calsoft/PSME/agent/network/acc_sw/C_PINFO	2017-12-15 17:52:40.989991292 +0530
+@@ -28,6 +28,17 @@
+ else
+     MANUFACTURER=`${ONLPDUMP} | grep -m 1 "Manufacturer" | awk -F':' '{print $2}'`
+     SERIAL_NUMBER=`${ONLPDUMP} | grep -m 1 "Serial Number" | awk -F':' '{print $2}'`
++
++    PRODUCT_NAME=`${ONLPDUMP} | grep -m 1 "Product Name" | awk '{print $3}'`
++    MAC_ADDRESS=`${ONLPDUMP} | grep 'MAC:' | awk '{print $2}'`
++    MAC_RANGE=`${ONLPDUMP} | grep -m 1 'MAC Range' | awk '{print $3}'`
++    MANUFACTURE_DATE=`${ONLPDUMP} | grep  'Manufacture Date:' | awk '{print $3}'`
++    PLATFORM_NAME=`${ONLPDUMP} | grep -m 1 'Platform Name:' | awk {'print $3'}`
++    LABEL_REVISION=`${ONLPDUMP} | grep -m 1 'Label Revision:' | awk {'print $3'}`
++    COUNTRY_CODE=`${ONLPDUMP} | grep -m 1 'Country Code:' | awk {'print $3'}`
++    DIAG_VERSION=`${ONLPDUMP} | grep -m 1 'Diag Version:' | awk {'print $3'}`
++    ONIE_VERSION=`${ONLPDUMP} | grep -m 1 'ONIE Version:' | awk {'print $3'}`
++
+     ASSET_TAG_C=`cat "${ASSET_TAG}"`
+     PLATFORM="BDCR"
+     MODULE_NUMBER=`${ONLPDUMP} | grep -m 1 "Part Number" | awk -F':' '{print $2}'`
+@@ -56,7 +67,16 @@
+ 				\""asset_tag"\"        : \""${ASSET_TAG_C}"\",
+ 				\""manufacturer"\"     : \""${MANUFACTURER}"\",
+ 				\""model_number"\"     : \""${MODULE_NUMBER}"\",
+-				\""serial_number"\"    : \""${SERIAL_NUMBER}"\"
++				\""serial_number"\"    : \""${SERIAL_NUMBER}"\",
++				\""product_name"\"    : \""${PRODUCT_NAME}"\",
++				\""mac_address"\"    : \""${MAC_ADDRESS}"\",
++				\""mac_range"\"    : \""${MAC_RANGE}"\",
++				\""platform_name"\"    : \""${PLATFORM_NAME}"\",
++				\""manufacture_date"\"    : \""${MANUFACTURE_DATE}"\",
++				\""country_code"\"    : \""${COUNTRY_CODE}"\",
++				\""label_revision"\"    : \""${LABEL_REVISION}"\",
++				\""diag_version"\"    : \""${DIAG_VERSION}"\",
++				\""onie_version"\"    : \""${ONIE_VERSION}"\"
+ 		}
+ 		,
+ 			\"onlp\" :
+diff -ruN rsd_org/PSME/agent/network/acc_sw/HW_NODE_ASXVOLT16 rsd_org_calsoft/PSME/agent/network/acc_sw/HW_NODE_ASXVOLT16
+--- rsd_org/PSME/agent/network/acc_sw/HW_NODE_ASXVOLT16	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/agent/network/acc_sw/HW_NODE_ASXVOLT16	2017-12-15 17:52:47.145067428 +0530
+@@ -14,6 +14,8 @@
+ 	eval CURRENT_THERMAL_NODE5_PATH="/sys/bus/i2c/devices/10-004e/hwmon/hwmon5/device/temp1_input"
+ 	eval CURRENT_THERMAL_NODE6_PATH="/sys/bus/i2c/devices/18-005b/psu_temp1_input"
+ 	eval CURRENT_THERMAL_NODE7_PATH="/sys/bus/i2c/devices/17-0058/psu_temp1_input"
++	eval CURRENT_PSU1_TEMP_NODE_PATH="/sys/bus/i2c/devices/18-005b/psu_temp1_input"
++	eval CURRENT_PSU2_TEMP_NODE_PATH="/sys/bus/i2c/devices/17-0058/psu_temp1_input"
+         
+ 	CURRENT_THERMAL_NUM="7"
+ 	CURRENT_PORT_NUM="20"
+diff -ruN rsd_org/PSME/agent/network/acc_sw/HW_NODE_VM rsd_org_calsoft/PSME/agent/network/acc_sw/HW_NODE_VM
+--- rsd_org/PSME/agent/network/acc_sw/HW_NODE_VM	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/agent/network/acc_sw/HW_NODE_VM	2017-12-15 17:52:55.509247611 +0530
+@@ -15,5 +15,7 @@
+     eval CURRENT_THERMAL_NODE5_PATH="/usr/local/bin/hwmon5/temp1_input"
+     eval CURRENT_THERMAL_NODE6_PATH="/usr/local/bin/hwmon6/temp1_input"
+     eval CURRENT_THERMAL_NODE7_PATH="/usr/local/bin/hwmon7/temp1_input"
++    eval CURRENT_PSU1_TEMP_NODE_PATH="/usr/local/bin/hwmon6/temp1_input"
++    eval CURRENT_PSU2_TEMP_NODE_PATH="/usr/local/bin/hwmon7/temp1_input"
+ 
+     CURRENT_THERMAL_NUM="7"
+diff -ruN rsd_org/PSME/agent/network/acc_sw/psme.sh rsd_org_calsoft/PSME/agent/network/acc_sw/psme.sh
+--- rsd_org/PSME/agent/network/acc_sw/psme.sh	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/agent/network/acc_sw/psme.sh	2017-12-19 13:08:45.948051405 +0530
+@@ -8,10 +8,14 @@
+     echo "psme.sh get fan_rear_speed_rpm    : get current fan rear speed              "
+     echo "psme.sh get thermal_sensor        : get current thermal sensor              "
+     echo "psme.sh get thermal_sensor_num    : get current thermal sensor number       "
+-    echo "psme.sh get psu_power_out         : get currnet psu power out               "
++    echo "psme.sh get psu_power_out         : get current psu power out               "
++    echo "psme.sh get psu_fan_out           : get current psu fan out                 "
++    echo "psme.sh get psu_temp_out          : get current psu temp out                "
+     echo "psme.sh get max_port_num          : get current max port num                "
+     echo "psme.sh get sfp_presence          : get currnet sfp presence status         "
+     echo "psme.sh get sfp_port_status PORT  : get current PORT status                 "
++    echo "psme.sh get sfp_bias_current PORT : get current bias PORT                   "
++    echo "psme.sh get sfp_path PORT         : get sfp port path                       "
+     echo "psme.sh set force_off             : set device force off                    "
+     echo "psme.sh set shutdown              : set device shutdown gracefully          "
+     echo "psme.sh set force_restart         : set device force restart                "
+@@ -146,6 +150,48 @@
+     echo "${pout1} ${pout2}"
+ }
+ 
++#ACL Added for PSU fan and temp 
++get_psu_temp_out()
++{
++    if [ -f "${CURRENT_PSU1_TEMP_NODE_PATH}" ];then
++        local tout1=`cat ${CURRENT_PSU1_TEMP_NODE_PATH}`
++    if [ "${tout1}" = "" ];then
++	tout1="0"
++    fi
++    else
++        local tout1=-1
++    fi
++
++    if [ -f "${CURRENT_PSU2_TEMP_NODE_PATH}" ];then
++        local tout2=`cat ${CURRENT_PSU2_TEMP_NODE_PATH}`
++    if [ "${tout2}" = "" ];then
++	tout2="0"
++    fi
++    else
++        local tout2=-1
++    fi
++    echo "${tout1} ${tout2}"
++}
++
++get_psu_fan_out()
++{
++    local status1=`cat ${CURRENT_PSU1_FAN_NODE_PATH}/psu_fan1_speed_rpm`
++    if [ "$status1" = "" ] || [ "$status1" = "0" ] ; then
++	f_status="${f_status} -1 "
++    else
++	f_status="${f_status} ${status1} "
++    fi	
++
++    local status2=`cat ${CURRENT_PSU2_FAN_NODE_PATH}/psu_fan1_speed_rpm`
++    if [ "$status2" = "" ] || [ "$status2" = "0" ] ; then
++	f_status="${f_status} -1 "
++    else
++	f_status="${f_status} ${status2} "
++    fi	
++
++    echo "${f_status}"
++}
++
+ get_max_fan_num()
+ {
+         #if there doesn't have the 'fan1_present' file , it will receive double fan number.
+@@ -435,6 +481,108 @@
+     echo "$fault_value"
+ }
+ 
++get_sfp_path ()
++{
++    echo "$(get_sfp_port_path "${1}")"
++}
++
++check_bias_current()
++{
++    #check_bias_current bias_ct bias_ha bias_la bias_hw bias_lw
++    bias_ct=$1
++    bias_ha=$2
++    bias_la=$3
++    bias_hw=$4
++    bias_lw=$5
++    res=0
++
++    if [ $((16#${bias_ct})) -ge $((16#${bias_ha})) ] || [ $((16#${bias_ct})) -le $((16#${bias_la})) ]; then
++         res=$((1 << 0 | 1 << 1))
++         echo $res
++    elif [[ $((16#$bias_ct)) -ge $((16#$bias_hw)) ]]  &&  [[ $((16#$bias_ct)) -lt $((16#$bias_ha)) ]]; then
++         res=$(($res | 1 << 0))
++         echo $res
++    elif [[ $((16#$bias_ct)) -le $((16#$bias_lw)) ]] && [[ $((16#$bias_ct)) -gt $((16#$bias_la)) ]]; then
++         res=$(($res | 1 << 0))
++         echo $res
++    else
++         res=0
++         echo $res
++    fi
++}
++
++get_bias_current()
++{
++    status=1
++
++    if [ "$status" = "1" ]; then
++
++        port=$(printf %02d $1)
++        if [ $port -ge 1 ] && [ $port -le 16 ];then
++            #XFP port
++            sfp_path=$(get_sfp_port_path "${port}")
++            sfp_is_present=`cat $sfp_path/sfp_is_present`
++            if [ "$sfp_is_present" == "1" ]; then
++                sfp_eeprom="hd $sfp_path/sfp_eeprom"
++                bias_ct=`$sfp_eeprom | grep "0060 " | awk -F' ' '{print $6 $7}'`
++                if [[ ! -z ${bias_ct} ]]; then
++                    bias_ha=`$sfp_eeprom | grep "0010 " | awk -F' ' '{print $4 $5}'`
++                    bias_la=`$sfp_eeprom | grep "0010 " | awk -F' ' '{print $6 $7}'`
++                    bias_hw=`$sfp_eeprom | grep "0010 " | awk -F' ' '{print $8 $9}'`
++                    bias_lw=`$sfp_eeprom | grep "0010 " | awk -F' ' '{print $10 $11}'`
++                    res=$(check_bias_current $bias_ct $bias_ha $bias_la $bias_hw $bias_lw)
++                    if [ $res -eq 0 ]; then
++                        echo "OKAY [$bias_ct]"
++                    elif [ $res -eq 1 ]; then
++                        echo "WARN [$bias_ct]"
++                    elif [ $res -eq 3 ]; then
++                        echo "CRIT [$bias_ct]"
++                    fi
++                fi
++            else
++                bias_ct=-1
++                echo "$bias_ct"
++            fi
++        elif  [ $port -ge 17 ] && [ $port -le 20 ];then
++            qsfp_path=$(get_sfp_port_path "${port}")
++            qsfp_is_present=`cat $qsfp_path/sfp_is_present`
++            if [ "$qsfp_is_present" == "1" ]; then
++                qsfp_eeprom="hd $qsfp_path/sfp_eeprom"
++                #QSFP port
++                bias_c1=`$qsfp_eeprom | grep "0020 " | awk -F' ' '{print $12 $13}' `
++                bias_c2=`$qsfp_eeprom | grep "0020 " | awk -F' ' '{print $14 $15}' `
++                bias_c3=`$qsfp_eeprom | grep "0020 " | awk -F' ' '{print $16 $17}' `
++                bias_c4=`$qsfp_eeprom | grep "0030 " | awk -F' ' '{print $2 $3}' `
++                if [[ ! -z ${bias_c1} ]] && [[ ! -z ${bias_c2} ]] && [[ ! -z ${bias_c3} ]] && [[ ! -z ${bias_c4} ]]  ; then
++                    #get threshold values from qsfp_eeprom path with $port
++                    bias_ha=`$qsfp_eeprom | grep "00230 " | awk -F' ' '{print $10 $11}'`
++                    bias_la=`$qsfp_eeprom | grep "00230 " | awk -F' ' '{print $12 $13}'`
++                    bias_hw=`$qsfp_eeprom | grep "00230 " | awk -F' ' '{print $14 $15}'`
++                    bias_lw=`$qsfp_eeprom | grep "00230 " | awk -F' ' '{print $16 $17}'`
++                    res_c1=$(check_bias_current $bias_c1 $bias_ha $bias_la $bias_hw $bias_lw)
++                    res_c2=$(check_bias_current $bias_c2 $bias_ha $bias_la $bias_hw $bias_lw)
++                    res_c3=$(check_bias_current $bias_c3 $bias_ha $bias_la $bias_hw $bias_lw)
++                    res_c4=$(check_bias_current $bias_c4 $bias_ha $bias_la $bias_hw $bias_lw)
++                    if [ $res_c1 -eq 0 ] && [ $res_c2 -eq 0 ] && [ $res_c3 -eq 0 ] && [ $res_c4 -eq 0 ] ; then
++                        echo "OKAY [$bias_c1, $bias_c2, $bias_c3, $bias_c4]"
++                    elif [ $res_c1 -eq 1 ] || [ $res_c2 -eq 1 ] || [ $res_c3 -eq 1 ] ||[ $res_c4 -eq 1 ] ; then
++                        echo "WARN [$bias_c1, $bias_c2, $bias_c3, $bias_c4]"
++                    elif [ $res_c1 -eq 3 ] || [ $res_c2 -eq 3 ] || [ $res_c3 -eq 3 ] ||[ $res_c4 -eq 3 ] ; then
++                        echo "CRIT [$bias_c1, $bias_c2, $bias_c3, $bias_c4]"
++                    fi
++                fi
++            else
++                bias_ct=-1
++                echo "$bias_ct"
++            fi
++        else
++            echo "wrong port number"
++        fi
++    else
++        echo "Port disabled"
++    fi
++}
++
+ get_max_port_num()
+ {
+ 	echo "${CURRENT_PORT_NUM}"
+@@ -554,6 +702,12 @@
+ 	"psu_power_out")
+ 	get_psu_power_out
+ 	;;		
++	"psu_fan_out")
++	get_psu_fan_out
++	;;		
++	"psu_temp_out")
++	get_psu_temp_out
++	;;		
+ 	"max_fan_num")
+ 	get_max_fan_num
+         ;;
+@@ -563,6 +717,12 @@
+ 	"sfp_port_status")
+ 	get_sfp_port_status "${3}"
+         ;;
++	"sfp_bias_current")
++        get_bias_current "${3}"
++        ;;
++        "sfp_path")
++        get_sfp_path "${3}"
++        ;;
+ 	"sfp_presence")
+ 	get_sfp_presence
+ 	;;
+diff -ruN rsd_org/PSME/application/include/psme/rest/constants/chassis.hpp rsd_org_calsoft/PSME/application/include/psme/rest/constants/chassis.hpp
+--- rsd_org/PSME/application/include/psme/rest/constants/chassis.hpp	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/application/include/psme/rest/constants/chassis.hpp	2017-12-15 17:55:54.238571548 +0530
+@@ -74,6 +74,10 @@
+ extern const char POWER_AVAILABLE[];
+ extern const char POWER_CAPACITY[];
+ extern const char POWER_CONSUMED[];
++/* ACL Added Begin */
++extern const char FAN_OUTPUT[];
++extern const char TEMP_OUTPUT[];
++/* ACL Added End */
+ extern const char POWER_SUPPLIES[];
+ extern const char LAST_POWER_OUTPUT[];
+ /*Nick Added Begin: */
+diff -ruN rsd_org/PSME/application/include/psme/rest/constants/constants.hpp rsd_org_calsoft/PSME/application/include/psme/rest/constants/constants.hpp
+--- rsd_org/PSME/application/include/psme/rest/constants/constants.hpp	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/application/include/psme/rest/constants/constants.hpp	2017-12-15 17:56:03.283091747 +0530
+@@ -118,6 +118,17 @@
+ extern const char MODEL[];
+ extern const char SERIAL[];
+ extern const char PART_NUMBER[];
++/* ACL Added Begin */
++extern const char PRODUCT_NAME[];
++extern const char MAC_ADDRESS[];
++extern const char MAC_RANGE[];
++extern const char MANUFACTURE_DATE[];
++extern const char PLATFORM_NAME[];
++extern const char COUNTRY_CODE[];
++extern const char LABEL_REVISION[];
++extern const char DIAG_VERSION[];
++extern const char ONIE_VERSION[];
++/* ACL Added End */
+ extern const char ASSET_TAG[];
+ extern const char STATUS[];
+ extern const char STATE[];
+@@ -139,7 +150,6 @@
+ extern const char HASH[];
+ extern const char CHASSIS[];
+ extern const char RESET_TYPE[];
+-extern const char MAC_ADDRESS[];
+ }
+ 
+ namespace ErrorMessage {
+diff -ruN rsd_org/PSME/application/include/psme/rest/constants/ethernet.hpp rsd_org_calsoft/PSME/application/include/psme/rest/constants/ethernet.hpp
+--- rsd_org/PSME/application/include/psme/rest/constants/ethernet.hpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/application/include/psme/rest/constants/ethernet.hpp	2017-12-19 13:09:05.036051150 +0530
+@@ -43,6 +43,7 @@
+ namespace EthernetSwitchPort {
+ extern const char PORT[];
+ extern const char PORT_ID[];
++extern const char BIAS_CURRENT[];
+ extern const char LINK_TYPE[];
+ extern const char OPERATIONAL_STATE[];
+ extern const char ADMINISTRATIVE_STATE[];
+diff -ruN rsd_org/PSME/application/include/psme/rest/constants/system.hpp rsd_org_calsoft/PSME/application/include/psme/rest/constants/system.hpp
+--- rsd_org/PSME/application/include/psme/rest/constants/system.hpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/application/include/psme/rest/constants/system.hpp	2017-12-15 17:56:09.021959873 +0530
+@@ -59,6 +59,17 @@
+ extern const char TARGET_PORTAL_IP[];
+ extern const char TARGET_PORTAL_PORT[];
+ extern const char BIOS_VERSION[];
++/* ACL Added Begin */
++extern const char PRODUCT_NAME[];
++extern const char PLATFORM_NAME[];
++extern const char COUNTRY_CODE[];
++extern const char MAC_RANGE[];
++extern const char MAC_ADDRESS[];
++extern const char LABEL_REVISION[];
++extern const char MANUFACTURE_DATE[];
++extern const char DIAG_VERSION[];
++extern const char ONIE_VERSION[];
++/* ACL Added End */
+ extern const char PROCESSOR_SUMMARY[];
+ extern const char COUNT[];
+ extern const char MEMORY_SUMMARY[];
+diff -ruN rsd_org/PSME/application/src/rest/constants/chassis.cpp rsd_org_calsoft/PSME/application/src/rest/constants/chassis.cpp
+--- rsd_org/PSME/application/src/rest/constants/chassis.cpp	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/application/src/rest/constants/chassis.cpp	2017-12-15 17:56:19.139016095 +0530
+@@ -66,6 +66,10 @@
+ const char POWER_AVAILABLE[] = "PowerAvailableWatts";
+ const char POWER_CAPACITY[] = "PowerCapacity";
+ const char POWER_CONSUMED[] = "PowerConsumedWatts";
++/* ACL Added Begin */
++const char TEMP_OUTPUT[] = "PsuTemperature";
++const char FAN_OUTPUT[] = "PsuFanRpm";
++/* ACL Added End */
+ const char POWER_SUPPLIES[] = "PowerSupplies";
+ const char LAST_POWER_OUTPUT[] = "LastPowerOutputWatts";
+ }
+diff -ruN rsd_org/PSME/application/src/rest/constants/constants.cpp rsd_org_calsoft/PSME/application/src/rest/constants/constants.cpp
+--- rsd_org/PSME/application/src/rest/constants/constants.cpp	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/application/src/rest/constants/constants.cpp	2017-12-15 17:56:23.237064187 +0530
+@@ -100,6 +100,16 @@
+ const char MODEL[] = "Model";
+ const char SERIAL[] = "SerialNumber";
+ const char PART_NUMBER[] = "PartNumber";
++/* ACL Added Begin */
++const char PRODUCT_NAME[] = "ProductName";
++const char MAC_RANGE[] = "MACRange";
++const char MANUFACTURE_DATE[] = "ManufactureDate";
++const char COUNTRY_CODE[] = "CountryCode";
++const char LABEL_REVISION[] = "LabelRevision";
++const char PLATFORM_NAME[] = "PlatformName";
++const char DIAG_VERSION[] = "DiagVersion";
++const char ONIE_VERSION[] = "OnieVersion";
++/* ACL Added End */
+ const char ASSET_TAG[] = "AssetTag";
+ const char STATUS[] = "Status";
+ const char STATE[] = "State";
+diff -ruN rsd_org/PSME/application/src/rest/constants/ethernet.cpp rsd_org_calsoft/PSME/application/src/rest/constants/ethernet.cpp
+--- rsd_org/PSME/application/src/rest/constants/ethernet.cpp	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/application/src/rest/constants/ethernet.cpp	2017-12-19 13:09:40.252050678 +0530
+@@ -38,6 +38,7 @@
+ namespace EthernetSwitchPort {
+ const char PORT[] = "Port";
+ const char PORT_ID[] = "PortId";
++const char BIAS_CURRENT[] = "BiasCurrent";
+ const char LINK_TYPE[] = "LinkType";
+ const char OPERATIONAL_STATE[] = "OperationalState";
+ const char ADMINISTRATIVE_STATE[] = "AdministrativeState";
+diff -ruN rsd_org/PSME/application/src/rest/constants/system.cpp rsd_org_calsoft/PSME/application/src/rest/constants/system.cpp
+--- rsd_org/PSME/application/src/rest/constants/system.cpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/application/src/rest/constants/system.cpp	2017-12-15 17:56:28.175532295 +0530
+@@ -59,6 +59,17 @@
+ const char TARGET_PORTAL_IP[] = "TargetPortalIP";
+ const char TARGET_PORTAL_PORT[] = "TargetPortalPort";
+ const char BIOS_VERSION[] = "BiosVersion";
++/* ACL Added Begin */
++const char PRODUCT_NAME[] = "ProductName";
++const char MAC_ADDRESS[] = "MACAddress";
++const char MAC_RANGE[] = "MACRange";
++const char MANUFACTURE_DATE[] = "ManufactureDate";
++const char PLATFORM_NAME[] = "PlatformName";
++const char LABEL_REVISION[] = "LabelRevision";
++const char COUNTRY_CODE[] = "CountryCode";
++const char DIAG_VERSION[] = "DiagVersion";
++const char ONIE_VERSION[] = "OnieVersion";
++/* ACL Added End */
+ const char PROCESSOR_SUMMARY[] = "ProcessorSummary";
+ const char COUNT[] = "Count";
+ const char MEMORY_SUMMARY[] = "MemorySummary";
+diff -ruN rsd_org/PSME/application/src/rest/endpoints/chassis/thermal_zone.cpp rsd_org_calsoft/PSME/application/src/rest/endpoints/chassis/thermal_zone.cpp
+--- rsd_org/PSME/application/src/rest/endpoints/chassis/thermal_zone.cpp	2017-12-19 13:19:16.492042958 +0530
++++ rsd_org_calsoft/PSME/application/src/rest/endpoints/chassis/thermal_zone.cpp	2017-12-15 17:56:45.712296681 +0530
+@@ -65,7 +65,7 @@
+ 
+ 			if(tz_.get_temperature() == -1)
+ 			{
+-				json["Temperature"]["Status"]["health"] = json::Value::Type::NIL;
++				json["Temperature"]["Status"]["Health"] = json::Value::Type::NIL;
+ 				json["Temperature"]["Status"]["State"] = "Disabled";	
+ 
+ 				json["Temperature"]["ReadingCelsius"] = "0";	
+@@ -74,22 +74,22 @@
+ 			{
+ 				if((tz_.get_temperature() < 0) || ((tz_.get_temperature() < 55000) && (tz_.get_temperature() >= 45000)))
+ 				{
+-					json["Temperature"]["Status"]["health"] = "Warning";
++					json["Temperature"]["Status"]["Health"] = "Warning";
+ 					json["Temperature"]["Status"]["State"] = "Enabled";					
+ 				}
+ 				else if((tz_.get_temperature() < 60000) && ((tz_.get_temperature() >= 55000)))
+ 				{
+-					json["Temperature"]["Status"]["health"] = "Warning";
++					json["Temperature"]["Status"]["Health"] = "Warning";
+ 					json["Temperature"]["Status"]["State"] = "Enabled";					
+ 				}
+ 				else if((tz_.get_temperature() >= 60000))
+ 				{
+-					json["Temperature"]["Status"]["health"] = "Critical";
++					json["Temperature"]["Status"]["Health"] = "Critical";
+ 					json["Temperature"]["Status"]["State"] = "Enabled";					
+ 				}
+ 				else
+ 				{
+-					json["Temperature"]["Status"]["health"] = "OK";					
++					json["Temperature"]["Status"]["Health"] = "OK";					
+ 					json["Temperature"]["Status"]["State"] = "Enabled";
+ 				}
+ 			}
+@@ -175,6 +175,10 @@
+     json::Value rs;
+     rs[Common::ODATA_TYPE] = "Power.v1_0_0.PowerSupply";
+     rs[PowerZone::POWER_CONSUMED] = json::Value::Type::NIL;
++/* ACL Added Begin */
++    rs[PowerZone::TEMP_OUTPUT] = json::Value::Type::NIL;
++    rs[PowerZone::FAN_OUTPUT] = json::Value::Type::NIL;
++/* ACL Added End */
+ 
+     r["PowerSupply"] = std::move(rs);
+ 
+@@ -207,6 +211,38 @@
+     if (psu_.get_psu_id() == req_psu_id) {
+ 		json["PowerSupply"][Common::MEMBER_ID] = req_psu_id ;
+     		json["PowerSupply"][PowerZone::POWER_CONSUMED] = (psu_.get_power_output() * 0.001);	
++            /* ACL Added Begin */
++    		json["PowerSupply"][PowerZone::TEMP_OUTPUT] = (psu_.get_temp_output() * 0.001);	
++    		json["PowerSupply"][PowerZone::FAN_OUTPUT] = (psu_.get_fan_output() * 0.001);	
++    		if (psu_.get_fan_output() < 0)
++                {
++  		    json["PowerSupply"]["Status"]["State"] = "Disabled";
++	            json["PowerSupply"]["Status"]["Health"] = json::Value::Type::NIL;
++                }
++ 	        else
++                {
++		    if((psu_.get_temp_output() < 0) || ((psu_.get_temp_output() < 55000) && (psu_.get_temp_output() >= 45000)))
++		    {
++		        json["PowerSupply"]["Status"]["Health"] = "Warning";
++		        json["PowerSupply"]["Status"]["State"] = "Enabled";					
++		    }
++		    else if((psu_.get_temp_output() < 60000) && ((psu_.get_temp_output() >= 55000)))
++		    {
++		        json["PowerSupply"]["Status"]["Health"] = "Warning";
++		        json["PowerSupply"]["Status"]["State"] = "Enabled";					
++		    }
++		    else if((psu_.get_temp_output() >= 60000))
++		    {
++		        json["PowerSupply"]["Status"]["Health"] = "Critical";
++		        json["PowerSupply"]["Status"]["State"] = "Enabled";					
++		    }
++		    else
++		    {
++		        json["PowerSupply"]["Status"]["Health"] = "OK";					
++		        json["PowerSupply"]["Status"]["State"] = "Enabled";
++		    }
++                }
++            /* ACL Added End */
+         }
+     }
+  	    
+diff -ruN rsd_org/PSME/application/src/rest/endpoints/ethernet/ethernet_switch_port.cpp rsd_org_calsoft/PSME/application/src/rest/endpoints/ethernet/ethernet_switch_port.cpp
+--- rsd_org/PSME/application/src/rest/endpoints/ethernet/ethernet_switch_port.cpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/application/src/rest/endpoints/ethernet/ethernet_switch_port.cpp	2017-12-19 13:11:09.044049488 +0530
+@@ -58,6 +58,7 @@
+     r[Common::NAME] = "Ethernet Switch Port";
+     r[Common::DESCRIPTION] = "Ethernet Switch Port description";
+     r[constants::EthernetSwitchPort::PORT_ID] = json::Value::Type::NIL;
++    r[constants::EthernetSwitchPort::BIAS_CURRENT] = json::Value::Type::NIL;
+     r[Common::STATUS][Common::STATE] = json::Value::Type::NIL;
+     r[Common::STATUS][Common::HEALTH] = json::Value::Type::NIL;
+     r[Common::STATUS][Common::HEALTH_ROLLUP] = json::Value::Type::NIL;
+@@ -401,18 +402,43 @@
+ 	if( std::stoi(req.params[PathParam::ETHERNET_SWITCH_ID])==1)//mgmt port
+ 		sprintf(command, "cat /sys/class/net/%s/operstate", "ma1");	
+ 	else
+-		sprintf(command, "psme.sh get sfp_port_status %d" , std::stoi(req.params[PathParam::SWITCH_PORT_ID]));
++        {
++		//sprintf(command, "psme.sh get sfp_port_status %d" , std::stoi(req.params[PathParam::SWITCH_PORT_ID]));
++        /* ACL Added Begin */
++		sprintf(command, "psme.sh get sfp_bias_current %d" , std::stoi(req.params[PathParam::SWITCH_PORT_ID]));
++                log_debug(GET_LOGGER("ethernet"), "Ethernet switch command" << command);
++        /* ACL Added End */
++        }
+ 
+ 	memset(resultA,0x0, sizeof(resultA));
+ 	
+ 	exec_shell(command, resultA);
++/* ACL Added Begin */
++	if( std::stoi(req.params[PathParam::ETHERNET_SWITCH_ID]) !=1)//mgmt port
++        {
++            resultA[strlen(resultA) -1] = '\0';
++            r[constants::EthernetSwitchPort::BIAS_CURRENT] = resultA+5;
++        }
++
+ 
+-	if(!strncmp(resultA, "1", 1) || !strncmp("up", resultA, 2))
++	if(!strncmp(resultA, "OKAY", 4) || !strncmp("up", resultA, 2))
+ 	{
+ 		r[Common::STATUS][Common::STATE]  = "Enabled";
+ 		r[Common::STATUS][Common::HEALTH] = "OK";
+ 		r[Common::STATUS][Common::HEALTH_ROLLUP] = "OK";	
+ 	}
++        else if(!strncmp(resultA, "WARN", 4))
++        {
++		r[Common::STATUS][Common::STATE]  = "Enabled";
++		r[Common::STATUS][Common::HEALTH] = "Warning";
++		r[Common::STATUS][Common::HEALTH_ROLLUP] = "N/A";	
++        }
++        else if(!strncmp(resultA, "CRIT", 4))
++        {
++		r[Common::STATUS][Common::STATE]  = "Enabled";
++		r[Common::STATUS][Common::HEALTH] = "Critical";
++		r[Common::STATUS][Common::HEALTH_ROLLUP] = "N/A";	
++        }
+ 	else
+ 	{
+ 		r[Common::STATUS][Common::STATE]  = "Disabled";
+@@ -420,6 +446,7 @@
+ 		r[Common::STATUS][Common::HEALTH_ROLLUP] = "N/A";	
+ 	}
+ 	}
++/* ACL Added End */
+ /* Nick disable //
+     r[Common::STATUS][Common::HEALTH_ROLLUP] =
+         endpoint::HealthRollup<agent_framework::model::EthernetSwitchPort>().get(port.get_uuid());
+diff -ruN rsd_org/PSME/application/src/rest/endpoints/system/system.cpp rsd_org_calsoft/PSME/application/src/rest/endpoints/system/system.cpp
+--- rsd_org/PSME/application/src/rest/endpoints/system/system.cpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/application/src/rest/endpoints/system/system.cpp	2017-12-15 17:57:14.950909325 +0530
+@@ -68,6 +68,17 @@
+     response[System::INDICATOR_LED] = json::Value::Type::NIL;
+     response[System::POWER_STATE] = json::Value::Type::NIL;
+     response[System::BIOS_VERSION] = json::Value::Type::NIL;
++    /* ACL Added Begin */
++    response[System::PRODUCT_NAME] = json::Value::Type::NIL;
++    response[System::MAC_ADDRESS] = json::Value::Type::NIL;
++    response[System::MAC_RANGE] = json::Value::Type::NIL;
++    response[System::MANUFACTURE_DATE] = json::Value::Type::NIL;
++    response[System::PLATFORM_NAME] = json::Value::Type::NIL;
++    response[System::LABEL_REVISION] = json::Value::Type::NIL;
++    response[System::COUNTRY_CODE] = json::Value::Type::NIL;
++    response[System::DIAG_VERSION] = json::Value::Type::NIL;
++    response[System::ONIE_VERSION] = json::Value::Type::NIL;
++    /* ACL Added End */
+ 
+     json::Value boot;
+     boot[Common::ODATA_TYPE] = "#ComputerSystem.v1_1_0.Boot";
+@@ -324,7 +335,6 @@
+ 
+ endpoint::System::~System() {}
+ 
+-
+ void endpoint::System::get(const server::Request& req, server::Response& res) {
+     auto response = make_prototype();
+     response[Common::ODATA_ID] = PathBuilder(req).build();
+@@ -339,6 +349,17 @@
+     response[Common::MODEL] = system.get_fru_info().get_model_number();
+     response[Common::SERIAL] = system.get_fru_info().get_serial_number();
+     response[Common::PART_NUMBER] = system.get_fru_info().get_part_number();
++    /* ACL Added Begin */
++    response[Common::PRODUCT_NAME] = system.get_fru_info().get_product_name();
++    response[Common::MAC_ADDRESS] = system.get_fru_info().get_mac_address();
++    response[Common::MAC_RANGE] = system.get_fru_info().get_mac_range();
++    response[Common::MANUFACTURE_DATE] = system.get_fru_info().get_manufacture_date();
++    response[Common::PLATFORM_NAME] = system.get_fru_info().get_platform_name();
++    response[Common::COUNTRY_CODE] = system.get_fru_info().get_country_code();
++    response[Common::LABEL_REVISION] = system.get_fru_info().get_label_revision();
++    response[Common::DIAG_VERSION] = system.get_fru_info().get_diag_version();
++    response[Common::ONIE_VERSION] = system.get_fru_info().get_onie_version();
++    /* ACL Added End */
+ 	response[constants::Common::UUID] = ServiceUuid::get_instance()->get_service_uuid();
+     endpoint::status_to_json(system, response);
+     response[Common::STATUS][Common::HEALTH_ROLLUP] =
+@@ -359,10 +380,7 @@
+ 		}
+ 
+ 
+-
+-
+ 	}
+-
+     response[constants::System::SKU] = system.get_sku();
+     response[constants::Common::ASSET_TAG] = system.get_asset_tag();
+     response[constants::System::INDICATOR_LED] = system.get_indicator_led();
+diff -ruN rsd_org/PSME/common/agent-framework/include/agent-framework/module/constants/chassis.hpp rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/constants/chassis.hpp
+--- rsd_org/PSME/common/agent-framework/include/agent-framework/module/constants/chassis.hpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/constants/chassis.hpp	2017-12-15 17:57:26.028445568 +0530
+@@ -107,6 +107,10 @@
+     static constexpr const char SLOT[] = "slot";
+     static constexpr const char POWER_INPUT[] = "powerInput";
+     static constexpr const char POWER_OUTPUT[] = "powerOutput";
++    /* ACL Added Begin */
++    static constexpr const char TEMP_OUTPUT[] = "tempOutput";
++    static constexpr const char FAN_OUTPUT[] = "fanOutput";
++    /* ACL Added End */
+     static constexpr const char POWER_CAPACITY[] = "powerCapacity";
+     static constexpr const char FRU_INFO[] = "fruInfo";
+     static constexpr const char OEM[] = "oem";
+@@ -125,6 +129,10 @@
+     static constexpr const char ZONE[] = "zone";
+     static constexpr const char STATUS[] = "status";
+     static constexpr const char POWER_INPUT[] = "powerInput";
++/* ACL Added Begin */
++    static constexpr const char FAN_OUTPUT[] = "fanOutput";
++    static constexpr const char TEMP_OUTPUT[] = "tempOutput";
++/* ACL Added End */
+     static constexpr const char POWER_OUTPUT[] = "powerOutput";
+     static constexpr const char POWER_CAPACITY[] = "powerCapacity";
+     static constexpr const char COLLECTIONS[] = "collections";
+diff -ruN rsd_org/PSME/common/agent-framework/include/agent-framework/module/constants/common.hpp rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/constants/common.hpp
+--- rsd_org/PSME/common/agent-framework/include/agent-framework/module/constants/common.hpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/constants/common.hpp	2017-12-15 17:57:40.789978871 +0530
+@@ -52,6 +52,17 @@
+     static constexpr const char MANUFACTURER[] = "manufacturer";
+     static constexpr const char MODEL[] = "modelNumber";
+     static constexpr const char PART[] = "partNumber";
++   /* ACL Added Begin */
++    static constexpr const char PRODUCT_NAME[] = "productName";
++    static constexpr const char MAC_ADDRESS[] = "macAddress";
++    static constexpr const char MAC_RANGE[] = "macRange";
++    static constexpr const char MANUFACTURE_DATE[] = "manufactureDate";
++    static constexpr const char PLATFORM_NAME[] = "platformName";
++    static constexpr const char COUNTRY_CODE[] = "countryCode";
++    static constexpr const char LABEL_REVISION[] = "labelRevision";
++    static constexpr const char DIAG_VERSION[] = "diagVersion";
++    static constexpr const char ONIE_VERSION[] = "onieVersion";
++    /* ACL Added End */
+ };
+ 
+ /*!
+diff -ruN rsd_org/PSME/common/agent-framework/include/agent-framework/module/constants/pnc.hpp rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/constants/pnc.hpp
+--- rsd_org/PSME/common/agent-framework/include/agent-framework/module/constants/pnc.hpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/constants/pnc.hpp	2017-12-19 13:12:07.532048705 +0530
+@@ -68,6 +68,7 @@
+     static constexpr const char PORT[] = "port";
+     static constexpr const char STATUS[] = "status";
+     static constexpr const char PORT_ID[] = "portId";
++    static constexpr const char BIAS_CURRENT[] = "bias_current";
+     static constexpr const char PORT_TYPE[] = "portType";
+     static constexpr const char CABLE_ID[] = "cableId";
+     static constexpr const char OPERATIONAL_STATE[] = "operationalState";
+diff -ruN rsd_org/PSME/common/agent-framework/include/agent-framework/module/model/attributes/fru_info.hpp rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/model/attributes/fru_info.hpp
+--- rsd_org/PSME/common/agent-framework/include/agent-framework/module/model/attributes/fru_info.hpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/model/attributes/fru_info.hpp	2017-12-15 17:57:53.069981406 +0530
+@@ -40,10 +40,32 @@
+     FruInfo(const std::string& serial_number,
+             const std::string& manufacturer,
+             const std::string& model_number,
++            /* ACL Added Begin */
++            const std::string& product_name,
++            const std::string& mac_address,
++            const std::string& mac_range,
++            const std::string& manufacture_date,
++            const std::string& platform_name,
++            const std::string& label_revision,
++            const std::string& country_code,
++            const std::string& diag_version,
++            const std::string& onie_version,
++            /* ACL Added End */
+             const std::string& part_number):
+             m_serial_number{serial_number},
+             m_manufacturer{manufacturer},
+             m_model_number{model_number},
++           /* ACL Added Begin */
++            m_product_name{product_name},
++            m_mac_address{mac_address},
++            m_mac_range{mac_range},
++            m_manufacture_date{manufacture_date},
++            m_platform_name{platform_name},
++            m_label_revision{label_revision},
++            m_country_code{country_code},
++            m_diag_version{diag_version},
++            m_onie_version{onie_version},
++            /* ACL Added End */
+             m_part_number{part_number}
+             {}
+ 
+@@ -120,6 +142,151 @@
+         return m_part_number;
+     }
+ 
++    /* ACL Added Begin */
++    /*!
++     * Sets product name
++     *
++     * @param[in] product name product name
++     * */
++    void set_product_name(const OptionalField<std::string>& product_name) {
++        m_product_name = product_name;
++    }
++
++    /*!
++     * Gets product name
++     * */
++    const OptionalField<std::string>& get_product_name() const {
++        return m_product_name;
++    }
++
++    /*!
++     * Sets MAC address
++     *
++     * @param[in] MAC address MAC address
++     * */
++    void set_mac_address(const OptionalField<std::string>& mac_address) {
++        m_mac_address = mac_address;
++    }
++
++    /*!
++     * Gets MAC address
++     * */
++    const OptionalField<std::string>& get_mac_address() const {
++        return m_mac_address;
++    }
++
++    /*!
++     * Sets MAC Range
++     *
++     * @param[in] MAC Range MAC Range
++     * */
++    void set_mac_range(const OptionalField<std::string>& mac_range) {
++        m_mac_range = mac_range;
++    }
++
++    /*!
++     * Gets MAC range
++     * */
++    const OptionalField<std::string>& get_mac_range() const {
++        return m_mac_range;
++    }
++
++    /*!
++     * Sets Manufacture date
++     *
++     * @param[in] Manufacture date Manufacture date
++     * */
++    void set_manufacture_date(const OptionalField<std::string>& manufacture_date) {
++        m_manufacture_date = manufacture_date;
++    }
++
++    /*!
++     * Gets Manufacture date
++     * */
++    const OptionalField<std::string>& get_manufacture_date() const {
++        return m_manufacture_date;
++    }
++
++    /*!
++     * Sets Platform Name
++     *
++     * @param[in] Platform Name Platform Name
++     * */
++    void set_platform_name(const OptionalField<std::string>& platform_name) {
++        m_platform_name = platform_name;
++    }
++
++    /*!
++     * Gets Platform Name
++     * */
++    const OptionalField<std::string>& get_platform_name() const {
++        return m_platform_name;
++    }
++
++    /*!
++     * Sets Label Revision
++     *
++     * @param[in] Label Revision Label Revision
++     * */
++    void set_label_revision(const OptionalField<std::string>& label_revision) {
++        m_label_revision = label_revision;
++    }
++
++    /*!
++     * Gets Label Revision
++     * */
++    const OptionalField<std::string>& get_label_revision() const {
++        return m_label_revision;
++    }
++
++    /*!
++     * Sets Country Code
++     *
++     * @param[in] Country Code Country Code
++     * */
++    void set_country_code(const OptionalField<std::string>& country_code) {
++        m_country_code = country_code;
++    }
++
++    /*!
++     * Gets Country Code
++     * */
++    const OptionalField<std::string>& get_country_code() const {
++        return m_country_code;
++    }
++
++    /*!
++     * Sets Diag Version
++     *
++     * @param[in] Diag version Diag version
++     * */
++    void set_diag_version(const OptionalField<std::string>& diag_version) {
++        m_diag_version = diag_version;
++    }
++
++    /*!
++     * Gets Diag Version
++     * */
++    const OptionalField<std::string>& get_diag_version() const {
++        return m_diag_version;
++    }
++
++    /*!
++     * Sets Onie Version
++     *
++     * @param[in] Onie version Onie version
++     * */
++    void set_onie_version(const OptionalField<std::string>& onie_version) {
++        m_onie_version = onie_version;
++    }
++
++    /*!
++     * Gets Onie Version
++     * */
++    const OptionalField<std::string>& get_onie_version() const {
++        return m_onie_version;
++    }
++/* ACL Added End */
+     /*!
+      * Converts this to json representation.
+      *
+@@ -141,6 +308,17 @@
+     OptionalField<std::string> m_manufacturer{};
+     OptionalField<std::string> m_model_number{};
+     OptionalField<std::string> m_part_number{};
++    /* ACL Added Begin */
++    OptionalField<std::string> m_product_name{};
++    OptionalField<std::string> m_mac_address{};
++    OptionalField<std::string> m_mac_range{};
++    OptionalField<std::string> m_manufacture_date{};
++    OptionalField<std::string> m_platform_name{};
++    OptionalField<std::string> m_country_code{};
++    OptionalField<std::string> m_label_revision{};
++    OptionalField<std::string> m_diag_version{};
++    OptionalField<std::string> m_onie_version{};
++   /* ACL Added End */
+ };
+ 
+ }
+diff -ruN rsd_org/PSME/common/agent-framework/include/agent-framework/module/model/power_zone.hpp rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/model/power_zone.hpp
+--- rsd_org/PSME/common/agent-framework/include/agent-framework/module/model/power_zone.hpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/model/power_zone.hpp	2017-12-15 17:58:03.141982386 +0530
+@@ -127,6 +127,43 @@
+     void set_power_output(const OptionalField<double> power_output) {
+         m_power_output = power_output;
+     }
++    /* ACL Added Begin */
++    /*!
++     * @brief setter for psu_fan_output attribute
++     *
++     * @param psu_fan_output of type double
++     */
++    void set_fan_output(const OptionalField<double> fan_output) {
++        m_fan_output = fan_output;
++    }
++
++    /*!
++     * @brief return  psu_fan_output attribute
++     *
++     * @return the psu fan output value
++     */
++     OptionalField<double> get_fan_output() const {
++        return m_fan_output;
++    }
++
++    /*!
++     * @brief setter for psu_temp_output attribute
++     *
++     * @param psu_temp_output of type double
++     */
++    void set_temp_output(const OptionalField<double> temp_output) {
++        m_temp_output = temp_output;
++    }
++
++    /*!
++     * @brief return  psu_temp_output attribute
++     *
++     * @return psu_temp_output of type double
++     */
++    OptionalField<double> get_temp_output() const {
++        return m_temp_output;
++    }
++    /* ACL Added Begin */
+ 
+ /*Nick Added Begin: */
+    /*!
+@@ -179,6 +216,10 @@
+ 
+     OptionalField<double> m_power_input{0.0};
+     OptionalField<double> m_power_output{0.0};
++    /* ACL Added Begin */
++    OptionalField<double> m_fan_output{0.0};
++    OptionalField<double> m_temp_output{0.0};
++    /* ACL Added End */
+     OptionalField<double> m_power_capacity{0.0};
+ 
+     static const enums::CollectionName collection_name;
+diff -ruN rsd_org/PSME/common/agent-framework/include/agent-framework/module/model/psu.hpp rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/model/psu.hpp
+--- rsd_org/PSME/common/agent-framework/include/agent-framework/module/model/psu.hpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/include/agent-framework/module/model/psu.hpp	2017-12-15 17:58:10.985982559 +0530
+@@ -137,6 +137,44 @@
+         m_power_output = power_output;
+     }
+ 
++    /* ACL Added Begin */
++    /*!
++
++     * @brief return fan_output of type double
++     *
++     * @return the fan_output value
++     */
++    OptionalField<double> get_fan_output() const {
++        return m_fan_output;
++    }
++
++    /*!
++     * @brief setter for fan_output attribute
++     *
++     * @param fan_output of type double
++     */
++    void set_fan_output(const OptionalField<double> fan_output) {
++        m_fan_output = fan_output;
++    }
++
++    /*!
++     * @brief return temp_output of type double
++     *
++     * @return the temp_output value
++     */
++    OptionalField<double> get_temp_output() const {
++        return m_temp_output;
++    }
++
++    /*!
++     * @brief setter for temp_output attribute
++     *
++     * @param temp_output of type double
++     */
++    void set_temp_output(const OptionalField<double> temp_output) {
++        m_temp_output = temp_output;
++    }
++/* ACL Added End */
+     /*!
+ 	 * @brief return an object fru_info of class attribute::FruInfo
+ 	 *
+@@ -201,6 +239,10 @@
+     OptionalField<uint32_t> m_slot{0u};
+     OptionalField<double> m_power_input{0.0};
+     OptionalField<double> m_power_output{0.0};
++    /* ACL Added Begin */
++    OptionalField<double> m_temp_output{0.0};
++    OptionalField<double> m_fan_output{0.0};
++    /* ACL Added End */
+     OptionalField<double> m_power_capacity{0.0};
+     attribute::FruInfo m_fru_info{};
+ /*Nick Added Begin: */
+diff -ruN rsd_org/PSME/common/agent-framework/src/module/constants/chassis.cpp rsd_org_calsoft/PSME/common/agent-framework/src/module/constants/chassis.cpp
+--- rsd_org/PSME/common/agent-framework/src/module/constants/chassis.cpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/src/module/constants/chassis.cpp	2017-12-15 17:58:27.809982930 +0530
+@@ -74,6 +74,10 @@
+ constexpr const char Psu::SLOT[];
+ constexpr const char Psu::POWER_INPUT[];
+ constexpr const char Psu::POWER_OUTPUT[];
++/* ACL Added Begin */
++constexpr const char Psu::TEMP_OUTPUT[];
++constexpr const char Psu::FAN_OUTPUT[];
++/* ACL Added End */
+ constexpr const char Psu::POWER_CAPACITY[];
+ constexpr const char Psu::FRU_INFO[];
+ constexpr const char Psu::OEM[];
+@@ -88,6 +92,10 @@
+ constexpr const char PowerZone::STATUS[];
+ constexpr const char PowerZone::POWER_INPUT[];
+ constexpr const char PowerZone::POWER_OUTPUT[];
++/* ACL Added Begin */
++constexpr const char PowerZone::TEMP_OUTPUT[];
++constexpr const char PowerZone::FAN_OUTPUT[];
++/* ACL Added End */
+ constexpr const char PowerZone::POWER_CAPACITY[];
+ constexpr const char PowerZone::COLLECTIONS[];
+ constexpr const char PowerZone::OEM[];
+diff -ruN rsd_org/PSME/common/agent-framework/src/module/constants/common.cpp rsd_org_calsoft/PSME/common/agent-framework/src/module/constants/common.cpp
+--- rsd_org/PSME/common/agent-framework/src/module/constants/common.cpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/src/module/constants/common.cpp	2017-12-15 17:58:32.633983036 +0530
+@@ -41,6 +41,17 @@
+ constexpr const char FruInfo::MANUFACTURER[];
+ constexpr const char FruInfo::MODEL[];
+ constexpr const char FruInfo::PART[];
++/* ACL Added Begin */
++constexpr const char FruInfo::PRODUCT_NAME[];
++constexpr const char FruInfo::MAC_ADDRESS[];
++constexpr const char FruInfo::MAC_RANGE[];
++constexpr const char FruInfo::PLATFORM_NAME[];
++constexpr const char FruInfo::MANUFACTURE_DATE[];
++constexpr const char FruInfo::COUNTRY_CODE[];
++constexpr const char FruInfo::LABEL_REVISION[];
++constexpr const char FruInfo::DIAG_VERSION[];
++constexpr const char FruInfo::ONIE_VERSION[];
++/* ACL Added End */
+ 
+ constexpr const char Collections::COLLECTIONS[];
+ constexpr const char Collections::NAME[];
+diff -ruN rsd_org/PSME/common/agent-framework/src/module/model/attributes/fru_info.cpp rsd_org_calsoft/PSME/common/agent-framework/src/module/model/attributes/fru_info.cpp
+--- rsd_org/PSME/common/agent-framework/src/module/model/attributes/fru_info.cpp	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/src/module/model/attributes/fru_info.cpp	2017-12-15 17:58:40.433983208 +0530
+@@ -39,6 +39,17 @@
+     json[literals::FruInfo::PART] = get_part_number();
+     json[literals::FruInfo::SERIAL] = get_serial_number();
+     json[literals::FruInfo::MODEL] = get_model_number();
++/* ACL Added Begin */
++    json[literals::FruInfo::PRODUCT_NAME] = get_product_name();
++    json[literals::FruInfo::MAC_ADDRESS] = get_mac_address();
++    json[literals::FruInfo::MAC_RANGE] = get_mac_range();
++    json[literals::FruInfo::MANUFACTURE_DATE] = get_manufacture_date();
++    json[literals::FruInfo::PLATFORM_NAME] = get_platform_name();
++    json[literals::FruInfo::COUNTRY_CODE] = get_country_code();
++    json[literals::FruInfo::LABEL_REVISION] = get_label_revision();
++    json[literals::FruInfo::DIAG_VERSION] = get_diag_version();
++    json[literals::FruInfo::ONIE_VERSION] = get_onie_version();
++/* ACL Added End */
+     return json;
+ }
+ 
+@@ -48,5 +59,16 @@
+     fru_info.set_manufacturer(json[literals::FruInfo::MANUFACTURER]);
+     fru_info.set_model_number(json[literals::FruInfo::MODEL]);
+     fru_info.set_part_number(json[literals::FruInfo::PART]);
++/* ACL Added Begin */
++    fru_info.set_product_name(json[literals::FruInfo::PRODUCT_NAME]);
++    fru_info.set_mac_address(json[literals::FruInfo::MAC_ADDRESS]);
++    fru_info.set_mac_range(json[literals::FruInfo::MAC_RANGE]);
++    fru_info.set_manufacture_date(json[literals::FruInfo::MANUFACTURE_DATE]);
++    fru_info.set_platform_name(json[literals::FruInfo::PLATFORM_NAME]);
++    fru_info.set_country_code(json[literals::FruInfo::COUNTRY_CODE]);
++    fru_info.set_label_revision(json[literals::FruInfo::LABEL_REVISION]);
++    fru_info.set_diag_version(json[literals::FruInfo::DIAG_VERSION]);
++    fru_info.set_onie_version(json[literals::FruInfo::ONIE_VERSION]);
++/* ACL Added End */
+     return fru_info;
+ }
+diff -ruN rsd_org/PSME/common/agent-framework/src/module/model/power_zone.cpp rsd_org_calsoft/PSME/common/agent-framework/src/module/model/power_zone.cpp
+--- rsd_org/PSME/common/agent-framework/src/module/model/power_zone.cpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/src/module/model/power_zone.cpp	2017-12-15 17:58:48.009983375 +0530
+@@ -40,6 +40,10 @@
+     result[literals::PowerZone::STATUS] = get_status().to_json();
+     result[literals::PowerZone::POWER_INPUT] = get_power_input();
+     result[literals::PowerZone::POWER_OUTPUT] = get_power_output();
++/* ACL Added Begin */
++    result[literals::PowerZone::TEMP_OUTPUT] = get_temp_output();
++    result[literals::PowerZone::FAN_OUTPUT] = get_fan_output();
++/* ACL Added End */
+     result[literals::PowerZone::POWER_CAPACITY] = get_power_capacity();
+     result[literals::PowerZone::COLLECTIONS] = get_collections().to_json();
+     result[literals::PowerZone::OEM] = get_oem().to_json();
+@@ -56,6 +60,10 @@
+     zone.set_status(attribute::Status::from_json(json[literals::PowerZone::STATUS]));
+     zone.set_power_input(json[literals::PowerZone::POWER_INPUT]);
+     zone.set_power_output(json[literals::PowerZone::POWER_OUTPUT]);
++/* ACL Added Begin */
++    zone.set_fan_output(json[literals::PowerZone::FAN_OUTPUT]);
++    zone.set_temp_output(json[literals::PowerZone::TEMP_OUTPUT]);
++/* ACL Added End */
+     zone.set_power_capacity(
+         json[literals::PowerZone::POWER_CAPACITY]);
+     zone.set_collections(Collections::from_json(
+diff -ruN rsd_org/PSME/common/agent-framework/src/module/model/psu.cpp rsd_org_calsoft/PSME/common/agent-framework/src/module/model/psu.cpp
+--- rsd_org/PSME/common/agent-framework/src/module/model/psu.cpp	2017-12-19 13:19:16.496042958 +0530
++++ rsd_org_calsoft/PSME/common/agent-framework/src/module/model/psu.cpp	2017-12-15 17:58:54.681983522 +0530
+@@ -39,6 +39,10 @@
+     result[literals::Psu::SLOT] = get_slot();
+     result[literals::Psu::POWER_INPUT] = get_power_input();
+     result[literals::Psu::POWER_OUTPUT] = get_power_output();
++/* ACL Added Begin */
++    result[literals::Psu::FAN_OUTPUT] = get_fan_output();
++    result[literals::Psu::TEMP_OUTPUT] = get_temp_output();
++/* ACL Added End */
+     result[literals::Psu::POWER_CAPACITY] = get_power_capacity();
+     result[literals::Psu::FRU_INFO] = get_fru_info().to_json();
+     result[literals::Psu::OEM] = get_oem().to_json();
+@@ -56,6 +60,10 @@
+     psu.set_slot(json[literals::Psu::SLOT].asUInt());
+     psu.set_power_input(json[literals::Psu::POWER_INPUT].asDouble());
+     psu.set_power_output(json[literals::Psu::POWER_OUTPUT].asDouble());
++/* ACL Added Begin */
++    psu.set_fan_output(json[literals::Psu::FAN_OUTPUT].asDouble());
++    psu.set_temp_output(json[literals::Psu::TEMP_OUTPUT].asDouble());
++/* ACL Added End */
+     psu.set_power_capacity(json[literals::Psu::POWER_CAPACITY].asDouble());
+     psu.set_oem(attribute::Oem::from_json(json[literals::Psu::OEM]));
+     psu.set_resource_hash(json);
+diff -ruN rsd_org/RMM/src/core/snmp_subagentd/CMakeLists.txt rsd_org_calsoft/RMM/src/core/snmp_subagentd/CMakeLists.txt
+--- rsd_org/RMM/src/core/snmp_subagentd/CMakeLists.txt	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/RMM/src/core/snmp_subagentd/CMakeLists.txt	2017-12-15 17:59:01.145983664 +0530
+@@ -1,13 +1,13 @@
+-SET(TARGET SNMPSubagentd)
+-
+-AUX_SOURCE_DIRECTORY(. SRC_LIST)
+-
+-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+-
+-LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
+-SET(SNMP_AGENT_NEED_LIBS librmm_init.so  librmm_cfg.so librmm_redfish.so librmm_wrap.so librmm_log.so librmm_utils.a  librmm_jsonrpcapi.so librmm_jsonrpc.so librmm_json.so libnetsnmpmibs.a libnetsnmpagent.a libnetsnmp.a libcrypto.a libssl.a libcurl.a librmm_jsonrpcapi.so librmm_securec.so)
+-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/include)
+-INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
+-
+-ADD_EXECUTABLE(${TARGET} ${SRC_LIST})
+-TARGET_LINK_LIBRARIES(${TARGET} ${SNMP_AGENT_NEED_LIBS} libuuid.so libdl.so)
++#SET(TARGET SNMPSubagentd)
++#
++#AUX_SOURCE_DIRECTORY(. SRC_LIST)
++#
++#SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
++#
++#LINK_DIRECTORIES(${PROJECT_BINARY_DIR}/lib)
++#SET(SNMP_AGENT_NEED_LIBS librmm_init.so  librmm_cfg.so librmm_redfish.so librmm_wrap.so librmm_log.so librmm_utils.a  librmm_jsonrpcapi.so librmm_jsonrpc.so librmm_json.so libnetsnmpmibs.a libnetsnmpagent.a libnetsnmp.a libcrypto.a libssl.a libcurl.a librmm_jsonrpcapi.so librmm_securec.so)
++#INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/include)
++#INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR}/include)
++#
++#ADD_EXECUTABLE(${TARGET} ${SRC_LIST})
++#TARGET_LINK_LIBRARIES(${TARGET} ${SNMP_AGENT_NEED_LIBS} libuuid.so libdl.so)
+diff -ruN rsd_org/RMM/src/deps/CMakeLists.txt rsd_org_calsoft/RMM/src/deps/CMakeLists.txt
+--- rsd_org/RMM/src/deps/CMakeLists.txt	2017-12-15 06:54:00.000000000 +0530
++++ rsd_org_calsoft/RMM/src/deps/CMakeLists.txt	2017-12-15 17:59:05.777983766 +0530
+@@ -1,6 +1,6 @@
+ ADD_SUBDIRECTORY(uuid)
+ ADD_SUBDIRECTORY(openssl)
+ ADD_SUBDIRECTORY(libcurl)
+-ADD_SUBDIRECTORY(snmp)
+-ADD_SUBDIRECTORY(stunnel)
+-ADD_SUBDIRECTORY(flatui)
++#ADD_SUBDIRECTORY(snmp)
++#ADD_SUBDIRECTORY(stunnel)
++#ADD_SUBDIRECTORY(flatui)
+diff -ruN rsd_org/RMM/utils/deb_maker/install/multi-deb/sh/prepare.sh rsd_org_calsoft/RMM/utils/deb_maker/install/multi-deb/sh/prepare.sh
+--- rsd_org/RMM/utils/deb_maker/install/multi-deb/sh/prepare.sh	2017-12-19 13:19:16.596042956 +0530
++++ rsd_org_calsoft/RMM/utils/deb_maker/install/multi-deb/sh/prepare.sh	2017-12-15 17:59:22.449984133 +0530
+@@ -56,11 +56,11 @@
+ cp $PROJ_PATH/build/utils/redfish/MR.json $ITEM_PATH/var/rmm/redfish
+ cp $PROJ_PATH/build/utils/cfg/rmm.cfg $ITEM_PATH/etc/rmm
+ cp $PROJ_PATH/build/utils/cfg/pwm_rpm.cfg $ITEM_PATH/etc/rmm
+-cp $PROJ_PATH/build/utils/encrypt_text/keyfile $ITEM_PATH/etc/rmm
++#cp $PROJ_PATH/build/utils/encrypt_text/keyfile $ITEM_PATH/etc/rmm
+ cp $PROJ_PATH/src/VERSION $ITEM_PATH/etc/rmm
+ 
+-cp $PROJ_PATH/build/bin/ptasd $ITEM_PATH/usr/local/bin/
+-cp $PROJ_PATH/build/bin/OEM_coe_file $ITEM_PATH/var/rmm/
++#cp $PROJ_PATH/build/bin/ptasd $ITEM_PATH/usr/local/bin/
++#cp $PROJ_PATH/build/bin/OEM_coe_file $ITEM_PATH/var/rmm/
+ cp $PROJ_PATH/build/bin/Memdbd $ITEM_PATH/usr/local/bin/
+ cp $PROJ_PATH/build/bin/IPMIModule $ITEM_PATH/usr/local/bin
+ cp $PROJ_PATH/build/bin/Assetd $ITEM_PATH/usr/local/bin
+@@ -68,10 +68,10 @@
+ cp $PROJ_PATH/build/bin/Registerd $ITEM_PATH/usr/local/bin
+ cp $PROJ_PATH/build/bin/RMMLogd $ITEM_PATH/usr/local/bin
+ cp $PROJ_PATH/build/bin/Upgraded $ITEM_PATH/usr/local/bin
+-cp $PROJ_PATH/build/bin/SNMPSubagentd $ITEM_PATH/usr/local/bin
++#cp $PROJ_PATH/build/bin/SNMPSubagentd $ITEM_PATH/usr/local/bin
+ cp $PROJ_PATH/build/bin/cm_reset $ITEM_PATH/usr/local/bin
+-cp $PROJ_PATH/build/bin/snmpd $ITEM_PATH/usr/local/bin
+-cp $PROJ_PATH/build/bin/stunnel $ITEM_PATH/usr/local/bin
++#cp $PROJ_PATH/build/bin/snmpd $ITEM_PATH/usr/local/bin
++#cp $PROJ_PATH/build/bin/stunnel $ITEM_PATH/usr/local/bin
+ cp $PROJ_PATH/build/bin/rmm_post_install $ITEM_PATH/usr/local/bin
+ cp $PROJ_PATH/build/bin/rmm_super $ITEM_PATH/usr/local/bin
+ 
+@@ -90,7 +90,7 @@
+ 
+ 
+ cp $PSME_PROJ_PATH/bin/psme-rest-server               $ITEM_PATH/usr/local/bin
+-cp $PSME_PROJ_PATH/bin/psme-network-stubs             $ITEM_PATH/usr/local/bin
++#cp $PSME_PROJ_PATH/bin/psme-network-stubs             $ITEM_PATH/usr/local/bin
+ cp $PSME_PROJ_PATH/bin/psme-chassis                   $ITEM_PATH/usr/local/bin
+ cp $PSME_PROJ_PATH/lib/libjsoncpp.so.999              $ITEM_PATH/usr/local/lib
+ cp $PSME_PROJ_PATH/lib/libjsonrpccpp-server.so.999    $ITEM_PATH/usr/local/lib
+@@ -141,13 +141,13 @@
+ $CUR_PATH/modify_ver.sh $ITEM_PATH
+ 
+ #5
+-ITEM_PATH=$CUR_PATH/../net-snmp
++#ITEM_PATH=$CUR_PATH/../net-snmp
+ 
+ mkdir -p $ITEM_PATH/usr/local/bin
+ del_file $ITEM_PATH/usr/local/bin/
+ 
+-mkdir -p $ITEM_PATH/etc/snmp
+-del_file $ITEM_PATH/etc/snmp/
++#mkdir -p $ITEM_PATH/etc/snmp
++#del_file $ITEM_PATH/etc/snmp/
+ 
+ mkdir -p $ITEM_PATH/usr/local/lib
+ del_file $ITEM_PATH/usr/local/lib/
+@@ -155,10 +155,10 @@
+ #mkdir -p $ITEM_PATH/usr/local/share/snmp/mibs
+ #del_file $ITEM_PATH/usr/local/share/snmp/mibs
+ 
+-cp $PROJ_PATH/build/lib/libnet* $ITEM_PATH/usr/local/lib
+-cp $PROJ_PATH/build/bin/snmp* $ITEM_PATH/usr/local/bin/
++#cp $PROJ_PATH/build/lib/libnet* $ITEM_PATH/usr/local/lib
++#cp $PROJ_PATH/build/bin/snmp* $ITEM_PATH/usr/local/bin/
+ #copy snmp config file
+-cp $PROJ_PATH/src/core/snmp_subagentd/config/*.conf $ITEM_PATH/etc/snmp/
++#cp $PROJ_PATH/src/core/snmp_subagentd/config/*.conf $ITEM_PATH/etc/snmp/
+ #copy mibs file
+ #cp $PROJ_PATH/src/core/snmp_subagentd/*.txt $ITEM_PATH/usr/local/share/snmp/mibs/
+ #cp $PROJ_PATH/src/dep/snmp/net-snmp-5.7.3/mibs/*.txt $ITEM_PATH/usr/local/share/snmp/mibs/
