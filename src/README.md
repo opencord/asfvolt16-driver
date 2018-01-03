@@ -13,12 +13,12 @@ Contact Dave Baron at Broadcom for details on accessing these files.  dave.baron
 
 | Component     | Version | Filename                        |
 | ------------- |-------- | -----                           |
-| BAL/Maple SDK | 2.4.3.6 | SW-BCM68620_2_4_3_6.zip         |
+| BAL/Maple SDK | 2.4.7.12 | SW-BCM68620_2_4_7_12.zip         |
 | Qumran SDK    | 6.5.7   | sdk-all-6.5.7.tar.gz            |
 
-| Component          | Filename                           |MD5|
+| Component          | Filename                           |SHA1|
 | -------------      | -----                              |---|
-| ASFvOLT16 BAL patch| ACCTON_BAL_2.4.3.6-V201710131639.patch | b7d1bff32c5ed7b46cb48ba36ff9ad84 |
+| ASFvOLT16 BAL patch| ACCTON_BAL_2.4.7.12-V201712061142.patch | e2d2e7924cbc73e60d29262f4b905cbe982758ae |
 
 The following **open-source** components are required to build the voltha_bal_driver.
 
@@ -57,9 +57,9 @@ Any of the following variables can be overridden to suit the local build environ
 ```
 ONL_TOPDIR=/aux/OpenNetworkLinux
 BALSRC_RELEASE=bal_src_release
-BALSRC_ZIPNAME=SW-BCM68620_2_4_3_6.zip
+BALSRC_ZIPNAME=SW-BCM68620_2_4_7_12.zip
 SWISDK_TARNAME=sdk-all-6.5.7
-PATCH_FILENAME=ACCTON_BAL_2.4.3.6-V201710131639.patch
+PATCH_FILENAME=ACCTON_BAL_2.4.7.12-V201712061142.patch
 BROADCOM_DOWNLOAD_DIR=/home/user/broadcom/download
 EDGECORE_DOWNLOAD_DIR=/home/user/edgecore/download
 ```
@@ -113,7 +113,7 @@ The tarball containing the packaged voltha_bal_driver can be found in ${ASFDRVR_
 
 ```
     > ls ${ONL_TOPDIR}/asfdrvr-package-dir/
-asfvolt16-voltha-bal-201710051908.tgz  broadcom  opt
+asfvolt16-voltha-bal-<timestamp>.tgz  broadcom  opt
 ```
 
 ### Install `voltha_bal_driver` BAL release tarball
@@ -121,7 +121,7 @@ asfvolt16-voltha-bal-201710051908.tgz  broadcom  opt
 Transfer BAL release tarball to ASFvOLT16:
 
 ```
-    > cp asfdrvr-package-dir/asfvolt16-voltha-bal-201710231906.tgz  root@<ASFvOLT16_IP>:.
+    > cp asfdrvr-package-dir/asfvolt16-voltha-bal-<timestamp>.tgz  root@<ASFvOLT16_IP>:.
 ```
 
 Install release tarball on ASFvOLT16:
@@ -137,7 +137,7 @@ Install release tarball on ASFvOLT16:
     root@localhost:~# cd /
     root@localhost:/# mv /broadcom /broadcom.prev
     root@localhost:/# mv /opt/bcm68620/ /opt/bcm68620.prev
-    root@localhost:/# tar zxf ~/asfvolt16-voltha-bal-201710231906.tgz
+    root@localhost:/# tar zxf ~/asfvolt16-voltha-bal-<timestamp>.tgz
     root@localhost:/# tail -5 /etc/rc.local # ensure rc.local has the following lines
     # By default this script does nothing.
 

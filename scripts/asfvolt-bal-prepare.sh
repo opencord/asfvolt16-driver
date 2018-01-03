@@ -22,7 +22,7 @@ set -e
 # override shell variables to match custom local build environment
 : ${ONL_TOPDIR:=`pwd`}
 : ${BALSRC_RELEASE:=bal_src_release}
-: ${BALSRC_ZIPNAME:=SW-BCM68620_2_4_3_6.zip}
+: ${BALSRC_ZIPNAME:=SW-BCM68620_2_4_7_12.zip}
 : ${SWISDK_TARNAME:=sdk-all-6.5.7}
 
 : ${BROADCOM_DOWNLOAD_DIR:=${HOME}/broadcom/download}  # directory containing SW-BCM68620_2_4_x.zip
