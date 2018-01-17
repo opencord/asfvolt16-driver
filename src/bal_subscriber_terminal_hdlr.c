@@ -222,26 +222,31 @@ uint32_t bal_subscriber_terminal_cfg_clear(BalSubscriberTerminalKey *terminal_ke
     bcmbal_subscriber_terminal_cfg cfg;
     bcmbal_subscriber_terminal_key key = { };
 
-    ASFVOLT_LOG(ASFVOLT_INFO,
-                    "Processing subscriber terminal cfg clear: %d",
-                     terminal_key->sub_term_id);
+    ASFVOLT_LOG(ASFVOLT_INFO, "Processing subscriber terminal cfg clear for sub_term_id = %d and intf_id = %d",
+                              terminal_key->sub_term_id,
+                              terminal_key->intf_id);
 
-    if (terminal_key->has_sub_term_id &&
-                    terminal_key->has_intf_id)
-    {
-        key.sub_term_id = terminal_key->sub_term_id ;
-        key.intf_id = terminal_key->intf_id ;
-    }
-    else
-    {
-       ASFVOLT_LOG(ASFVOLT_ERROR,
-                   "Invalid Key to handle subscriber terminal clear Req.subscriber_terminal_id(%d), Interface ID(%d)",
-                   key.sub_term_id, key.intf_id);
+    key.sub_term_id = terminal_key->sub_term_id ;
+    key.intf_id = terminal_key->intf_id ;
 
-        return BAL_ERRNO__BAL_ERR_PARM;
+    if (0 == key.sub_term_id)
+    {
+            ASFVOLT_LOG(ASFVOLT_ERROR,
+                        "Invalid Key to handle subscriber terminal clear subscriber_terminal_id(%d), Interface ID(%d)",
+                        key.sub_term_id, key.intf_id);
+            return BAL_ERRNO__BAL_ERR_PARM;
     }
+
+    BCMBAL_CFG_INIT(&cfg, subscriber_terminal, key);
 
     err = bcmbal_cfg_clear(DEFAULT_ATERM_ID, &cfg.hdr);
+    if (err != BCM_ERR_OK)
+    {
+       ASFVOLT_LOG(ASFVOLT_ERROR,
+                   "Failed to clear information for BAL subscriber_terminal_id(%d), Interface ID(%d)",
+                   key.sub_term_id, key.intf_id);
+        return BAL_ERRNO__BAL_ERR_INTERNAL;
+    }
     err = BAL_ERRNO__BAL_ERR_OK;
     return err;
 }
