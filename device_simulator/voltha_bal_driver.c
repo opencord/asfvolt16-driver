@@ -16,6 +16,8 @@
 #include <signal.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 #include <sys/time.h>
 #include "bal_msg_type.grpc-c.h"
 #include "bal_osmsg.grpc-c.h"
@@ -24,6 +26,7 @@
 #include "bal_model_types.grpc-c.h"
 #include "bal_errno.grpc-c.h"
 #include "bal.grpc-c.h"
+#include "asfvolt.grpc-c.h"
 
 #ifdef BAL_STUB
 #include "bal_stub.h"
@@ -31,7 +34,6 @@
 #include "asfvolt16_driver.h"
 #endif
 
-#include <unistd.h>
 #include <sys/reboot.h>
 #include "bal_indications_queue.h"
 
@@ -50,6 +52,9 @@ static void sigint_handler (int x) {
    grpc_c_server_destroy(test_server);
    exit(0);
 }
+
+/*MACRO Definitions*/
+#define ASFVOLT_FIELD_LEN 100
 
 void is_grpc_write_pending(int return_value)
 {
@@ -159,6 +164,94 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
    sleep(30);  /* allow system to shutdown gracefully */
    sync();  /* force shutdown if graceful did not work */
    reboot(RB_AUTOBOOT);
+}
+
+/*
+This function reads the specified field from the 'onldump -o' command.
+If the field was successfully read, it returns the field value.
+If it failed to read the field, then null charecter is returned
+*/
+char* asfvolt_read_sysinfo(char* field_name, char* field_val)
+{
+   FILE *fp;
+   /* Prepare the command*/
+   char command[150];
+
+   snprintf(command, sizeof command, "onlpdump -o | perl -ne 'print $1 if /%s: (\\S+)/'", field_name);
+   /* Open the command for reading. */
+   fp = popen(command, "r");
+   if (fp == NULL) {
+       /*The client has to check for a Null mac address in this case*/
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to query the mac address");
+       return field_val;
+   }
+
+   /*Read the field value*/
+   if (fp) {
+       fread(field_val, ASFVOLT_FIELD_LEN, 1, fp);
+       pclose(fp);
+   }
+   return field_val;
+}
+
+/*
+ * This functions gets invoked whenever AsfvoltGetSystemInfo RPC gets called
+ */
+void asfvolt__asfvolt_get_system_info_cb(grpc_c_context_t *context)
+{
+   BalDefault *dummy;
+   AsfSystemInfo asf_system_info;
+   char product_name[ASFVOLT_FIELD_LEN] = "\0";
+   char part_num[ASFVOLT_FIELD_LEN] = "\0";
+   char serial_num[ASFVOLT_FIELD_LEN] = "\0";
+   char mac_address[ASFVOLT_FIELD_LEN] = "\0";
+   char mac_range[ASFVOLT_FIELD_LEN] = "\0";
+   char manufacturer[ASFVOLT_FIELD_LEN] = "\0";
+   char manufacturer_date[ASFVOLT_FIELD_LEN] = "\0";
+   char vendor[ASFVOLT_FIELD_LEN] = "\0";
+   char platform_name[ASFVOLT_FIELD_LEN] = "\0";
+   char label_revision[ASFVOLT_FIELD_LEN] = "\0";
+   char coutry_code[ASFVOLT_FIELD_LEN] = "\0";
+   char diag_version[ASFVOLT_FIELD_LEN] = "\0";
+   char onie_version[ASFVOLT_FIELD_LEN] = "\0";
+   int ret_val;
+
+   if (context->gcc_payload) {
+	context->gcc_stream->read(context, (void **)&dummy, 0);
+   }
+
+   asf_system_info__init(&asf_system_info);
+
+   asf_system_info.product_name = asfvolt_read_sysinfo("Product Name", product_name);
+   asf_system_info.part_num = asfvolt_read_sysinfo("Part Number", part_num);
+   asf_system_info.serial_num = asfvolt_read_sysinfo("Serial Number", serial_num);
+   asf_system_info.mac_address = asfvolt_read_sysinfo("MAC", mac_address);
+   asf_system_info.mac_range = asfvolt_read_sysinfo("MAC Range", mac_range);
+   asf_system_info.manufacturer = asfvolt_read_sysinfo("Manufacturer", manufacturer);
+   asf_system_info.manufacture_date = asfvolt_read_sysinfo("Manufacture Date", manufacturer_date);
+   asf_system_info.vendor = asfvolt_read_sysinfo("Vendor", vendor);
+   asf_system_info.platform_name = asfvolt_read_sysinfo("Platform Name", platform_name);
+   asf_system_info.label_revision = asfvolt_read_sysinfo("Label Revision", label_revision);
+   asf_system_info.country_code = asfvolt_read_sysinfo("Country Code", coutry_code);
+   asf_system_info.diag_version = asfvolt_read_sysinfo("Diag Version", diag_version);
+   asf_system_info.onie_version = asfvolt_read_sysinfo("ONIE Version", onie_version);
+
+   /*
+    * Write reply back to the client
+    */
+   ret_val = context->gcc_stream->write(context, &asf_system_info, -1);
+   is_grpc_write_pending(ret_val);
+
+   grpc_c_status_t status;
+   status.gcs_code = 0;
+
+   /*
+     * Finish response for RPC
+   */
+   if (context->gcc_stream->finish(context, &status))
+   {
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
+   }
 }
 
 /*
@@ -994,6 +1087,7 @@ int main (int argc, char **argv)
    ASFVOLT_LOG(ASFVOLT_INFO, "voltha_bal_driver running.....");
    bal__service_init(test_server);
    bal_get_ind__service_init(test_server);
+   asfvolt__service_init(test_server);
 
    /*
     * Start server
@@ -1012,4 +1106,5 @@ int main (int argc, char **argv)
    /* code added for example Makefile to compile grpc-c along with edgecore driver */
    bal__service_init(server);
    bal_get_ind__service_init(server);
+   asfvolt__service_init(server);
 }
