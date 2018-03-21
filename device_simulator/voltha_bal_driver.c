@@ -15,6 +15,7 @@
 */
 #include <signal.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
@@ -54,7 +55,7 @@ static void sigint_handler (int x) {
 }
 
 /*MACRO Definitions*/
-#define ASFVOLT_FIELD_LEN 100
+#define ASFVOLT_FIELD_LEN 200
 
 void is_grpc_write_pending(int return_value)
 {
@@ -240,6 +241,76 @@ void asfvolt__asfvolt_get_system_info_cb(grpc_c_context_t *context)
     * Write reply back to the client
     */
    ret_val = context->gcc_stream->write(context, &asf_system_info, -1);
+   is_grpc_write_pending(ret_val);
+
+   grpc_c_status_t status;
+   status.gcs_code = 0;
+
+   /*
+     * Finish response for RPC
+   */
+   if (context->gcc_stream->finish(context, &status))
+   {
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
+   }
+}
+
+/*
+This function reads the SFP presence map information from 'onlpdump -p' system command
+and returns a bitmap with the presence information.
+*/
+unsigned int asfvolt_read_sfp_presence_bitmap(void)
+{
+   char command[150];
+   char sfp_presence_output[ASFVOLT_FIELD_LEN];
+   unsigned int sfp_presence_bitmap = 0;
+   char delim[2] = " ";
+   char  *field = NULL;
+   FILE *fp;
+   snprintf(command, sizeof command, "onlpdump -p | perl -ne 'print $1 if /Presence: ([0-9 ]+)/'");
+   /* Open the command for reading. */
+   fp = popen(command, "r");
+   if (fp == NULL) {
+       /*The client has to check for a Null mac address in this case*/
+       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to query the sfp presence map");
+       return sfp_presence_bitmap;
+   }
+
+   /*Read the field value*/
+   fread(sfp_presence_output, ASFVOLT_FIELD_LEN, 1, fp);
+   pclose(fp);
+
+   field = strtok(sfp_presence_output, delim);
+   while (field != NULL) {
+      sfp_presence_bitmap |= (1 << atoi(field));
+      field = strtok(NULL, delim);
+   }
+
+   return sfp_presence_bitmap;
+}
+
+/*
+ * This functions gets invoked whenever AsfvoltGetSfpPresenceBitmap RPC gets called
+ */
+void asfvolt__asfvolt_get_sfp_presence_bitmap_cb(grpc_c_context_t *context)
+{
+   BalDefault *dummy;
+   AsfSfpPresenceBitmap sfp_presence_bitmap;
+   int ret_val;
+
+   if (context->gcc_payload) {
+	context->gcc_stream->read(context, (void **)&dummy, 0);
+   }
+
+   asf_sfp_presence_bitmap__init(&sfp_presence_bitmap);
+
+   sfp_presence_bitmap.bitmap = asfvolt_read_sfp_presence_bitmap();
+   sfp_presence_bitmap.has_bitmap = true;
+
+   /*
+    * Write reply back to the client
+    */
+   ret_val = context->gcc_stream->write(context, &sfp_presence_bitmap, -1);
    is_grpc_write_pending(ret_val);
 
    grpc_c_status_t status;
