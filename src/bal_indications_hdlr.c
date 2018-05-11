@@ -1366,7 +1366,8 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
 		      sub_ind->data.serial_number.vendor_id[2],
 		      sub_ind->data.serial_number.vendor_id[3]);
       balIndCfg->terminal_ind->data->serial_number->vendor_id = vendor_id;
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor id is %s", balIndCfg->terminal_ind->data->serial_number->vendor_id);
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor id is %s",
+                  balIndCfg->terminal_ind->data->serial_number->vendor_id);
       char *vendor_specific = malloc(sizeof(char)*MAX_CHAR_LENGTH);
       memset(vendor_specific, 0, MAX_CHAR_LENGTH);
       sprintf(vendor_specific,"%1X%1X%1X%1X%1X%1X%1X%1X",
@@ -1379,7 +1380,10 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
 		      sub_ind->data.serial_number.vendor_specific[3]>>4 & 0x0f,
 		      sub_ind->data.serial_number.vendor_specific[3] & 0x0f);
       balIndCfg->terminal_ind->data->serial_number->vendor_specific = vendor_specific;
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor specific is %s", balIndCfg->terminal_ind->data->serial_number->vendor_specific);
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor specific is %s",
+                  balIndCfg->terminal_ind->data->serial_number->vendor_specific);
+      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Registration ID is %s",
+                  balIndCfg->terminal_ind->data->registration_id);
 
       BalIdList *balAggportList;
       balAggportList = malloc(sizeof(BalIdList));

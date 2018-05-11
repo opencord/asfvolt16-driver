@@ -36,62 +36,59 @@ uint32_t bal_interface_cfg_set(BalInterfaceCfg *interface_cfg)
     intf_key.intf_id = interface_cfg->key->intf_id;
     intf_key.intf_type = interface_cfg->key->intf_type;
 
+    ASFVOLT_LOG(ASFVOLT_DEBUG, "Setting Interface ID(%d) Interface Type(%d) to Admin state(%d)",
+                                intf_key.intf_id, intf_key.intf_type,
+                                interface_cfg->data->admin_state);
 
     /*
      * Set the key in the interface object and initialize the object itself
      */
     BCMBAL_CFG_INIT(&interface_obj, interface, intf_key);
 
-    bcmbal_cfg_get(DEFAULT_ATERM_ID, &(interface_obj.hdr));
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, admin_state, BCMOS_TRUE,
+                         interface_cfg->data->admin_state);
 
-    if(BCMBAL_STATUS_UP != ((bcmbal_interface_cfg *)&interface_obj.hdr)->data.oper_status)
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, min_data_agg_port_id,
+                         interface_cfg->data->has_min_data_svc_port_id,
+                         interface_cfg->data->min_data_agg_port_id);
+
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, min_data_svc_port_id,
+                         interface_cfg->data->has_min_data_svc_port_id,
+                         interface_cfg->data->min_data_svc_port_id);
+
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, transceiver_type,
+                         BCMOS_TRUE,
+                         interface_cfg->data->transceiver_type);
+    ASFVOLT_LOG(ASFVOLT_INFO, "Setting transceiver_type to : %d", interface_cfg->data->transceiver_type);
+
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, ds_miss_mode,
+                         interface_cfg->data->has_ds_miss_mode,
+                         interface_cfg->data->ds_miss_mode);
+
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, mtu,
+                         interface_cfg->data->has_mtu,
+                         interface_cfg->data->mtu);
+
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, flow_control,
+                         interface_cfg->data->has_flow_control,
+                         interface_cfg->data->flow_control);
+
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, ds_tm,
+                         interface_cfg->data->has_ds_tm,
+                         interface_cfg->data->ds_tm);
+
+    ASFVOLT_CFG_PROP_SET(interface_obj, interface, us_tm,
+                         interface_cfg->data->has_us_tm,
+                         interface_cfg->data->us_tm);
+
+    ASFVOLT_LOG(ASFVOLT_INFO, "Bringing up the interface No: %d", intf_key.intf_id);
+
+    err = bcmbal_cfg_set(DEFAULT_ATERM_ID, &(interface_obj.hdr));
+
+    if(BCM_ERR_OK != err)
     {
-        BCMBAL_CFG_INIT(&interface_obj, interface, intf_key);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, admin_state, BCMOS_TRUE, BCMBAL_STATE_UP);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, min_data_agg_port_id,
-                               interface_cfg->data->has_min_data_svc_port_id,
-                               interface_cfg->data->min_data_agg_port_id);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, min_data_svc_port_id,
-                               interface_cfg->data->has_min_data_svc_port_id,
-                               interface_cfg->data->min_data_svc_port_id);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, transceiver_type,
-                               BCMOS_TRUE,
-                               interface_cfg->data->transceiver_type);
-        ASFVOLT_LOG(ASFVOLT_INFO, "Setting transceiver_type to : %d", interface_cfg->data->transceiver_type);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, ds_miss_mode,
-                               interface_cfg->data->has_ds_miss_mode,
-                               interface_cfg->data->ds_miss_mode);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, mtu,
-                               interface_cfg->data->has_mtu,
-                               interface_cfg->data->mtu);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, flow_control,
-                               interface_cfg->data->has_flow_control,
-                               interface_cfg->data->flow_control);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, ds_tm,
-                               interface_cfg->data->has_ds_tm,
-                               interface_cfg->data->ds_tm);
-
-        ASFVOLT_CFG_PROP_SET(interface_obj, interface, us_tm,
-                               interface_cfg->data->has_us_tm,
-                               interface_cfg->data->us_tm);
-
-        ASFVOLT_LOG(ASFVOLT_INFO, "Bringing up the interface No: %d", intf_key.intf_id);
-
-        err = bcmbal_cfg_set(DEFAULT_ATERM_ID, &(interface_obj.hdr));
-
-        if(BCM_ERR_OK != err)
-        {
-            ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the interface object to ADMIN-UP");
-            return BAL_ERRNO__BAL_ERR_INTERNAL;
-        }
+        ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to configure the interface object to ADMIN-UP");
+        return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
     ASFVOLT_LOG(ASFVOLT_DEBUG, "Set Interface configuration sent to OLT.Interface ID(%d) Interface Type(%d)",
                                 intf_key.intf_id, intf_key.intf_type);

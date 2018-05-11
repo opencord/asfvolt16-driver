@@ -42,7 +42,8 @@ uint32_t bal_access_terminal_cfg_set(BalAccessTerminalCfg *access_term_cfg)
     BCMBAL_CFG_INIT(&acc_term_obj, access_terminal, key);
 
     /* decode API parameters from CLI */
-    ASFVOLT_CFG_PROP_SET(acc_term_obj, access_terminal, admin_state, BCMOS_TRUE, BCMBAL_STATE_UP);
+    ASFVOLT_CFG_PROP_SET(acc_term_obj, access_terminal, admin_state, BCMOS_TRUE,
+                         access_term_cfg->data->admin_state);
 
     err = bcmbal_cfg_set(DEFAULT_ATERM_ID, &(acc_term_obj.hdr));
 
@@ -52,7 +53,7 @@ uint32_t bal_access_terminal_cfg_set(BalAccessTerminalCfg *access_term_cfg)
         return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO, "Access Terminal UP configuration sent to OLT");
+    ASFVOLT_LOG(ASFVOLT_INFO, "Access Terminal %d sent to OLT", access_term_cfg->data->admin_state);
     return BAL_ERRNO__BAL_ERR_OK;
 }
 

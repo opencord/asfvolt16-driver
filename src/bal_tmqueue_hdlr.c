@@ -54,24 +54,26 @@ uint32_t bal_tm_queue_cfg_set(BalTmQueueCfg *tm_queue_cfg)
     /* init the API struct */
     BCMBAL_CFG_INIT(&tm_queue_obj, tm_queue, key);
 
-    /* decode API parameters from GRPC */
-    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, priority,
-                         tm_queue_cfg->data->has_priority,
-                         tm_queue_cfg->data->priority);
-    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, weight,
-                         tm_queue_cfg->data->has_weight,
-                         tm_queue_cfg->data->weight);
-    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, creation_mode,
-                         tm_queue_cfg->data->has_creation_mode,
-                         tm_queue_cfg->data->creation_mode);
-    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, ref_count,
-                         tm_queue_cfg->data->has_ref_count,
-                         tm_queue_cfg->data->ref_count);
-
+    if (NULL != tm_queue_cfg->data)
+    {
+	    /* decode API parameters from GRPC */
+	    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, priority,
+			    tm_queue_cfg->data->has_priority,
+			    tm_queue_cfg->data->priority);
+	    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, weight,
+			    tm_queue_cfg->data->has_weight,
+			    tm_queue_cfg->data->weight);
+	    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, creation_mode,
+			    tm_queue_cfg->data->has_creation_mode,
+			    tm_queue_cfg->data->creation_mode);
+	    ASFVOLT_CFG_PROP_SET(tm_queue_obj, tm_queue, ref_count,
+			    tm_queue_cfg->data->has_ref_count,
+			    tm_queue_cfg->data->ref_count);
+    }
     /* rating/shaping */
     BalTmShaping *balShaping = (BalTmShaping *)tm_queue_cfg->data->rate;
     bcmbal_tm_shaping val = {};
-    if (balShaping->has_presence_mask)
+    if ((NULL != balShaping) && (balShaping->has_presence_mask))
     {
        val.presence_mask = balShaping->presence_mask;
        if (balShaping->has_cir)
@@ -92,7 +94,7 @@ uint32_t bal_tm_queue_cfg_set(BalTmQueueCfg *tm_queue_cfg)
     /* bac - Buffer addmission Control */
     BalTmBac *balBac = (BalTmBac *)tm_queue_cfg->data->bac;
     bcmbal_tm_bac valBac = {};
-    if(balBac->has_type)
+    if((NULL != balBac) && (balBac->has_type))
     {
        valBac.type = balBac->type;
        switch(valBac.type)
