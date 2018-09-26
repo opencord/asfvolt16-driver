@@ -80,11 +80,11 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
            (balFlows->n_val)*sizeof(bcmbal_flow_id));
     ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, flows, BCMOS_TRUE, valFlows);
 
-    if(tm_group_cfg->data->has_owner)
+    if(tm_group_cfg->data->has_type)
     {
-        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, owner,
-                             tm_group_cfg->data->has_owner,
-                             tm_group_cfg->data->owner);
+        ASFVOLT_CFG_PROP_SET(grp_cfg_obj, group, type,
+                             tm_group_cfg->data->has_type,
+                             tm_group_cfg->data->type);
     }
 
     BalGroupMemberInfoList *balMembers =
@@ -114,45 +114,10 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
              valMembers.val[grp_mem_idx].svc_port_id
                                = balMembers->val[grp_mem_idx]->svc_port_id;
           }
-          if(balMembers->val[grp_mem_idx]->action->has_presence_mask)
+          if(balMembers->val[grp_mem_idx]->has_intf_type)
           {
-             valMembers.val[grp_mem_idx].action.presence_mask
-                     = balMembers->val[grp_mem_idx]->action->presence_mask;
-          }
-          if(balMembers->val[grp_mem_idx]->action->has_cmds_bitmask)
-          {
-             valMembers.val[grp_mem_idx].action.cmds_bitmask
-                     = balMembers->val[grp_mem_idx]->action->cmds_bitmask;
-          }
-          if(balMembers->val[grp_mem_idx]->action->has_o_vid)
-          {
-             valMembers.val[grp_mem_idx].action.o_vid
-                     = balMembers->val[grp_mem_idx]->action->o_vid;
-          }
-          if(balMembers->val[grp_mem_idx]->action->has_o_pbits)
-          {
-             valMembers.val[grp_mem_idx].action.o_pbits
-                     = balMembers->val[grp_mem_idx]->action->o_pbits;
-          }
-          if(balMembers->val[grp_mem_idx]->action->has_o_tpid)
-          {
-             valMembers.val[grp_mem_idx].action.o_tpid
-                     = balMembers->val[grp_mem_idx]->action->o_tpid;
-          }
-          if(balMembers->val[grp_mem_idx]->action->has_i_vid)
-          {
-             valMembers.val[grp_mem_idx].action.i_vid
-                     = balMembers->val[grp_mem_idx]->action->i_vid;
-          }
-          if(balMembers->val[grp_mem_idx]->action->has_i_pbits)
-          {
-             valMembers.val[grp_mem_idx].action.i_pbits
-                     = balMembers->val[grp_mem_idx]->action->i_pbits;
-          }
-          if(balMembers->val[grp_mem_idx]->action->has_i_tpid)
-          {
-             valMembers.val[grp_mem_idx].action.i_tpid
-                     = balMembers->val[grp_mem_idx]->action->i_tpid;
+             valMembers.val[grp_mem_idx].intf_type
+                     = balMembers->val[grp_mem_idx]->intf_type;
           }
           if(balMembers->val[grp_mem_idx]->queue->has_sched_id)
           {
@@ -183,20 +148,19 @@ uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg)
 
 
 /********************************************************************\
- * Function    : bal_group_get_req                              *
- * Description : get the OLT device group cfg                    *
+ * Function    : bal_group_cfg_get                                  *
+ * Description : get the OLT device group cfg                       *
  ********************************************************************/
 
-uint32_t bal_group_cfg_get(BalGroupKey *tm_group_cfg_key,
-                           BalGroupCfg *tm_group_cfg)
+uint32_t bal_group_cfg_get(BalGroupCfg *group_cfg)
 {
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_group_cfg grp_cfg_obj;   /**< declare main API struct */
     bcmbal_group_key key = { };      /**< declare key */
 
-    if(tm_group_cfg_key->has_group_id)
+    if(group_cfg->key->has_group_id)
     {
-       key.group_id = tm_group_cfg_key->group_id;
+       key.group_id = group_cfg->key->group_id;
     }
     else
     {
@@ -222,6 +186,10 @@ uint32_t bal_group_cfg_get(BalGroupKey *tm_group_cfg_key,
 
     ASFVOLT_LOG(ASFVOLT_INFO, "Get Group cfg sent to OLT for Group Id(%d)",
                                key.group_id);
+   
+    memcpy(group_cfg->key, &key, sizeof(BalFlowKey));
+    memcpy(group_cfg->data, &grp_cfg_obj, sizeof(BalFlowCfgData));
+
     return err;
 }
 

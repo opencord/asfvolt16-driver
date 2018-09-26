@@ -22,7 +22,7 @@ set -e
 # override shell variables to match custom local build environment
 : ${ONL_TOPDIR:=`pwd`}
 : ${MAKE_JOBS:=1}
-: ${BALSRC_RELEASE:=bal_src_release}
+: ${BALSRC_RELEASE:=${BROADCOM_DOWNLOAD_DIR}/bal_src_release}
 : ${SWISDK_TARNAME:=sdk-all-6.5.7}
 
 echo ONL_TOPDIR=${ONL_TOPDIR}

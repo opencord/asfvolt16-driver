@@ -4,11 +4,8 @@ bin_PROGRAMS = voltha_bal_driver
 
 HOSTPROG=yes
 
-DEFS += -UBAL_STUB
-
 voltha_bal_driver_SOURCES = \
     voltha_bal_driver.c \
-    bal_stub.c \
     grpc-c.h \
     bal_errno.grpc-c.h bal_indications.grpc-c.h bal_model_types.grpc-c.h \
     bal_obj.grpc-c.h bal.grpc-c.h bal_model_ids.grpc-c.h \
@@ -65,7 +62,7 @@ AM_CFLAGS = \
     -I${EDGECORE}/.
 
 $(BRCM_BAL_LIB):
-	@cp $(BRCM_PATH)/build/core/lib/libbal_api_dist.so .
+	@cp $(BRCM_PATH)/3rdparty/maple/cur/asfvolt16/release/broadcom/libbal_api_dist.so .
 
 $(EDGECORE_DRIV_LIB):
 	@cd $(EDGECORE);make 

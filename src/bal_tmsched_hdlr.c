@@ -98,20 +98,6 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
                  }
               }
               break;
-           case BCMBAL_TM_SCHED_OWNER_TYPE_UNI:
-              if(tmScOwn->uni->has_intf_id)
-              {
-                 valtmScOwn.u.uni.intf_id = tmScOwn->uni->intf_id;
-              }
-              if(tmScOwn->uni->has_sub_term_id)
-              {
-                 valtmScOwn.u.uni.sub_term_id = tmScOwn->uni->sub_term_id;
-              }
-              if(tmScOwn->uni->has_idx)
-              {
-                 valtmScOwn.u.uni.idx = tmScOwn->uni->idx;
-              }
-              break;
            case BCMBAL_TM_SCHED_OWNER_TYPE_VIRTUAL:
               if(tmScOwn->virtual_->has_idx)
               {
@@ -148,10 +134,6 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
        }
        ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sched_parent, BCMOS_TRUE, valSchedPar);
     }
-
-    ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sched_child_type,
-                         tm_sched_cfg->data->has_sched_child_type,
-                         tm_sched_cfg->data->sched_child_type);
 
     /* rating/shaping */
     BalTmShaping *balShaping = (BalTmShaping *)tm_sched_cfg->data->rate;
@@ -250,7 +232,7 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
     }
 
     /* Subsidiary queues */
-    BalIdList *balQueues = (BalIdList *)tm_sched_cfg->data->queues;
+    BalTmQueueIdList *balQueues = (BalTmQueueIdList *)tm_sched_cfg->data->queues;
     bcmbal_tm_queue_id_list_u8 valQueues = {};
     if(balQueues != NULL && balQueues->n_val)
     {
@@ -264,11 +246,11 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
        }
        memcpy((void *)valQueues.val, (const void *)balQueues->val,
               (balQueues->n_val)*sizeof(uint32_t));
-       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, queues, BCMOS_TRUE, valQueues);
+       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, queue_list, BCMOS_TRUE, valQueues);
     }
 
     /* Subsidiary schedulers */
-    BalIdList *balSubScheds = (BalIdList *)tm_sched_cfg->data->sub_scheds;
+    BalTmSchedIdList *balSubScheds = (BalTmSchedIdList *)tm_sched_cfg->data->sub_scheds;
     bcmbal_tm_sched_id_list_u8 valSubScheds = {};
     if(balSubScheds != NULL && balSubScheds->n_val)
     {
@@ -282,7 +264,7 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
        }
        memcpy((void *)valSubScheds.val, (const void *)balSubScheds->val,
               (balSubScheds->n_val)*sizeof(uint32_t));
-       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sub_scheds, BCMOS_TRUE, valSubScheds);
+       ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, sub_sched_list, BCMOS_TRUE, valSubScheds);
     }
 
     ASFVOLT_CFG_PROP_SET(tm_sched_obj, tm_sched, num_priorities,
@@ -308,25 +290,14 @@ uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg)
  * Description : get the OLT device tm queue configuration          *
  ********************************************************************/
 
-uint32_t bal_tm_sched_cfg_get(BalTmSchedKey *tm_sched_key, BalTmSchedCfg *tm_sched_cfg)
+uint32_t bal_tm_sched_cfg_get(BalTmSchedCfg *tm_sched_cfg)
 {
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_tm_sched_cfg tm_sched_obj;   /**< declare main API struct */
     bcmbal_tm_sched_key key = { };      /**< declare key */
 
-    if((tm_sched_cfg->key->has_dir) && (tm_sched_cfg->key->has_id))
-    {
-       key.dir = tm_sched_cfg->key->dir;
-       key.id = tm_sched_cfg->key->id;
-    }
-    else
-    {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the tm schedule cfg(OLT): Missing Key values "
-                                  "Received key values Sched-Dir(%d), Sched-Id(%d)",
-                                   tm_sched_cfg->key->dir, tm_sched_cfg->key->id);
-       return BAL_ERRNO__BAL_ERR_NOENT;
-    }
-
+    key.dir = tm_sched_cfg->key->dir;
+    key.id = tm_sched_cfg->key->id;
 
     ASFVOLT_LOG(ASFVOLT_DEBUG, "Gem tm scheduler cfg (for OLT) starts");
 
@@ -346,6 +317,10 @@ uint32_t bal_tm_sched_cfg_get(BalTmSchedKey *tm_sched_key, BalTmSchedCfg *tm_sch
 
     ASFVOLT_LOG(ASFVOLT_INFO, "Get tm scheduler cfg sent to OLT. "
                               "Sched ID(%d) Sched Dir(%d)", key.id, key.dir);
+
+    memcpy(tm_sched_cfg->key, &key, sizeof(BalTmSchedKey));
+    memcpy(tm_sched_cfg->data, &tm_sched_obj, sizeof(BalTmSchedCfgData));
+
     return err;
 }
 

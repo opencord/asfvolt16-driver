@@ -15,7 +15,6 @@
 */
 
 extern uint32_t bal_group_cfg_set(BalGroupCfg *tm_group_cfg);
-extern uint32_t bal_group_cfg_get(BalGroupKey *tm_group_cfg_key,
-                                  BalGroupCfg *tm_group_cfg);
+extern uint32_t bal_group_cfg_get(BalGroupCfg *tm_group_cfg);
 extern uint32_t bal_group_cfg_clear(BalGroupKey *tm_group_cfg_key);
 extern bcmos_errno bal_group_cfg_indication_cb(bcmbal_obj *obj);

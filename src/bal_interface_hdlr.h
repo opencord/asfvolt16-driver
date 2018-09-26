@@ -15,7 +15,6 @@
 */
 
 extern uint32_t bal_interface_cfg_set(BalInterfaceCfg *interface_cfg);
-extern uint32_t bal_interface_cfg_get(BalInterfaceKey *interface_cfg_key,
-                                      BalInterfaceCfg *interface_cfg);
+extern uint32_t bal_interface_cfg_get(BalInterfaceCfg *interface_cfg);
 extern uint32_t bal_interface_cfg_clear(BalInterfaceKey *interface_cfg_key);
 extern bcmos_errno bal_interface_indication_cb(bcmbal_obj *obj);

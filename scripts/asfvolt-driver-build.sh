@@ -23,12 +23,12 @@ ASFVOLT_REPO_NAME=asfvolt16-driver
 
 # override shell variables to match custom local build environment
 : ${ONL_TOPDIR:=`pwd`}
-: ${BALSRC_RELEASE=bal_src_release}
-: ${VOLTHA_TOPDIR:=${HOME}/voltha/incubator/voltha}
-: ${BALSRC_TOPDIR:=${ONL_TOPDIR}/${BALSRC_RELEASE}/bal_release}
-: ${ASFSRC_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/src}
-: ${DEVSIM_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/device_simulator}
-: ${PATCHF_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/patches}
+: ${BALSRC_RELEASE=${BROADCOM_DOWNLOAD_DIR}/bal_src_release}
+: ${VOLTHA_TOPDIR:=${HOME}/voltha}
+: ${BALSRC_TOPDIR:=${BALSRC_RELEASE}/bal_release}
+: ${ASFSRC_TOPDIR:=${EDGECORE_DOWNLOAD_DIR}/${ASFVOLT_REPO_NAME}/src}
+: ${PATCHF_TOPDIR:=${EDGECORE_DOWNLOAD_DIR}/${ASFVOLT_REPO_NAME}/patches}
+: ${GRPC_C_PATH:=${EDGECORE_DOWNLOAD_DIR}/grpc-c}
 
 echo ONL_TOPDIR=${ONL_TOPDIR}
 echo MAKE_JOBS=${MAKE_JOBS}
@@ -36,7 +36,6 @@ echo BALSRC_RELEASE=${BALSRC_RELEASE}
 echo VOLTHA_TOPDIR=${VOLTHA_TOPDIR}
 echo BALSRC_TOPDIR=${BALSRC_TOPDIR}
 echo ASFSRC_TOPDIR=${ASFSRC_TOPDIR}
-echo DEVSIM_TOPDIR=${DEVSIM_TOPDIR}
 echo PATCHF_TOPDIR=${PATCHF_TOPDIR}
 
 # archived ZIP files from "https://github.com/opennetworkinglab/asfvolt16-driver/tree/master/third_party"
@@ -44,6 +43,8 @@ GRPC_ARCH=ed7d06af3eef1c27f10328c73b3ae3ab10d72b10
 GRPC_C_ARCH=be82ab1605717f33e2e0d3038996ea46d9efe25e
 PROTOBUF_ARCH=703cd8e11c8d34283d4c8bf869c61866e8211c9d
 PROTOBUF_C_ARCH=6a4f9a9a67c06769aaa9f65e8f89a56483271f5a
+
+cd ${EDGECORE_DOWNLOAD_DIR}
 
 # Note: removes existing directories: grpc, protobuf
 rm -rf grpc protobuf grpc-* protobuf-*
@@ -56,6 +57,7 @@ rm -rf grpc protobuf grpc-* protobuf-*
 
 #steps to install grpc
 #   - Download as zip "grpc", "grpc-c", "protobuf" and "protobuf-c" from "https://github.com/opennetworkinglab/asfvolt16-driver/tree/master/third_party"
+#comment the below 4 lines and download manually in case of errors
 wget https://github.com/grpc/grpc/archive/${GRPC_ARCH}.zip
 wget https://github.com/Juniper/grpc-c/archive/${GRPC_C_ARCH}.zip
 wget https://github.com/google/protobuf/archive/${PROTOBUF_ARCH}.zip
@@ -86,7 +88,7 @@ rm -rf protobuf-c-${PROTOBUF_C_ARCH}
 #  - ./configure
 #  - make
 #  - sudo make install
-cd ${ONL_TOPDIR}/grpc/thirdparty/protobuf
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc/thirdparty/protobuf
 ./autogen.sh
 ./configure
 make --jobs=${MAKE_JOBS}
@@ -97,7 +99,7 @@ sudo make install
 # - make
 # - sudo make install
 
-cd ${ONL_TOPDIR}/grpc
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc
 export LD_LIBRARY_PATH=/usr/local/lib
 make --jobs=${MAKE_JOBS}
 sudo make install
@@ -109,7 +111,7 @@ sudo make install
 #- make
 #- sudo make install
 
-cd ${ONL_TOPDIR}/grpc-c/third_party/protobuf-c
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc-c/third_party/protobuf-c
 ./autogen.sh
 ./configure
 export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/protobuf
@@ -118,7 +120,7 @@ sudo make install
 
 #Apply grpc-c patch
 #   - cd ${HOME}/OpenNetworkLinux/grpc-c/
-cd ${ONL_TOPDIR}/grpc-c
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc-c
 #     Patch 1:
 #     Apply patch in following link for grpc-c/lib - "https://github.com/Juniper/grpc-c/commit/353b40cd920cd749ed6cf71f8df17f1d5cf2c89d"
 #     Note:
@@ -130,18 +132,9 @@ patch -p1 -i ${PATCHF_TOPDIR}/grpc-c_compile-error.patch
 #     Apply patch in service.c.patch and client.c.patch
 patch -p1 -i ${PATCHF_TOPDIR}/grpc-c_asfvolt16.patch
 
-#
-#     - cd ${HOME}/OpenNetworkLinux
-#     - cp asfvolt16-driver/device_simulator/Makefile.am grpc-c/examples/
-#     - cp asfvolt16-driver/device_simulator/voltha_bal_driver.c grpc-c/examples/
-#     - cp asfvolt16-driver/device_simulator/bal_stub.c grpc-c/examples/
-#     - cp asfvolt16-driver/device_simulator/bal_stub.h grpc-c/examples/
-#         - Note: Update voltha adaptor IP in bal_stub.c (Is this required? Not clear which variable needs to be updated).
 cd ${ONL_TOPDIR}
-cp ${DEVSIM_TOPDIR}/Makefile.am grpc-c/examples/
-cp ${DEVSIM_TOPDIR}/voltha_bal_driver.c grpc-c/examples/
-cp ${DEVSIM_TOPDIR}/bal_stub.c grpc-c/examples/
-cp ${DEVSIM_TOPDIR}/bal_stub.h grpc-c/examples/
+cp ${ASFSRC_TOPDIR}/Makefile.am ${EDGECORE_DOWNLOAD_DIR}/grpc-c/examples/
+cp ${ASFSRC_TOPDIR}/voltha_bal_driver.c ${EDGECORE_DOWNLOAD_DIR}/grpc-c/examples/
 
 #
 #     - cd ${HOME}/OpenNetworkLinux/grpc-c
@@ -150,7 +143,7 @@ cp ${DEVSIM_TOPDIR}/bal_stub.h grpc-c/examples/
 #     - ../configure
 #     - make
 #     - sudo make install
-cd ${ONL_TOPDIR}/grpc-c
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc-c
 autoreconf --install
 mkdir build && cd build
 ../configure
@@ -162,13 +155,13 @@ sudo make install
 #     - cd ${HOME}/OpenNetworkLinux/grpc-c/
 #     - cp ${HOME}/voltha/voltha/adapters/asfvolt16_olt/protos/* examples/
 #
-cd ${ONL_TOPDIR}/grpc-c
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc-c
 cp ${VOLTHA_TOPDIR}/voltha/adapters/asfvolt16_olt/protos/* examples
 
 #To autogenerate code from proto files:
 #     - cd ${HOME}/OpenNetworkLinux/grpc-c/build/examples
 #     - make autogen
-cd ${ONL_TOPDIR}/grpc-c/build/examples
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc-c/build/examples
 make autogen
 
 #
@@ -176,7 +169,7 @@ make autogen
 #     - cd ${HOME}/OpenNetworkLinux/grpc-c/build/examples
 #     - Note: Remove "-O2" from Makefile
 #     - Note: Set EDGECORE and BRCM_PATH in Makefile
-cd ${ONL_TOPDIR}/grpc-c/build/examples
+cd ${EDGECORE_DOWNLOAD_DIR}/grpc-c/build/examples
 sed -i -e 's/-O2/-O0/g' \
        -e "s:^EDGECORE = /home/asfvolt/shared.*:#&\nEDGECORE = ${ASFSRC_TOPDIR}:" \
        -e "s:^BRCM_PATH = /home/asfvolt/shared.*:#&\nBRCM_PATH = ${BALSRC_TOPDIR}:" \
@@ -184,12 +177,13 @@ sed -i -e 's/-O2/-O0/g' \
 
 pushd ${ASFSRC_TOPDIR}
 sed -i -e "s:^BRDCM_SRC=/home/asfvolt/shared.*:#&\nBRDCM_SRC = ${BALSRC_TOPDIR}:" \
-       -e "s:^GRPC_C_PATH= /home/asfvolt/shared.*:#&\nGRPC_C_PATH = ${ONL_TOPDIR}/grpc-c:" \
-        Makefile
+       -e "s:^GRPC_C_PATH=/home/asfvolt/shared.*:#&\nGRPC_C_PATH = ${GRPC_C_PATH}:" \
+       Makefile
 popd
+
 #```
-#       EDGECORE = ${HOME}/OpenNetworkLinux/asfvolt16-driver/src/
-#       BRCM_PATH = ${HOME}/OpenNetworkLinux/bal_src_release/bal_release
+#       EDGECORE = ${EDGECORE_DOWNLOAD_DIR}asfvolt16-driver/src/
+#       BRCM_PATH = ${BROADCOM_DOWNLOAD_DIR}/bal_src_release/bal_release
 #```
 #     - make clean_all;make
 make clean_all

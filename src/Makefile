@@ -4,8 +4,8 @@ AR=/usr/bin/ar
 
 LIB=libEdgecoreDriver.a
 
-BRDCM_SRC=/home/asfvolt/shared/OpenNetworkLinux/bal_src_release_2.4.3.6/bal_release
-GRPC_C_PATH= /home/asfvolt/shared/OpenNetworkLinux/grpc-c/
+BRDCM_SRC=/home/asfvolt/shared/OpenNetworkLinux/bal_src_release/bal_release
+GRPC_C_PATH=/home/asfvolt/shared/OpenNetworkLinux/grpc-c
 
 GRPC_C_INC= -I$(GRPC_C_PATH)/build/ \
 	-I$(GRPC_C_PATH)/build/examples/ \

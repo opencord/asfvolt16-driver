@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/time.h>
 #include "bal_msg_type.grpc-c.h"
 #include "bal_osmsg.grpc-c.h"
@@ -29,11 +30,7 @@
 #include "bal.grpc-c.h"
 #include "asfvolt.grpc-c.h"
 
-#ifdef BAL_STUB
-#include "bal_stub.h"
-#else
 #include "asfvolt16_driver.h"
-#endif
 
 #include <sys/reboot.h>
 #include "bal_indications_queue.h"
@@ -53,6 +50,7 @@ static void sigint_handler (int x) {
    grpc_c_server_destroy(test_server);
    exit(0);
 }
+static bool is_init_done = false;
 
 /*MACRO Definitions*/
 #define ASFVOLT_FIELD_LEN 200
@@ -93,11 +91,7 @@ void bal__bal_api_heartbeat_cb(grpc_c_context_t *context)
    bal_reboot_state__init(&bal_reboot);
 
    bal_reboot.has_is_reboot = 1;
-#ifndef BAL_STUB
    bal_reboot.is_reboot = is_reboot;
-#else
-   bal_reboot.is_reboot = is_stub_reboot;
-#endif
 
    /*
     * Write reply back to the client
@@ -132,9 +126,9 @@ void bal__bal_api_reboot_cb(grpc_c_context_t *context)
    if (context->gcc_payload)
    {
       context->gcc_stream->read(context, (void **)&read_device, 0);
+      ASFVOLT_LOG(ASFVOLT_INFO, "Bal Server - Reboot : Device ID is %s",read_device->device_id);
    }
 
-   ASFVOLT_LOG(ASFVOLT_INFO, "Bal Server - Reboot : Device ID is %s",read_device->device_id);
 
    /*
     * send it to BAL
@@ -178,7 +172,7 @@ char* asfvolt_read_sysinfo(char* field_name, char* field_val)
    /* Prepare the command*/
    char command[150];
 
-   snprintf(command, sizeof command, "onlpdump -o | perl -ne 'print $1 if /%s: (\\S+)/'", field_name);
+   snprintf(command, sizeof command, "bash -l -c \"onlpdump -s\" | perl -ne 'print $1 if /%s: (\\S+)/'", field_name);
    /* Open the command for reading. */
    fp = popen(command, "r");
    if (fp == NULL) {
@@ -267,7 +261,7 @@ unsigned int asfvolt_read_sfp_presence_bitmap(void)
    char delim[2] = " ";
    char  *field = NULL;
    FILE *fp;
-   snprintf(command, sizeof command, "onlpdump -p | perl -ne 'print $1 if /Presence: ([0-9 ]+)/'");
+   snprintf(command, sizeof command, "bash -l -c \"onlpdump -p\" | perl -ne 'print $1 if /Presence: ([0-9 ]+)/'");
    /* Open the command for reading. */
    fp = popen(command, "r");
    if (fp == NULL) {
@@ -330,7 +324,7 @@ void asfvolt__asfvolt_get_sfp_presence_bitmap_cb(grpc_c_context_t *context)
  */
 void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
 {
-    BalInterfaceKey *read_stats;
+    BalInterfaceKey *read_stats = 0;
     int ret_val;
 
     /*
@@ -338,9 +332,9 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     */
     if (context->gcc_payload) {
        context->gcc_stream->read(context, (void **)&read_stats, 0);
+       ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats :NNI port is %d",read_stats->intf_id);
     }
 
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats :NNI port is %d",read_stats->intf_id);
 
     BalInterfaceStat get_stats;
     memset(&get_stats, 0, sizeof(BalInterfaceStat));
@@ -354,14 +348,11 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     memset(&stat_key, 0, sizeof(BalInterfaceKey));
     bal_interface_key__init(&stat_key);
 
-#ifndef BAL_STUB
     /* Interface Type, Interface ID
        stat_data - Statistics Data */
-    asfvolt16_bal_stats_get(read_stats->intf_type, read_stats->intf_id, &stat_data, &stat_key);
-#else
-    stub_bal_stats_get(&stat_data);
-    ASFVOLT_LOG(ASFVOLT_DEBUG, "Bal Server - Get Stats In BalStubs : Got all the statistics");
-#endif
+    if ((read_stats) && (is_init_done == true)) {
+       asfvolt16_bal_stats_get(read_stats->intf_type, read_stats->intf_id, &stat_data, &stat_key);
+    }
 
     get_stats.data = &stat_data;
     get_stats.key = &stat_key;
@@ -381,23 +372,195 @@ void bal__bal_cfg_stat_get_cb(grpc_c_context_t *context)
     }
 }
 
+void bal_cfg_get__free_mem_sub_term_cfg_get(BalCfg *balCfgRsp)
+{
+   free(balCfgRsp->terminal->data->password);
+   free(balCfgRsp->terminal->data->registration_id);
+   free(balCfgRsp->terminal->data->serial_number->vendor_id);
+   free(balCfgRsp->terminal->data->serial_number->vendor_specific);
+   free(balCfgRsp->terminal->data->serial_number);
+}
+
+void bal_cfg_get__free_mem(BalCfg *balCfgRsp)
+{
+    switch (balCfgRsp->hdr->obj_type)
+	{
+	    case BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL:
+               break;
+
+	    case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
+	       break;
+
+	    case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
+               bal_cfg_get__free_mem_sub_term_cfg_get(balCfgRsp);
+	       break;
+
+	    default:
+	       break;
+	}
+}
+
 /*
  * This functions gets invoked whenever bal RPC gets called
  */
 void bal__bal_cfg_get_cb(grpc_c_context_t *context)
 {
-   BalCfg *get_cfg;
+   BalKey *bal_key = 0;
+   int ret_val;
 
    /*
-    * Read incoming message into get_cfg
+    * Read incoming message into bal_key
     */
    if (context->gcc_payload) {
-      context->gcc_stream->read(context, (void **)&get_cfg, 0);
+      context->gcc_stream->read(context, (void **)&bal_key, 0);
    }
 
-#ifndef BAL_STUB
-   //asfvolt16_bal_cfg_get(key, get_cfg);
-#endif
+   /*
+    * send it to BAL
+    */
+   BalCfg get_cfg_resp;
+   memset(&get_cfg_resp, 0, sizeof(BalCfg));
+   bal_cfg__init(&get_cfg_resp);
+
+   BalObj hdr_cfg;
+   memset(&hdr_cfg, 0, sizeof(BalObj));
+   bal_obj__init(&hdr_cfg);
+   get_cfg_resp.hdr = &hdr_cfg;
+
+   BalCommMsgHdr comm_hdr;
+   memset(&comm_hdr, 0, sizeof(BalCommMsgHdr));
+   bal_comm_msg_hdr__init(&comm_hdr);
+   get_cfg_resp.hdr->comm_hdr = &comm_hdr;
+
+   if (bal_key) {
+      switch(bal_key->hdr->obj_type)
+      {
+	 case BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL:
+	    {
+	       ASFVOLT_LOG(ASFVOLT_ERROR, "Bal Get For Access Terminal Received\n");
+
+	       get_cfg_resp.obj_case = BAL_CFG__OBJ_CFG;
+
+	       get_cfg_resp.hdr->obj_type = BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL;
+
+	       BalAccessTerminalCfg access_term_cfg;
+	       memset(&access_term_cfg, 0, sizeof(BalAccessTerminalCfg));
+	       bal_access_terminal_cfg__init(&access_term_cfg);
+	       get_cfg_resp.cfg = &access_term_cfg;
+
+	       BalAccessTerminalCfgData access_term_cfg_data;
+	       memset(&access_term_cfg_data, 0, sizeof(BalAccessTerminalCfgData));
+	       bal_access_terminal_cfg_data__init(&access_term_cfg_data);
+	       get_cfg_resp.cfg->data = &access_term_cfg_data;
+
+	       BalTopology access_term_cfg_data_topology;
+	       memset(&access_term_cfg_data_topology, 0, sizeof(BalTopology));
+	       bal_topology__init(&access_term_cfg_data_topology);
+	       get_cfg_resp.cfg->data->topology = &access_term_cfg_data_topology;
+
+	       BalSwVersion access_term_cfg_data_sw_version;
+	       memset(&access_term_cfg_data_sw_version, 0, sizeof(BalSwVersion));
+	       bal_sw_version__init(&access_term_cfg_data_sw_version);
+	       get_cfg_resp.cfg->data->sw_version = &access_term_cfg_data_sw_version;
+
+	       BalAccessTerminalKey access_term_key;
+	       memset(&access_term_key, 0, sizeof(BalAccessTerminalKey));
+	       bal_access_terminal_key__init(&access_term_key);
+	       get_cfg_resp.cfg->key = &access_term_key;
+
+	       if (is_init_done == true) {
+		  asfvolt16_bal_cfg_get(&get_cfg_resp);
+	       }
+	    }
+	    break;
+
+	 case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
+	    {
+	       BalInterfaceCfg intf_cfg;
+	       memset(&intf_cfg, 0, sizeof(BalInterfaceCfg));
+	       bal_interface_cfg__init(&intf_cfg);
+	       get_cfg_resp.interface = &intf_cfg;
+
+	       BalInterfaceCfgData intf_cfg_data;
+	       memset(&intf_cfg_data, 0, sizeof(BalInterfaceCfgData));
+	       bal_interface_cfg_data__init(&intf_cfg_data);
+	       get_cfg_resp.interface->data = &intf_cfg_data;
+
+	       BalInterfaceKey intf_key;
+	       memset(&intf_key, 0, sizeof(BalInterfaceKey));
+	       bal_interface_key__init(&intf_key);
+	       get_cfg_resp.interface->key = &intf_key;
+
+	       if (is_init_done == true) {
+		  asfvolt16_bal_cfg_get(&get_cfg_resp);
+	       }
+	    }
+	    break;
+
+	 case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
+	    {
+	       ASFVOLT_LOG(ASFVOLT_ERROR, "Bal Get For Subscriber Terminal Received\n");
+
+	       get_cfg_resp.obj_case = BAL_CFG__OBJ_TERMINAL;
+
+	       get_cfg_resp.hdr->obj_type = BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL;
+
+	       BalSubscriberTerminalCfg sub_term_cfg;
+	       memset(&sub_term_cfg, 0, sizeof(BalSubscriberTerminalCfg));
+	       bal_subscriber_terminal_cfg__init(&sub_term_cfg);
+	       get_cfg_resp.terminal = &sub_term_cfg;
+
+	       BalSubscriberTerminalCfgData sub_term_cfg_data;
+	       memset(&sub_term_cfg_data, 0, sizeof(BalSubscriberTerminalCfgData));
+	       bal_subscriber_terminal_cfg_data__init(&sub_term_cfg_data);
+	       get_cfg_resp.terminal->data = &sub_term_cfg_data;
+
+	       BalSerialNumber serial_number;
+	       memset(&serial_number, 0, sizeof(BalSerialNumber));
+	       bal_serial_number__init(&serial_number);
+	       get_cfg_resp.terminal->data->serial_number = &serial_number;
+
+	       BalSubscriberTerminalKey sub_term_key;
+	       memset(&sub_term_key, 0, sizeof(BalSubscriberTerminalKey));
+	       bal_subscriber_terminal_key__init(&sub_term_key);
+	       get_cfg_resp.terminal->key = &sub_term_key;
+
+	       get_cfg_resp.terminal->key->has_sub_term_id =  true;
+	       get_cfg_resp.terminal->key->sub_term_id =  bal_key->terminal_key->sub_term_id;
+
+	       get_cfg_resp.terminal->key->has_intf_id =  true;
+	       get_cfg_resp.terminal->key->intf_id =  bal_key->terminal_key->intf_id;
+
+	       if (is_init_done == true) { 
+		  asfvolt16_bal_cfg_get(&get_cfg_resp);
+	       }
+	    }
+	    break;
+	 default:
+	    {
+	       ASFVOLT_LOG(ASFVOLT_ERROR, "Bal Get not implemented for %d object type", bal_key->hdr->obj_type);
+	    }
+	    break;
+      } 
+   }
+
+   /*
+	* Write reply back to the client
+	*/
+   ret_val = context->gcc_stream->write(context, &get_cfg_resp, -1);
+   is_grpc_write_pending(ret_val);
+
+   grpc_c_status_t status;
+   status.gcs_code = 0;
+
+   /*
+    * Finish response for RPC
+    */
+   if (context->gcc_stream->finish(context, &status))
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
+   }
+   bal_cfg_get__free_mem(&get_cfg_resp);
 }
 
 /*
@@ -405,7 +568,7 @@ void bal__bal_cfg_get_cb(grpc_c_context_t *context)
  */
 void bal__bal_cfg_set_cb(grpc_c_context_t *context)
 {
-   BalCfg *set_cfg;
+   BalCfg *set_cfg = 0;
    BalErr bal_err;
    int ret_val = 0;
 
@@ -442,85 +605,16 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
    }
 
-#ifdef BAL_STUB
-   pthread_mutex_lock(&lock);
+   if (set_cfg) {
 
-   struct QNode *temp = newNode(set_cfg->hdr->obj_type,
-         BAL_ERRNO__BAL_ERR_OK,
-         set_cfg->device_id);
+      if(BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL == set_cfg->hdr->obj_type)
+      {
+         sleep(5); /* enable this if running with gdb */
+      }
+   
 
-   switch(set_cfg->hdr->obj_type)
-   {
-      case BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL:
-         {
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received Access Terminal Configuration msg");
-         }
-         break;
-      case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
-         {
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received PON Interface Configuration msg");
-            temp->intf_id = set_cfg->interface->key->intf_id;
-            ASFVOLT_LOG(ASFVOLT_INFO, "Pon ID = %d", temp->intf_id);
-         }
-         break;
-      case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
-         {
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received ONU Activation msg");
-            temp->intf_id = set_cfg->terminal->key->intf_id;
-            temp->onu_id = set_cfg->terminal->key->sub_term_id;
-            memset(temp->vendor_id, 0, BAL_DEVICE_STR_LEN);
-            memcpy(temp->vendor_id,
-                   set_cfg->terminal->data->serial_number->vendor_id,
-                   strlen(set_cfg->terminal->data->serial_number->vendor_id));
-            memset(temp->vendor_specific, 0, BAL_DEVICE_STR_LEN);
-            memcpy(temp->vendor_specific,
-                   set_cfg->terminal->data->serial_number->vendor_specific,
-                   strlen(set_cfg->terminal->data->serial_number->vendor_specific));
-         }
-         break;
-      case BAL_OBJ_ID__BAL_OBJ_ID_TM_SCHED:
-         {
-            ASFVOLT_LOG(ASFVOLT_INFO, "Received TM schedule msg");
-         }
-         break;
-    case BAL_OBJ_ID__BAL_OBJ_ID_PACKET:
-       {
-          switch(set_cfg->packet->key->packet_send_dest->type)
-          {
-             case BAL_DEST_TYPE__BAL_DEST_TYPE_ITU_OMCI_CHANNEL:
-                {
-                   ASFVOLT_LOG(ASFVOLT_INFO, "Received OMCI msg");
-                   temp->intf_id = set_cfg->terminal->key->intf_id;
-                   temp->onu_id = set_cfg->terminal->key->sub_term_id;
-                }
-                break;
-             default:
-                {
-                   ASFVOLT_LOG(ASFVOLT_INFO, "Dest type invalid");
-                }
-                break;
-          }
-       }
-       break;
-    default:
-       {
-          ASFVOLT_LOG(ASFVOLT_INFO, "Received Invalid msg type === %d", set_cfg->hdr->obj_type);
-          pthread_mutex_unlock(&lock);
-          return;
-       }
-       break;
+      asfvolt16_bal_cfg_set(set_cfg);
    }
-   enQueue(set_cfg->hdr->obj_type, temp);
-   pthread_mutex_unlock(&lock);
-   sleep(2);
-   pthread_cond_signal(&cv);
-#else
-   if(BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL == set_cfg->hdr->obj_type)
-   {
-      sleep(5); /* enable this if running with gdb */
-   }
-   asfvolt16_bal_cfg_set(set_cfg);
-#endif
 }
 
 
@@ -529,7 +623,7 @@ void bal__bal_cfg_set_cb(grpc_c_context_t *context)
  */
 void bal__bal_cfg_clear_cb(grpc_c_context_t *context)
 {
-   BalKey *clear_key;
+   BalKey *clear_key = 0;
    BalErr bal_err;
    int ret_val = 0;
 
@@ -566,9 +660,9 @@ void bal__bal_cfg_clear_cb(grpc_c_context_t *context)
       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
    }
 
-#ifndef BAL_STUB
-   asfvolt16_bal_cfg_clear(clear_key);
-#endif
+   if (clear_key) {
+       asfvolt16_bal_cfg_clear(clear_key);
+   }
 }
 
 
@@ -577,7 +671,7 @@ void bal__bal_cfg_clear_cb(grpc_c_context_t *context)
  */
 void bal__bal_api_init_cb(grpc_c_context_t *context)
 {
-   BalInit *bal_init;
+   BalInit *bal_init = 0;
    BalErr bal_err;
    int ret_val;
 
@@ -616,32 +710,25 @@ void bal__bal_api_init_cb(grpc_c_context_t *context)
       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to write status");
    }
 
-#ifndef BAL_STUB
-   asfvolt16_bal_init(bal_init, &coreIpPortInfo);
-#else
-   ASFVOLT_LOG(ASFVOLT_INFO, "Received IP Address == %s", bal_init->voltha_adapter_ip_port);
-   stub_bal_init(bal_init);
-#endif
-
+   if (bal_init) {
+       asfvolt16_bal_init(bal_init, &coreIpPortInfo);
+   }
+   is_init_done = true;
 }
 
-void bal_get_ind__free_mem_access_term_ind(BalIndications *balIndCfg)
-{
-   free(balIndCfg->access_term_ind->data->sw_version);
-   free(balIndCfg->access_term_ind->data->topology);
-   free(balIndCfg->access_term_ind->data);
-   free(balIndCfg->access_term_ind->key);
-   free(balIndCfg->access_term_ind->hdr);
-   free(balIndCfg->access_term_ind);
-   free(balIndCfg);
-}
 
 void bal_get_ind__free_mem_access_term_ind_op_state(BalIndications *balIndCfg)
 {
    free(balIndCfg->access_term_ind_op_state->data);
    free(balIndCfg->access_term_ind_op_state->key);
-   free(balIndCfg->access_term_ind_op_state->hdr);
    free(balIndCfg->access_term_ind_op_state);
+   free(balIndCfg);
+}
+
+void bal_get_ind__free_mem_access_term_proc_err(BalIndications *balIndCfg)
+{
+   free(balIndCfg->access_term_proc_err->key);
+   free(balIndCfg->access_term_proc_err);
    free(balIndCfg);
 }
 
@@ -649,40 +736,14 @@ void bal_get_ind__free_mem_flow_op_state(BalIndications *balIndCfg)
 {
    free(balIndCfg->flow_op_state->data);
    free(balIndCfg->flow_op_state->key);
-   free(balIndCfg->flow_op_state->hdr);
    free(balIndCfg->flow_op_state);
    free(balIndCfg);
 }
 
-void bal_get_ind__free_mem_flow_ind(BalIndications *balIndCfg)
+void bal_get_ind__free_mem_flow_proc_err(BalIndications *balIndCfg)
 {
-   free(balIndCfg->flow_ind->data->action);
-   free(balIndCfg->flow_ind->data->classifier->src_mac.data);
-   free(balIndCfg->flow_ind->data->classifier->dst_mac.data);
-   free(balIndCfg->flow_ind->data->classifier);
-   free(balIndCfg->flow_ind->data);
-   free(balIndCfg->flow_ind->key);
-   free(balIndCfg->flow_ind->hdr);
-   free(balIndCfg->flow_ind);
-   free(balIndCfg);
-}
-
-void bal_get_ind__free_mem_group_ind(BalIndications *balIndCfg)
-{
-   unsigned int i = 0;
-   free(balIndCfg->group_ind->data->flows->val);
-   free(balIndCfg->group_ind->data->flows);
-   for (i = 0; i < balIndCfg->group_ind->data->members->n_val; i++)
-   {
-      free(balIndCfg->group_ind->data->members->val[i]->queue);
-      free(balIndCfg->group_ind->data->members->val[i]->action);
-      free(balIndCfg->group_ind->data->members->val[i]);
-   }
-   free(balIndCfg->group_ind->data->members);
-   free(balIndCfg->group_ind->data);
-   free(balIndCfg->group_ind->key);
-   free(balIndCfg->group_ind->hdr);
-   free(balIndCfg->group_ind);
+   free(balIndCfg->flow_proc_err->key);
+   free(balIndCfg->flow_proc_err);
    free(balIndCfg);
 }
 
@@ -690,7 +751,6 @@ void bal_get_ind__free_mem_interface_op_state(BalIndications *balIndCfg)
 {
    free(balIndCfg->interface_op_state->data);
    free(balIndCfg->interface_op_state->key);
-   free(balIndCfg->interface_op_state->hdr);
    free(balIndCfg->interface_op_state);
    free(balIndCfg);
 }
@@ -698,19 +758,7 @@ void bal_get_ind__free_mem_interface_op_state(BalIndications *balIndCfg)
 void bal_get_ind__free_mem_interface_los(BalIndications *balIndCfg)
 {
    free(balIndCfg->interface_los->data);
-   free(balIndCfg->interface_los->hdr);
    free(balIndCfg->interface_los);
-   free(balIndCfg);
-}
-
-void bal_get_ind__free_mem_interface_ind(BalIndications *balIndCfg)
-{
-   free(balIndCfg->interface_ind->data->sub_term_id_list->val);
-   free(balIndCfg->interface_ind->data->sub_term_id_list);
-   free(balIndCfg->interface_ind->data);
-   free(balIndCfg->interface_ind->key);
-   free(balIndCfg->interface_ind->hdr);
-   free(balIndCfg->interface_ind);
    free(balIndCfg);
 }
 
@@ -718,7 +766,6 @@ void bal_get_ind__free_mem_terminal_op_state(BalIndications *balIndCfg)
 {
    free(balIndCfg->terminal_op_state->data);
    free(balIndCfg->terminal_op_state->key);
-   free(balIndCfg->terminal_op_state->hdr);
    free(balIndCfg->terminal_op_state);
    free(balIndCfg);
 }
@@ -730,7 +777,6 @@ void bal_get_ind__free_mem_terminal_disc(BalIndications *balIndCfg)
    free(balIndCfg->terminal_disc->data->serial_number);
    free(balIndCfg->terminal_disc->data);
    free(balIndCfg->terminal_disc->key);
-   free(balIndCfg->terminal_disc->hdr);
    free(balIndCfg->terminal_disc);
    free(balIndCfg);
 }
@@ -740,7 +786,6 @@ void bal_get_ind__free_mem_terminal_alarm(BalIndications *balIndCfg)
    free(balIndCfg->terminal_alarm->data->alarm);
    free(balIndCfg->terminal_alarm->data);
    free(balIndCfg->terminal_alarm->key);
-   free(balIndCfg->terminal_alarm->hdr);
    free(balIndCfg->terminal_alarm);
    free(balIndCfg);
 }
@@ -749,62 +794,78 @@ void bal_get_ind__free_mem_terminal_dgi(BalIndications *balIndCfg)
 {
    free(balIndCfg->terminal_dgi->data);
    free(balIndCfg->terminal_dgi->key);
-   free(balIndCfg->terminal_dgi->hdr);
    free(balIndCfg->terminal_dgi);
    free(balIndCfg);
 }
 
-void bal_get_ind__free_mem_terminal_ind(BalIndications *balIndCfg)
+void bal_get_ind__free_mem_terminal_dowi(BalIndications *balIndCfg)
 {
-   free(balIndCfg->terminal_ind->data->agg_port_id_list);
-   free(balIndCfg->terminal_ind->data->serial_number->vendor_specific);
-   free(balIndCfg->terminal_ind->data->serial_number->vendor_id);
-   free(balIndCfg->terminal_ind->data->serial_number);
-   free(balIndCfg->terminal_ind->data->registration_id);
-   free(balIndCfg->terminal_ind->data->password);
-   free(balIndCfg->terminal_ind->data);
-   free(balIndCfg->terminal_ind->key);
-   free(balIndCfg->terminal_ind->hdr);
-   free(balIndCfg->terminal_ind);
+   free(balIndCfg->terminal_dowi->data);
+   free(balIndCfg->terminal_dowi->key);
+   free(balIndCfg->terminal_dowi);
    free(balIndCfg);
 }
 
-void bal_get_ind__free_mem_tm_queue_ind(BalIndications *balIndCfg)
+void bal_get_ind__free_mem_terminal_looci(BalIndications *balIndCfg)
 {
-   switch (balIndCfg->tm_queue_ind->data->bac->type)
-   {
-      case BAL_TM_BAC_TYPE__BAL_TM_BAC_TYPE_TAILDROP:
-        free(balIndCfg->tm_queue_ind->data->bac->taildrop);
-	break;
-      case BAL_TM_BAC_TYPE__BAL_TM_BAC_TYPE_WTAILDROP:
-        /*Nothing to do*/
-        break;
-      case BAL_TM_BAC_TYPE__BAL_TM_BAC_TYPE_RED:
-        free(balIndCfg->tm_queue_ind->data->bac->red->red);
-        free(balIndCfg->tm_queue_ind->data->bac->red);
-	break;
-      case BAL_TM_BAC_TYPE__BAL_TM_BAC_TYPE_WRED:
-        free(balIndCfg->tm_queue_ind->data->bac->wred->red);
-	free(balIndCfg->tm_queue_ind->data->bac->wred->yellow);
-	free(balIndCfg->tm_queue_ind->data->bac->wred->green);
-	free(balIndCfg->tm_queue_ind->data->bac->wred);
-      default:
-        /*Nothing to do*/
-         break;
-   }
-   free(balIndCfg->tm_queue_ind->data->bac);
-   free(balIndCfg->tm_queue_ind->data->rate);
-   free(balIndCfg->tm_queue_ind->data);
-   free(balIndCfg->tm_queue_ind->key);
-   free(balIndCfg->tm_queue_ind);
+   free(balIndCfg->terminal_looci->data);
+   free(balIndCfg->terminal_looci->key);
+   free(balIndCfg->terminal_looci);
    free(balIndCfg);
 }
 
-void bal_get_ind__free_mem_u_tm_sched_ind(BalIndications *balIndCfg)
+void bal_get_ind__free_mem_terminal_proc_err(BalIndications *balIndCfg)
 {
-   free(balIndCfg->tm_sched_ind->data);
-   free(balIndCfg->tm_sched_ind->key);
-   free(balIndCfg->tm_sched_ind);
+   free(balIndCfg->terminal_proc_err->key);
+   free(balIndCfg->terminal_proc_err);
+   free(balIndCfg);
+}
+
+void bal_get_ind__free_mem_terminal_sdi(BalIndications *balIndCfg)
+{
+   free(balIndCfg->terminal_sdi->data);
+   free(balIndCfg->terminal_sdi->key);
+   free(balIndCfg->terminal_sdi);
+   free(balIndCfg);
+}
+
+void bal_get_ind__free_mem_terminal_sfi(BalIndications *balIndCfg)
+{
+   free(balIndCfg->terminal_sfi->data);
+   free(balIndCfg->terminal_sfi->key);
+   free(balIndCfg->terminal_sfi);
+   free(balIndCfg);
+}
+
+void bal_get_ind__free_mem_terminal_sufi(BalIndications *balIndCfg)
+{
+   free(balIndCfg->terminal_sufi->data);
+   free(balIndCfg->terminal_sufi->key);
+   free(balIndCfg->terminal_sufi);
+   free(balIndCfg);
+}
+
+void bal_get_ind__free_mem_terminal_sub_term_act_fail(BalIndications *balIndCfg)
+{
+   free(balIndCfg->terminal_sub_term_act_fail->data);
+   free(balIndCfg->terminal_sub_term_act_fail->key);
+   free(balIndCfg->terminal_sub_term_act_fail);
+   free(balIndCfg);
+}
+
+void bal_get_ind__free_mem_terminal_tiwi(BalIndications *balIndCfg)
+{
+   free(balIndCfg->terminal_tiwi->data);
+   free(balIndCfg->terminal_tiwi->key);
+   free(balIndCfg->terminal_tiwi);
+   free(balIndCfg);
+}
+
+void bal_get_ind__free_mem_tm_sched_osc(BalIndications *balIndCfg)
+{
+   free(balIndCfg->tm_sched_oper_stats_change->data);
+   free(balIndCfg->tm_sched_oper_stats_change->key);
+   free(balIndCfg->tm_sched_oper_stats_change);
    free(balIndCfg);
 }
 
@@ -829,7 +890,6 @@ void bal_get_ind__free_mem_u_pkt_data(BalIndications *balIndCfg)
    }
    free(balIndCfg->pktdata->key->packet_send_dest);
    free(balIndCfg->pktdata->key);
-   free(balIndCfg->pktdata->hdr);
    free(balIndCfg->pktdata);
    free(balIndCfg);
 }
@@ -849,7 +909,6 @@ void bal_get_ind__free_mem_u_bal_omci_resp(BalIndications *balIndCfg)
    free(balIndCfg->balomciresp->data->pkt.data);
    free(balIndCfg->balomciresp->data);
    free(balIndCfg->balomciresp->key);
-   free(balIndCfg->balomciresp->hdr);
    free(balIndCfg->balomciresp);
    free(balIndCfg);
 }
@@ -869,7 +928,6 @@ void bal_get_ind__free_mem_u_bal_oam_resp(BalIndications *balIndCfg)
    }
    free(balIndCfg->baloamresp->key->packet_send_dest);
    free(balIndCfg->baloamresp->key);
-   free(balIndCfg->baloamresp->hdr);
    free(balIndCfg->baloamresp);
    free(balIndCfg);
 }
@@ -878,24 +936,20 @@ void bal_get_ind__free_mem(BalIndications *balIndCfg)
 {
     switch (balIndCfg->u_case)
     {
-       case BAL_INDICATIONS__U_ACCESS_TERM_IND:
-          bal_get_ind__free_mem_access_term_ind(balIndCfg);
-          break;
-
        case BAL_INDICATIONS__U_ACCESS_TERM_IND_OP_STATE:
           bal_get_ind__free_mem_access_term_ind_op_state(balIndCfg);
+          break;
+
+       case BAL_INDICATIONS__U_ACCESS_TERM_PROC_ERR:
+          bal_get_ind__free_mem_access_term_proc_err(balIndCfg);
           break;
 
        case BAL_INDICATIONS__U_FLOW_OP_STATE:
           bal_get_ind__free_mem_flow_op_state(balIndCfg);
           break;
 
-       case BAL_INDICATIONS__U_FLOW_IND:
-          bal_get_ind__free_mem_flow_ind(balIndCfg);
-          break;
-
-       case BAL_INDICATIONS__U_GROUP_IND:
-          bal_get_ind__free_mem_group_ind(balIndCfg);
+       case BAL_INDICATIONS__U_FLOW_PROC_ERR:
+          bal_get_ind__free_mem_flow_proc_err(balIndCfg);
           break;
 
        case BAL_INDICATIONS__U_INTERFACE_OP_STATE:
@@ -904,10 +958,6 @@ void bal_get_ind__free_mem(BalIndications *balIndCfg)
 
        case BAL_INDICATIONS__U_INTERFACE_LOS:
           bal_get_ind__free_mem_interface_los(balIndCfg);
-          break;
-
-       case BAL_INDICATIONS__U_INTERFACE_IND:
-          bal_get_ind__free_mem_interface_ind(balIndCfg);
           break;
 
        case BAL_INDICATIONS__U_TERMINAL_OP_STATE:
@@ -926,16 +976,40 @@ void bal_get_ind__free_mem(BalIndications *balIndCfg)
           bal_get_ind__free_mem_terminal_dgi(balIndCfg);
           break;
 
-       case BAL_INDICATIONS__U_TERMINAL_IND:
-          bal_get_ind__free_mem_terminal_ind(balIndCfg);
+       case BAL_INDICATIONS__U_TERMINAL_DOWI:
+          bal_get_ind__free_mem_terminal_dowi(balIndCfg);
           break;
 
-       case BAL_INDICATIONS__U_TM_QUEUE__IND:
-          bal_get_ind__free_mem_tm_queue_ind(balIndCfg);
+       case BAL_INDICATIONS__U_TERMINAL_LOOCI:
+          bal_get_ind__free_mem_terminal_looci(balIndCfg);
           break;
 
-       case BAL_INDICATIONS__U_TM_SCHED__IND:
-          bal_get_ind__free_mem_u_tm_sched_ind(balIndCfg);
+       case BAL_INDICATIONS__U_TERMINAL_PROC_ERR:
+          bal_get_ind__free_mem_terminal_proc_err(balIndCfg);
+          break;
+
+       case BAL_INDICATIONS__U_TERMINAL_SDI:
+          bal_get_ind__free_mem_terminal_sdi(balIndCfg);
+          break;
+
+       case BAL_INDICATIONS__U_TERMINAL_SFI:
+          bal_get_ind__free_mem_terminal_sfi(balIndCfg);
+          break;
+
+       case BAL_INDICATIONS__U_TERMINAL_SUFI:
+          bal_get_ind__free_mem_terminal_sufi(balIndCfg);
+          break;
+
+       case BAL_INDICATIONS__U_TERMINAL_SUB_TERM_ACT_FAIL:
+          bal_get_ind__free_mem_terminal_sub_term_act_fail(balIndCfg);
+	      break;
+
+       case BAL_INDICATIONS__U_TERMINAL_TIWI:
+          bal_get_ind__free_mem_terminal_tiwi(balIndCfg);
+          break;
+
+       case BAL_INDICATIONS__U_TM_SCHED_OPER_STATS_CHANGE:
+          bal_get_ind__free_mem_tm_sched_osc(balIndCfg);
           break;
 
        case BAL_INDICATIONS__U_PKT_DATA:
@@ -1031,28 +1105,25 @@ void bal__bal_api_finish_cb(grpc_c_context_t *context)
 
 }
 
-void bal_ind__bal_acc_term_ind_cb(grpc_c_context_t *context)
+void bal_ind__bal_acc_term_oper_sts_cng_ind_cb(grpc_c_context_t *context)
 {
 }
-void bal_ind__bal_acc_term_oper_sts_cng_ind_cb(grpc_c_context_t *context)
+void bal_ind__bal_acc_term_cfg_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_acc_term_proc_err_cb(grpc_c_context_t *context)
 {
 }
 void bal_ind__bal_flow_oper_sts_cng_cb(grpc_c_context_t *context)
 {
 }
-void bal_ind__bal_flow_ind_cb(grpc_c_context_t *context)
-{
-}
-void bal_ind__bal_group_ind_cb(grpc_c_context_t *context)
+void bal_ind__bal_flow_proc_err_cb(grpc_c_context_t *context)
 {
 }
 void bal_ind__bal_iface_oper_sts_cng_cb(grpc_c_context_t *context)
 {
 }
 void bal_ind__bal_iface_los_cb(grpc_c_context_t *context)
-{
-}
-void bal_ind__bal_iface_ind_cb(grpc_c_context_t *context)
 {
 }
 void bal_ind__bal_iface_stat_cb(grpc_c_context_t *context)
@@ -1070,13 +1141,31 @@ void bal_ind__bal_subs_term_alarm_ind_cb(grpc_c_context_t *context)
 void bal_ind__bal_subs_term_dgi_ind_cb(grpc_c_context_t *context)
 {
 }
-void bal_ind__bal_subs_term_ind_cb(grpc_c_context_t *context)
+void bal_ind__bal_subs_term_proc_err_cb(grpc_c_context_t *context)
 {
 }
-void bal_ind__bal_tm_queue_ind_info_cb(grpc_c_context_t *context)
+void bal_ind__bal_subs_term_dowi_ind_cb(grpc_c_context_t *context)
 {
 }
-void bal_ind__bal_tm_sched_ind_info_cb(grpc_c_context_t *context)
+void bal_ind__bal_subs_term_looci_ind_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_subs_term_sdi_ind_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_subs_term_sfi_ind_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_subs_term_sufi_ind_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_subs_term_tiwi_ind_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_sub_term_act_fail_ind_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_tm_sched_oper_stats_change_cb(grpc_c_context_t *context)
 {
 }
 void bal_ind__bal_pkt_bearer_channel_rx_ind_cb(grpc_c_context_t *context)
@@ -1086,6 +1175,9 @@ void bal_ind__bal_pkt_omci_channel_rx_ind_cb(grpc_c_context_t *context)
 {
 }
 void bal_ind__bal_pkt_ieee_oam_channel_rx_ind_cb(grpc_c_context_t *context)
+{
+}
+void bal_ind__bal_sys_profile_ind_cb(grpc_c_context_t *context)
 {
 }
 
@@ -1116,16 +1208,14 @@ int main (int argc, char **argv)
    int i = 0;
    grpc_c_server_t *server = NULL;
 
-   if (argc < 6)
+   if (argc < 4)
    {
-      fprintf(stderr, "Missing socket path argument\n");
+      fprintf(stderr, "Missing arguments\n");
       exit(1);
    }
 
    strcpy(coreIpPortInfo.bal_core_arg1, argv[2] /*, strlen(argv[2])*/);
    strcpy(coreIpPortInfo.bal_core_ip_port, argv[3]/*, strlen(argv[3])*/);
-   strcpy(coreIpPortInfo.bal_core_arg2, argv[4]/*, strlen(argv[4])*/);
-   strcpy(coreIpPortInfo.bal_shared_lib_ip_port, argv[5]/*, strlen(argv[5])*/);
 
    signal(SIGINT, sigint_handler);
 
@@ -1164,10 +1254,6 @@ int main (int argc, char **argv)
     * Start server
     */
    grpc_c_server_start(test_server);
-
-#ifdef BAL_STUB
-   create_stub_thread();
-#endif
 
    /*
     * Blocks server to wait to completion

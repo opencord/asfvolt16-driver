@@ -61,17 +61,9 @@ uint32_t bal_interface_cfg_set(BalInterfaceCfg *interface_cfg)
                          interface_cfg->data->transceiver_type);
     ASFVOLT_LOG(ASFVOLT_INFO, "Setting transceiver_type to : %d", interface_cfg->data->transceiver_type);
 
-    ASFVOLT_CFG_PROP_SET(interface_obj, interface, ds_miss_mode,
-                         interface_cfg->data->has_ds_miss_mode,
-                         interface_cfg->data->ds_miss_mode);
-
     ASFVOLT_CFG_PROP_SET(interface_obj, interface, mtu,
                          interface_cfg->data->has_mtu,
                          interface_cfg->data->mtu);
-
-    ASFVOLT_CFG_PROP_SET(interface_obj, interface, flow_control,
-                         interface_cfg->data->has_flow_control,
-                         interface_cfg->data->flow_control);
 
     ASFVOLT_CFG_PROP_SET(interface_obj, interface, ds_tm,
                          interface_cfg->data->has_ds_tm,
@@ -101,25 +93,14 @@ uint32_t bal_interface_cfg_set(BalInterfaceCfg *interface_cfg)
  * Description : get the PON and NNI interfaces                     *
  *               of OLT Device                                      *
  ********************************************************************/
-uint32_t bal_interface_cfg_get(BalInterfaceKey *interface_cfg_key,
-                               BalInterfaceCfg *interface_cfg)
+uint32_t bal_interface_cfg_get(BalInterfaceCfg *interface_cfg)
 {
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_interface_cfg interface_obj;
     bcmbal_interface_key intf_key;
 
-    if((interface_cfg_key->has_intf_id) && (interface_cfg_key->has_intf_type))
-    {
-       intf_key.intf_id = interface_cfg_key->intf_id;
-       intf_key.intf_type = interface_cfg_key->intf_type;
-    }
-    else
-    {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the interface cfg(OLT): Missing Key values "
-                                  "Received key values intf-id(%d), intf-type(%d)",
-                                   interface_cfg_key->intf_id, interface_cfg_key->intf_type);
-       return BAL_ERRNO__BAL_ERR_NOENT;
-    }
+    intf_key.intf_id = interface_cfg->key->intf_id;
+    intf_key.intf_type = interface_cfg->key->intf_type;
 
     ASFVOLT_LOG(ASFVOLT_DEBUG, "Get interface cfg(for OLT) starts");
     /*
@@ -141,7 +122,8 @@ uint32_t bal_interface_cfg_get(BalInterfaceKey *interface_cfg_key,
     ASFVOLT_LOG(ASFVOLT_INFO, "Get Interface cfg sent to OLT. "
                               "Interface ID(%d) Interface Type(%d)",
                                intf_key.intf_id, intf_key.intf_type);
-    /* TODO - Add code to call grpc */
+
+    memcpy(interface_cfg->data, &interface_obj, sizeof(bcmbal_interface_cfg_data));
 
     return BAL_ERRNO__BAL_ERR_OK;
 }

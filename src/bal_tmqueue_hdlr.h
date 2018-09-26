@@ -16,5 +16,5 @@
 
 extern uint32_t bal_tm_queue_cfg_set(BalTmQueueCfg *tm_queue_cfg);
 extern uint32_t bal_tm_queue_cfg_clear(BalTmQueueKey *tm_queue_key);
-extern uint32_t bal_tm_queue_cfg_get(BalTmQueueKey *tm_queue_key, BalTmQueueCfg *tm_queue_cfg);
+extern uint32_t bal_tm_queue_cfg_get(BalTmQueueCfg *tm_queue_cfg);
 extern bcmos_errno bal_tm_queue_cfg_indication_cb(bcmbal_obj *obj);

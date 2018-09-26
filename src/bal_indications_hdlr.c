@@ -22,136 +22,6 @@
 /*extern variables*/
 
 
-/*static bcmos_mutex bal_ind_lock; - Need to define bcm independent mutex*/
-/********************************************************************\
- * Function    : bal_acc_term_indication_cb                         *
- * Description : This function will handle the indications for      *
- *               Access Terminal Indication                         *
- *                                                                  *
- ********************************************************************/
-bcmos_errno bal_acc_term_indication_cb(bcmbal_obj *obj)
-{
-   bcmos_errno result = BCM_ERR_OK;
-
-   if(BCMBAL_OBJ_ID_ACCESS_TERMINAL != obj->obj_type ||
-      bcmbal_access_terminal_auto_id_ind != obj->subgroup)
-   {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
-				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
-      result = BCM_ERR_INTERNAL;
-   }
-   else
-   {
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "Processing BAL API '%s' IND callback (status is %s)",
-				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
-      BalIndications *balIndCfg;
-      balIndCfg = malloc(sizeof(BalIndications));
-      memset(balIndCfg, 0, sizeof(BalIndications));
-      bal_indications__init(balIndCfg);
-      balIndCfg->u_case = BAL_INDICATIONS__U_ACCESS_TERM_IND;
-      balIndCfg->has_objtype = BAL_GRPC_PRES;
-      balIndCfg->objtype = obj->obj_type;
-      balIndCfg->has_sub_group = BAL_GRPC_PRES;
-      balIndCfg->sub_group = obj->subgroup;
-      balIndCfg->device_id = voltha_device_id;
-
-      bcmbal_access_terminal_ind *acc_term_ind = (bcmbal_access_terminal_ind *)obj;
-
-      balIndCfg->access_term_ind = malloc(sizeof(BalAccessTerminalInd));
-      memset(balIndCfg->access_term_ind, 0, sizeof(BalAccessTerminalInd));
-      bal_access_terminal_ind__init(balIndCfg->access_term_ind);
-
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->access_term_ind->hdr = hdr;
-
-      BalAccessTerminalKey *accessTermkey;
-      accessTermkey = malloc(sizeof(BalAccessTerminalKey));
-      memset(accessTermkey, 0, sizeof(BalAccessTerminalKey));
-      bal_access_terminal_key__init(accessTermkey);
-      balIndCfg->access_term_ind->key = accessTermkey;
-      balIndCfg->access_term_ind->key->has_access_term_id = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->key->access_term_id = acc_term_ind->key.access_term_id;
-
-      BalAccessTerminalIndData *accessTermIndData;
-      accessTermIndData = malloc(sizeof(BalAccessTerminalIndData));
-      memset(accessTermIndData, 0, sizeof(BalAccessTerminalIndData));
-      bal_access_terminal_ind_data__init(accessTermIndData);
-      balIndCfg->access_term_ind->data = accessTermIndData;
-      balIndCfg->access_term_ind->data->has_admin_state = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->admin_state = acc_term_ind->data.admin_state;
-      balIndCfg->access_term_ind->data->has_oper_status = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->oper_status = acc_term_ind->data.oper_status;
-      balIndCfg->access_term_ind->data->has_iwf_mode = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->iwf_mode = acc_term_ind->data.iwf_mode;
-
-      BalTopology *balTop;
-      balTop = malloc(sizeof(BalTopology));
-      memset(balTop, 0, sizeof(BalTopology));
-      bal_topology__init(balTop);
-      balIndCfg->access_term_ind->data->topology = balTop;
-
-      balIndCfg->access_term_ind->data->topology->has_num_of_nni_ports = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->topology->num_of_nni_ports =
-                                            acc_term_ind->data.topology.num_of_nni_ports;
-      balIndCfg->access_term_ind->data->topology->has_num_of_pon_ports = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->topology->num_of_pon_ports =
-                                            acc_term_ind->data.topology.num_of_pon_ports;
-      balIndCfg->access_term_ind->data->topology->has_num_of_mac_devs = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->topology->num_of_mac_devs =
-                                             acc_term_ind->data.topology.num_of_mac_devs;
-      balIndCfg->access_term_ind->data->topology->has_num_of_pons_per_mac_dev = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->topology->num_of_pons_per_mac_dev =
-                                      acc_term_ind->data.topology.num_of_pons_per_mac_dev;
-      balIndCfg->access_term_ind->data->topology->has_pon_family = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->topology->pon_family =
-                                                   acc_term_ind->data.topology.pon_family;
-      balIndCfg->access_term_ind->data->topology->has_pon_sub_family = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->topology->pon_sub_family =
-                                                acc_term_ind->data.topology.pon_sub_family;
-
-      BalSwVersion *balsv;
-      balsv = malloc(sizeof(BalSwVersion));
-      memset(balsv, 0, sizeof(BalSwVersion));
-      bal_sw_version__init(balsv);
-      balIndCfg->access_term_ind->data->sw_version = balsv;
-
-      balIndCfg->access_term_ind->data->sw_version->has_version_type = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->sw_version->version_type =
-                                                acc_term_ind->data.sw_version.version_type;
-      balIndCfg->access_term_ind->data->sw_version->has_major_rev = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->sw_version->major_rev =
-                                                   acc_term_ind->data.sw_version.major_rev;
-      balIndCfg->access_term_ind->data->sw_version->has_minor_rev = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->sw_version->minor_rev =
-                                                   acc_term_ind->data.sw_version.minor_rev;
-      balIndCfg->access_term_ind->data->sw_version->has_patch_rev = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->sw_version->patch_rev =
-                                                   acc_term_ind->data.sw_version.patch_rev;
-      balIndCfg->access_term_ind->data->sw_version->has_om_version = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->sw_version->om_version =
-                                                  acc_term_ind->data.sw_version.om_version;
-      balIndCfg->access_term_ind->data->sw_version->has_dev_point = BAL_GRPC_PRES;
-      balIndCfg->access_term_ind->data->sw_version->dev_point =
-                                                   acc_term_ind->data.sw_version.dev_point;
-
-      bal_register_indication_cbs();
-
-      list_node *bal_indication_node = malloc(sizeof(list_node));
-      bal_indication_node->bal_indication = balIndCfg;
-
-      pthread_mutex_lock(&bal_ind_queue_lock);
-      add_bal_indication_node(bal_indication_node);
-      pthread_mutex_unlock(&bal_ind_queue_lock);
-
-      is_reboot = BAL_REBOOT_STATUS__BAL_OLT_UP_AFTER_ACTIVATION;
-   }
-
-   return result;
-}
-
 /********************************************************************\
  * Function    : bal_acc_term_osc_indication_cb                     *
  * Description : This function will handle the indications for      *
@@ -191,11 +61,7 @@ bcmos_errno bal_acc_term_osc_indication_cb(bcmbal_obj *obj)
       bal_access_terminal_oper_status_change__init(acessTermOSC);
       balIndCfg->access_term_ind_op_state = acessTermOSC;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->access_term_ind_op_state->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalAccessTerminalKey *accessTermkey;
       accessTermkey = malloc(sizeof(BalAccessTerminalKey));
@@ -220,6 +86,70 @@ bcmos_errno bal_acc_term_osc_indication_cb(bcmbal_obj *obj)
       balIndCfg->access_term_ind_op_state->data->has_admin_state = BAL_GRPC_PRES;
       balIndCfg->access_term_ind_op_state->data->admin_state =
                                                  acc_term_osc->data.admin_state;
+
+      bal_register_indication_cbs();
+
+      list_node *bal_indication_node = malloc(sizeof(list_node));
+      bal_indication_node->bal_indication = balIndCfg;
+
+      pthread_mutex_lock(&bal_ind_queue_lock);
+      add_bal_indication_node(bal_indication_node);
+      pthread_mutex_unlock(&bal_ind_queue_lock);
+      is_reboot = BAL_REBOOT_STATUS__BAL_OLT_UP_AFTER_ACTIVATION;
+   }
+
+   return result;
+}
+
+/********************************************************************\
+ * Function    : bal_acc_term_processing_error_indication_cb        *
+ * Description : This function will handle the error indications    *
+ *               for Access Terminal                                *
+ *                                                                  *
+ ********************************************************************/
+bcmos_errno bal_acc_term_processing_error_indication_cb(bcmbal_obj *obj)
+{
+   bcmos_errno result = BCM_ERR_OK;
+
+   if(BCMBAL_OBJ_ID_ACCESS_TERMINAL != obj->obj_type ||
+      bcmbal_access_terminal_auto_id_processing_error != obj->subgroup)
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
+				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
+      result = BCM_ERR_INTERNAL;
+   }
+   else
+   {
+      BalIndications *balIndCfg;
+      balIndCfg = malloc(sizeof(BalIndications));
+      memset(balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(balIndCfg);
+      balIndCfg->has_objtype = BAL_GRPC_PRES;
+      balIndCfg->objtype = obj->obj_type;
+      balIndCfg->has_sub_group = BAL_GRPC_PRES;
+      balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->u_case = BAL_INDICATIONS__U_ACCESS_TERM_PROC_ERR;
+      balIndCfg->device_id = voltha_device_id;
+
+      bcmbal_access_terminal_processing_error *acc_term_err =
+                                  (bcmbal_access_terminal_processing_error *)obj;
+
+      BalAccessTerminalProcessingError *acessTermError;
+      acessTermError = malloc(sizeof(BalAccessTerminalProcessingError));
+      memset(acessTermError, 0, sizeof(BalAccessTerminalProcessingError));
+      bal_access_terminal_processing_error__init(acessTermError);
+      balIndCfg->access_term_proc_err = acessTermError;
+
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
+
+      BalAccessTerminalKey *accessTermkey;
+      accessTermkey = malloc(sizeof(BalAccessTerminalKey));
+      memset(accessTermkey, 0, sizeof(BalAccessTerminalKey));
+      bal_access_terminal_key__init(accessTermkey);
+      balIndCfg->access_term_proc_err->key = accessTermkey;
+      balIndCfg->access_term_proc_err->key->has_access_term_id = BAL_GRPC_PRES;
+      balIndCfg->access_term_proc_err->key->access_term_id =
+                                              acc_term_err->key.access_term_id;
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
@@ -270,11 +200,7 @@ bcmos_errno bal_flow_osc_indication_cb(bcmbal_obj *obj)
       bal_flow_oper_status_change__init(flowOscInd);
       balIndCfg->flow_op_state = flowOscInd;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->flow_op_state->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalFlowKey *flowkey;
       flowkey = malloc(sizeof(BalFlowKey));
@@ -318,17 +244,16 @@ bcmos_errno bal_flow_osc_indication_cb(bcmbal_obj *obj)
 }
 
 /********************************************************************\
- * Function    : bal_flow_indication_cb                             *
- * Description : This function will handle the indications for      *
- *               Flow Indication                                    *
+ * Function    : bal_flow_processing_error_indication_cb            *
+ * Description : This function will handle flow processing errors   *
  *                                                                  *
  ********************************************************************/
-bcmos_errno bal_flow_indication_cb(bcmbal_obj *obj)
+bcmos_errno bal_flow_processing_error_indication_cb(bcmbal_obj *obj)
 {
-   bcmos_errno result = BCM_ERR_OK;
+    bcmos_errno result = BCM_ERR_OK;
 
    if(BCMBAL_OBJ_ID_FLOW != obj->obj_type ||
-      bcmbal_flow_auto_id_ind != obj->subgroup)
+      bcmbal_flow_auto_id_processing_error != obj->subgroup)
    {
       ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
@@ -340,136 +265,38 @@ bcmos_errno bal_flow_indication_cb(bcmbal_obj *obj)
       balIndCfg = malloc(sizeof(BalIndications));
       memset(balIndCfg, 0, sizeof(BalIndications));
       bal_indications__init(balIndCfg);
-      balIndCfg->u_case = BAL_INDICATIONS__U_FLOW_IND;
       balIndCfg->has_objtype = BAL_GRPC_PRES;
       balIndCfg->objtype = obj->obj_type;
       balIndCfg->has_sub_group = BAL_GRPC_PRES;
       balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->u_case = BAL_INDICATIONS__U_FLOW_PROC_ERR;
       balIndCfg->device_id = voltha_device_id;
 
-      bcmbal_flow_ind *flow_ind = (bcmbal_flow_ind *)obj;
+      bcmbal_flow_processing_error *flow_proc_error =
+                                  (bcmbal_flow_processing_error *)obj;
 
-      BalFlowInd *flowInd;
-      flowInd = malloc(sizeof(BalFlowInd));
-      memset(flowInd, 0, sizeof(BalFlowInd));
-      bal_flow_ind__init(flowInd);
-      balIndCfg->flow_ind = flowInd;
+      BalFlowProcessingError *flowProcError;
+      flowProcError = malloc(sizeof(BalFlowProcessingError));
+      memset(flowProcError, 0, sizeof(BalFlowProcessingError));
+      bal_flow_processing_error__init(flowProcError);
+      balIndCfg->flow_proc_err = flowProcError;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->flow_ind->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
-      BalFlowKey *flowkey;
-      flowkey = malloc(sizeof(BalFlowKey));
-      memset(flowkey, 0, sizeof(BalFlowKey));
-      bal_flow_key__init(flowkey);
-      balIndCfg->flow_ind->key = flowkey;
+      BalFlowKey *flowKey;
+      flowKey = malloc(sizeof(BalFlowKey));
+      memset(flowKey, 0, sizeof(BalFlowKey));
+      bal_flow_key__init(flowKey);
 
-      balIndCfg->flow_ind->key->has_flow_id = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->key->flow_id = flow_ind->key.flow_id;
-      balIndCfg->flow_ind->key->has_flow_type = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->key->flow_type = flow_ind->key.flow_type;
+      balIndCfg->flow_proc_err->key = flowKey;
 
-      BalFlowIndData *flowIndData;
-      flowIndData = malloc(sizeof(BalFlowIndData));
-      memset(flowIndData, 0, sizeof(BalFlowIndData));
-      bal_flow_ind_data__init(flowIndData);
-      balIndCfg->flow_ind->data = flowIndData;
+      balIndCfg->flow_proc_err->key->has_flow_id = BAL_GRPC_PRES;
+      balIndCfg->flow_proc_err->key->flow_id =
+                                    flow_proc_error->key.flow_id;
 
-      balIndCfg->flow_ind->data->has_admin_state = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->admin_state = flow_ind->data.admin_state;
-      balIndCfg->flow_ind->data->has_oper_status= BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->oper_status= flow_ind->data.oper_status;
-      balIndCfg->flow_ind->data->has_access_int_id = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->access_int_id = flow_ind->data.access_int_id;
-      balIndCfg->flow_ind->data->has_network_int_id = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->network_int_id = flow_ind->data.network_int_id;
-      balIndCfg->flow_ind->data->has_sub_term_id = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->sub_term_id = flow_ind->data.sub_term_id;
-      balIndCfg->flow_ind->data->has_sub_term_uni_idx = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->sub_term_uni_idx = flow_ind->data.sub_term_uni_idx;
-      balIndCfg->flow_ind->data->has_svc_port_id = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->svc_port_id = flow_ind->data.svc_port_id;
-      balIndCfg->flow_ind->data->has_resolve_mac = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->resolve_mac = flow_ind->data.resolve_mac;
-      balIndCfg->flow_ind->data->has_cookie = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->cookie = flow_ind->data.cookie;
-
-      BalClassifier *balClassifier;
-      balClassifier = malloc(sizeof(BalClassifier));
-      memset(balClassifier, 0, sizeof(BalClassifier));
-      bal_classifier__init(balClassifier);
-      balIndCfg->flow_ind->data->classifier = balClassifier;
-
-      balIndCfg->flow_ind->data->classifier->has_presence_mask = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->presence_mask = flow_ind->data.classifier.presence_mask;
-      balIndCfg->flow_ind->data->classifier->has_o_tpid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->o_tpid = flow_ind->data.classifier.o_tpid;
-      balIndCfg->flow_ind->data->classifier->has_o_vid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->o_vid = flow_ind->data.classifier.o_vid;
-      balIndCfg->flow_ind->data->classifier->has_i_tpid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->i_tpid = flow_ind->data.classifier.i_tpid;
-      balIndCfg->flow_ind->data->classifier->has_i_vid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->i_vid = flow_ind->data.classifier.i_vid;
-      balIndCfg->flow_ind->data->classifier->has_o_pbits = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->o_pbits = flow_ind->data.classifier.o_pbits;
-      balIndCfg->flow_ind->data->classifier->has_i_pbits = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->i_pbits = flow_ind->data.classifier.i_pbits;
-      balIndCfg->flow_ind->data->classifier->has_ether_type = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->ether_type = flow_ind->data.classifier.ether_type;
-      balIndCfg->flow_ind->data->classifier->has_dst_mac = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->dst_mac.len =
-                            (BCMOS_ETH_ALEN)*sizeof(flow_ind->data.classifier.dst_mac.u8);
-      balIndCfg->flow_ind->data->classifier->dst_mac.data =
-           (uint8_t *)malloc((balIndCfg->flow_ind->data->classifier->dst_mac.len)*sizeof(uint8_t));
-      memcpy(balIndCfg->flow_ind->data->classifier->dst_mac.data,
-             flow_ind->data.classifier.dst_mac.u8,
-             balIndCfg->flow_ind->data->classifier->dst_mac.len);
-      balIndCfg->flow_ind->data->classifier->has_src_mac = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->src_mac.len =
-                            (BCMOS_ETH_ALEN)*sizeof(flow_ind->data.classifier.src_mac.u8);
-      balIndCfg->flow_ind->data->classifier->src_mac.data =
-           (uint8_t *)malloc((balIndCfg->flow_ind->data->classifier->src_mac.len)*sizeof(uint8_t));
-      memcpy(balIndCfg->flow_ind->data->classifier->src_mac.data,
-             flow_ind->data.classifier.src_mac.u8,
-             balIndCfg->flow_ind->data->classifier->src_mac.len);
-      balIndCfg->flow_ind->data->classifier->has_ip_proto = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->ip_proto = flow_ind->data.classifier.ip_proto;
-      balIndCfg->flow_ind->data->classifier->has_dst_ip = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->dst_ip = flow_ind->data.classifier.dst_ip.u32;
-      balIndCfg->flow_ind->data->classifier->has_src_ip = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->src_ip = flow_ind->data.classifier.src_ip.u32;
-      balIndCfg->flow_ind->data->classifier->has_src_port = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->src_port = flow_ind->data.classifier.src_port;
-      balIndCfg->flow_ind->data->classifier->has_dst_port = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->dst_port = flow_ind->data.classifier.dst_port;
-      balIndCfg->flow_ind->data->classifier->has_pkt_tag_type = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->classifier->pkt_tag_type = flow_ind->data.classifier.pkt_tag_type;
-
-      BalAction *balAction;
-      balAction = malloc(sizeof(BalAction));
-      memset(balAction, 0, sizeof(BalAction));
-      bal_action__init(balAction);
-      balIndCfg->flow_ind->data->action = balAction;
-
-      balIndCfg->flow_ind->data->action->has_presence_mask = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->presence_mask = flow_ind->data.action.presence_mask;
-      balIndCfg->flow_ind->data->action->has_cmds_bitmask = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->cmds_bitmask = flow_ind->data.action.cmds_bitmask;
-      balIndCfg->flow_ind->data->action->has_o_vid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->o_vid = flow_ind->data.action.o_vid;
-      balIndCfg->flow_ind->data->action->has_o_pbits = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->o_pbits = flow_ind->data.action.o_pbits;
-      balIndCfg->flow_ind->data->action->has_o_tpid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->o_tpid = flow_ind->data.action.o_tpid;
-      balIndCfg->flow_ind->data->action->has_i_vid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->i_vid = flow_ind->data.action.i_vid;
-      balIndCfg->flow_ind->data->action->has_i_pbits = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->i_pbits = flow_ind->data.action.i_pbits;
-      balIndCfg->flow_ind->data->action->has_i_tpid = BAL_GRPC_PRES;
-      balIndCfg->flow_ind->data->action->i_tpid = flow_ind->data.action.i_tpid;
+      balIndCfg->flow_proc_err->key->has_flow_type = BAL_GRPC_PRES;
+      balIndCfg->flow_proc_err->key->flow_type =
+                                    flow_proc_error->key.flow_type;
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
@@ -479,156 +306,10 @@ bcmos_errno bal_flow_indication_cb(bcmbal_obj *obj)
       pthread_mutex_unlock(&bal_ind_queue_lock);
    }
 
-   return result;
+
+    return result;
 }
 
-/********************************************************************\
- * Function    : bal_group_indication_cb                            *
- * Description : This function will handle the indications for      *
- *               Group Indication                                   *
- *                                                                  *
- ********************************************************************/
-bcmos_errno bal_group_indication_cb(bcmbal_obj *obj)
-{
-   bcmos_errno result = BCM_ERR_OK;
-   unsigned int i = 0;
-
-   if(BCMBAL_OBJ_ID_GROUP != obj->obj_type ||
-      bcmbal_group_auto_id_ind != obj->subgroup)
-   {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
-				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
-      result = BCM_ERR_INTERNAL;
-   }
-   else
-   {
-      BalIndications *balIndCfg;
-      balIndCfg = malloc(sizeof(BalIndications));
-      memset(balIndCfg, 0, sizeof(BalIndications));
-      bal_indications__init(balIndCfg);
-      balIndCfg->u_case = BAL_INDICATIONS__U_GROUP_IND;
-      balIndCfg->has_objtype = BAL_GRPC_PRES;
-      balIndCfg->objtype = obj->obj_type;
-      balIndCfg->has_sub_group = BAL_GRPC_PRES;
-      balIndCfg->sub_group = obj->subgroup;
-      balIndCfg->device_id = voltha_device_id;
-
-      bcmbal_group_ind *group_ind = (bcmbal_group_ind *)obj;
-
-      BalGroupInd *groupInd;
-      groupInd = malloc(sizeof(BalGroupInd));
-      memset(groupInd, 0, sizeof(BalGroupInd));
-      bal_group_ind__init(groupInd);
-      balIndCfg->group_ind = groupInd;
-
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->group_ind->hdr = hdr;
-
-      BalGroupKey *groupkey;
-      groupkey = malloc(sizeof(BalGroupKey));
-      memset(groupkey, 0, sizeof(BalGroupKey));
-      bal_group_key__init(groupkey);
-      balIndCfg->group_ind->key = groupkey;
-
-      balIndCfg->group_ind->key->has_group_id = BAL_GRPC_PRES;
-      balIndCfg->group_ind->key->group_id = group_ind->key.group_id;
-
-      BalGroupIndData *groupIndData;
-      groupIndData = malloc(sizeof(BalGroupIndData));
-      memset(groupIndData, 0, sizeof(BalGroupIndData));
-      bal_group_ind_data__init(groupIndData);
-      balIndCfg->group_ind->data = groupIndData;
-
-      balIndCfg->group_ind->data->has_members_cmd = BAL_GRPC_PRES;
-      balIndCfg->group_ind->data->members_cmd = group_ind->data.members_cmd;
-      balIndCfg->group_ind->data->has_cookie = BAL_GRPC_PRES;
-      balIndCfg->group_ind->data->cookie = group_ind->data.cookie;
-      balIndCfg->group_ind->data->has_owner = BAL_GRPC_PRES;
-      balIndCfg->group_ind->data->owner = group_ind->data.owner;
-
-      BalGroupMemberInfoList *balMembers;
-      balMembers = malloc(sizeof(BalGroupMemberInfoList));
-      memset(balMembers, 0, sizeof(BalGroupMemberInfoList));
-      bal_group_member_info_list__init(balMembers);
-      balIndCfg->group_ind->data->members = balMembers;
-
-      balIndCfg->group_ind->data->members->n_val = group_ind->data.members.len;
-
-      BalGroupMemberInfo *balMemberInfo;
-      BalAction *balAction;
-      BalTmQueueRef *balQueue;
-      for (i = 0; i < balIndCfg->group_ind->data->members->n_val; i++)
-      {
-         balMemberInfo = malloc(sizeof(BalGroupMemberInfo));
-         memset(balMemberInfo, 0, sizeof(BalGroupMemberInfo));
-         bal_group_member_info__init(balMemberInfo);
-
-         balMemberInfo->has_intf_id = BAL_GRPC_PRES;
-         balMemberInfo->intf_id = group_ind->data.members.val->intf_id;
-         balMemberInfo->has_svc_port_id = BAL_GRPC_PRES;
-         balMemberInfo->svc_port_id = group_ind->data.members.val->svc_port_id;
-
-         balAction = malloc(sizeof(BalAction));
-         memset(balAction, 0, sizeof(BalAction));
-         bal_action__init(balAction);
-         balMemberInfo->action = balAction;
-
-         balMemberInfo->action->has_presence_mask = BAL_GRPC_PRES;
-         balMemberInfo->action->presence_mask = group_ind->data.members.val->action.presence_mask;
-         balMemberInfo->action->has_cmds_bitmask = BAL_GRPC_PRES;
-         balMemberInfo->action->cmds_bitmask = group_ind->data.members.val->action.cmds_bitmask;
-         balMemberInfo->action->has_o_vid = BAL_GRPC_PRES;
-         balMemberInfo->action->o_vid = group_ind->data.members.val->action.o_vid;
-         balMemberInfo->action->has_o_pbits = BAL_GRPC_PRES;
-         balMemberInfo->action->o_pbits = group_ind->data.members.val->action.o_pbits;
-         balMemberInfo->action->has_o_tpid = BAL_GRPC_PRES;
-         balMemberInfo->action->o_tpid = group_ind->data.members.val->action.o_tpid;
-         balMemberInfo->action->has_i_vid = BAL_GRPC_PRES;
-         balMemberInfo->action->i_vid = group_ind->data.members.val->action.i_vid;
-         balMemberInfo->action->has_i_pbits = BAL_GRPC_PRES;
-         balMemberInfo->action->i_pbits = group_ind->data.members.val->action.i_pbits;
-         balMemberInfo->action->has_i_tpid = BAL_GRPC_PRES;
-         balMemberInfo->action->i_tpid = group_ind->data.members.val->action.i_tpid;
-
-         balQueue = malloc(sizeof(BalTmQueueRef));
-         memset(balQueue, 0, sizeof(BalTmQueueRef));
-         bal_tm_queue_ref__init(balQueue);
-         balMemberInfo->queue = balQueue;
-
-         balMemberInfo->queue->has_sched_id = BAL_GRPC_PRES;
-         balMemberInfo->queue->sched_id = group_ind->data.members.val->queue.sched_id;
-         balMemberInfo->queue->has_queue_id = BAL_GRPC_PRES;
-         balMemberInfo->queue->queue_id = group_ind->data.members.val->queue.queue_id;
-
-         balIndCfg->group_ind->data->members->val[i] = balMemberInfo;
-      }
-
-
-      BalIdList *balFlows;
-      balFlows = malloc(sizeof(BalIdList));
-      memset(balFlows, 0, sizeof(BalIdList));
-      bal_id_list__init(balFlows);
-      balIndCfg->group_ind->data->flows = balFlows;
-
-      balIndCfg->group_ind->data->flows->n_val =  group_ind->data.flows.len;
-      balIndCfg->group_ind->data->flows->val =
-           (uint32_t *)malloc((balIndCfg->group_ind->data->flows->n_val)*sizeof(uint32_t));
-      memcpy(balIndCfg->group_ind->data->flows->val, group_ind->data.flows.val,
-             balIndCfg->group_ind->data->flows->n_val);
-
-      list_node *bal_indication_node = malloc(sizeof(list_node));
-      bal_indication_node->bal_indication = balIndCfg;
-
-      pthread_mutex_lock(&bal_ind_queue_lock);
-      add_bal_indication_node(bal_indication_node);
-      pthread_mutex_unlock(&bal_ind_queue_lock);
-   }
-
-   return result;
-}
 
 /********************************************************************\
  * Function    : bal_interface_osc_indication_cb                    *
@@ -669,11 +350,7 @@ bcmos_errno bal_interface_osc_indication_cb(bcmbal_obj *obj)
       bal_interface_oper_status_change__init(ifOsc);
       balIndCfg->interface_op_state = ifOsc;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->interface_op_state->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalInterfaceKey *ifkey;
       ifkey = malloc(sizeof(BalInterfaceKey));
@@ -749,11 +426,7 @@ bcmos_errno bal_interface_los_indication_cb(bcmbal_obj *obj)
       bal_interface_los__init(ifLos);
       balIndCfg->interface_los = ifLos;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->interface_los->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalInterfaceKey *ifkey;
       ifkey = malloc(sizeof(BalInterfaceKey));
@@ -774,111 +447,6 @@ bcmos_errno bal_interface_los_indication_cb(bcmbal_obj *obj)
 
       balIndCfg->interface_los->data->has_status = BAL_GRPC_PRES;
       balIndCfg->interface_los->data->status = int_los_ind->data.status;
-
-      list_node *bal_indication_node = malloc(sizeof(list_node));
-      bal_indication_node->bal_indication = balIndCfg;
-
-      pthread_mutex_lock(&bal_ind_queue_lock);
-      add_bal_indication_node(bal_indication_node);
-      pthread_mutex_unlock(&bal_ind_queue_lock);
-   }
-
-   return result;
-}
-
-/********************************************************************\
- * Function    : bal_interface_indication_cb                        *
- * Description : This function will handle the indications for      *
- *               Interface Indication                           *
- *                                                                  *
- ********************************************************************/
-bcmos_errno bal_interface_indication_cb(bcmbal_obj *obj)
-{
-   bcmos_errno result = BCM_ERR_OK;
-
-   if(BCMBAL_OBJ_ID_INTERFACE != obj->obj_type ||
-      bcmbal_interface_auto_id_ind != obj->subgroup)
-   {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
-				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
-      result = BCM_ERR_INTERNAL;
-   }
-   else
-   {
-      BalIndications *balIndCfg;
-      balIndCfg = malloc(sizeof(BalIndications));
-      memset(balIndCfg, 0, sizeof(BalIndications));
-      bal_indications__init(balIndCfg);
-      balIndCfg->u_case = BAL_INDICATIONS__U_INTERFACE_IND;
-      balIndCfg->has_objtype = BAL_GRPC_PRES;
-      balIndCfg->objtype = obj->obj_type;
-      balIndCfg->has_sub_group = BAL_GRPC_PRES;
-      balIndCfg->sub_group = obj->subgroup;
-      balIndCfg->device_id = voltha_device_id;
-
-      bcmbal_interface_ind *interface_ind = (bcmbal_interface_ind *)obj;
-
-      BalInterfaceInd *ifInd;
-      ifInd = malloc(sizeof(BalInterfaceInd));
-      memset(ifInd, 0, sizeof(BalInterfaceInd));
-      bal_interface_ind__init(ifInd);
-      balIndCfg->interface_ind = ifInd;
-
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->interface_ind->hdr = hdr;
-
-      BalInterfaceKey *ifkey;
-      ifkey = malloc(sizeof(BalInterfaceKey));
-      memset(ifkey, 0, sizeof(BalInterfaceKey));
-      bal_interface_key__init(ifkey);
-      balIndCfg->interface_ind->key = ifkey;
-
-      balIndCfg->interface_ind->key->has_intf_id = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->key->intf_id = interface_ind->key.intf_id;
-      balIndCfg->interface_ind->key->has_intf_type = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->key->intf_type = interface_ind->key.intf_type;
-
-      BalInterfaceIndData *ifIndData;
-      ifIndData = malloc(sizeof(BalInterfaceIndData));
-      memset(ifIndData, 0, sizeof(BalInterfaceIndData));
-      bal_interface_ind_data__init(ifIndData);
-      balIndCfg->interface_ind->data = ifIndData;
-
-      balIndCfg->interface_ind->data->has_admin_state = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->admin_state = interface_ind->data.admin_state;
-      balIndCfg->interface_ind->data->has_oper_status = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->oper_status = interface_ind->data.oper_status;
-      balIndCfg->interface_ind->data->has_min_data_agg_port_id = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->min_data_agg_port_id = interface_ind->data.min_data_agg_port_id;
-      balIndCfg->interface_ind->data->has_min_data_svc_port_id = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->min_data_svc_port_id = interface_ind->data.min_data_svc_port_id;
-      balIndCfg->interface_ind->data->has_transceiver_type = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->transceiver_type = interface_ind->data.transceiver_type;
-      balIndCfg->interface_ind->data->has_ds_miss_mode = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->ds_miss_mode = interface_ind->data.ds_miss_mode;
-      balIndCfg->interface_ind->data->has_mtu = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->mtu = interface_ind->data.mtu;
-      balIndCfg->interface_ind->data->has_flow_control = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->flow_control = interface_ind->data.flow_control;
-      balIndCfg->interface_ind->data->has_ds_tm = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->ds_tm = interface_ind->data.ds_tm;
-      balIndCfg->interface_ind->data->has_us_tm = BAL_GRPC_PRES;
-      balIndCfg->interface_ind->data->us_tm = interface_ind->data.us_tm;
-
-      BalIdList *balFlows;
-      balFlows = malloc(sizeof(BalIdList));
-      memset(balFlows, 0, sizeof(BalIdList));
-      bal_id_list__init(balFlows);
-      balIndCfg->interface_ind->data->sub_term_id_list = balFlows;
-
-      balIndCfg->interface_ind->data->sub_term_id_list->n_val =  interface_ind->data.sub_term_id_list.len;
-      balIndCfg->interface_ind->data->sub_term_id_list->val =
-           (uint32_t *)malloc((balIndCfg->interface_ind->data->sub_term_id_list->n_val)*sizeof(uint32_t));
-      memcpy(balIndCfg->interface_ind->data->sub_term_id_list->val, interface_ind->data.sub_term_id_list.val,
-             balIndCfg->interface_ind->data->sub_term_id_list->n_val);
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
@@ -930,11 +498,7 @@ bcmos_errno bal_sub_term_osc_indication_cb(bcmbal_obj *obj)
       bal_subscriber_terminal_oper_status_change__init(subOscInd);
       balIndCfg->terminal_op_state = subOscInd;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->terminal_op_state->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalSubscriberTerminalKey *subkey;
       subkey = malloc(sizeof(BalSubscriberTerminalKey));
@@ -1015,11 +579,7 @@ bcmos_errno bal_sub_term_disc_indication_cb(bcmbal_obj *obj)
       bal_subscriber_terminal_sub_term_disc__init(subDiscInd);
       balIndCfg->terminal_disc = subDiscInd;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->terminal_disc->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalSubscriberTerminalKey *subkey;
       subkey = malloc(sizeof(BalSubscriberTerminalKey));
@@ -1132,11 +692,7 @@ bcmos_errno bal_sub_term_alarm_indication_cb(bcmbal_obj *obj)
       bal_subscriber_terminal_sub_term_alarm__init(subTermAlarm);
       balIndCfg->terminal_alarm = subTermAlarm;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->terminal_alarm->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalSubscriberTerminalKey *subkey;
       subkey = malloc(sizeof(BalSubscriberTerminalKey));
@@ -1220,11 +776,7 @@ bcmos_errno bal_sub_term_dgi_indication_cb(bcmbal_obj *obj)
       bal_subscriber_terminal_dgi__init(subDgiInd);
       balIndCfg->terminal_dgi= subDgiInd;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->terminal_dgi->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalSubscriberTerminalKey *subkey;
       subkey = malloc(sizeof(BalSubscriberTerminalKey));
@@ -1258,17 +810,16 @@ bcmos_errno bal_sub_term_dgi_indication_cb(bcmbal_obj *obj)
 }
 
 /********************************************************************\
- * Function    : bal_sub_term_indication_cb                         *
- * Description : This function will handle the indications for      *
- *               Subscriber term indication                         *
+ * Function    : bal_sub_term_dowi_indication_cb                    *
+ * Description : This function will handle dowi indication          *
  *                                                                  *
  ********************************************************************/
-bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
+bcmos_errno bal_sub_term_dowi_indication_cb(bcmbal_obj *obj)
 {
-   bcmos_errno result = BCM_ERR_OK;
+bcmos_errno result = BCM_ERR_OK;
 
    if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
-      bcmbal_subscriber_terminal_auto_id_ind != obj->subgroup)
+      bcmbal_subscriber_terminal_auto_id_dowi != obj->subgroup)
    {
       ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
@@ -1280,124 +831,49 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
       balIndCfg = malloc(sizeof(BalIndications));
       memset(balIndCfg, 0, sizeof(BalIndications));
       bal_indications__init(balIndCfg);
-      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_IND;
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_DOWI;
       balIndCfg->has_objtype = BAL_GRPC_PRES;
       balIndCfg->objtype = obj->obj_type;
       balIndCfg->has_sub_group = BAL_GRPC_PRES;
       balIndCfg->sub_group = obj->subgroup;
       balIndCfg->device_id = voltha_device_id;
 
-      bcmbal_subscriber_terminal_ind *sub_ind = (bcmbal_subscriber_terminal_ind *)obj;
+      bcmbal_subscriber_terminal_dowi *sub_dowi_ind =
+                           (bcmbal_subscriber_terminal_dowi *)obj;
 
-      BalSubscriberTerminalInd *subInd;
-      subInd = malloc(sizeof(BalSubscriberTerminalInd));
-      memset(subInd, 0, sizeof(BalSubscriberTerminalInd));
-      bal_subscriber_terminal_ind__init(subInd);
-      balIndCfg->terminal_ind = subInd;
+      BalSubscriberTerminalDowi *subDowiInd;
+      subDowiInd = malloc(sizeof(BalSubscriberTerminalDowi));
+      memset(subDowiInd, 0, sizeof(BalSubscriberTerminalDowi));
+      bal_subscriber_terminal_dowi__init(subDowiInd);
+      balIndCfg->terminal_dowi= subDowiInd;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->terminal_ind->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalSubscriberTerminalKey *subkey;
       subkey = malloc(sizeof(BalSubscriberTerminalKey));
       memset(subkey, 0, sizeof(BalSubscriberTerminalKey));
       bal_subscriber_terminal_key__init(subkey);
-      balIndCfg->terminal_ind->key = subkey;
+      balIndCfg->terminal_dowi->key = subkey;
 
-      balIndCfg->terminal_ind->key->has_intf_id = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->key->intf_id = sub_ind->key.intf_id;
-      balIndCfg->terminal_ind->key->has_sub_term_id = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->key->sub_term_id = sub_ind->key.sub_term_id;
+      balIndCfg->terminal_dowi->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_dowi->key->intf_id = sub_dowi_ind->key.intf_id;
+      balIndCfg->terminal_dowi->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_dowi->key->sub_term_id = sub_dowi_ind->key.sub_term_id;
 
-      BalSubscriberTerminalIndData *subIndData;
-      subIndData = malloc(sizeof(BalSubscriberTerminalIndData));
-      memset(subIndData, 0, sizeof(BalSubscriberTerminalIndData));
-      bal_subscriber_terminal_ind_data__init(subIndData);
-      balIndCfg->terminal_ind->data = subIndData;
+      BalSubscriberTerminalDowiData *subDowiIndData;
+      subDowiIndData = malloc(sizeof(BalSubscriberTerminalDowiData));
+      memset(subDowiIndData, 0, sizeof(BalSubscriberTerminalDowiData));
+      bal_subscriber_terminal_dowi_data__init(subDowiIndData);
+      balIndCfg->terminal_dowi->data = subDowiIndData;
 
-      balIndCfg->terminal_ind->data->has_admin_state = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->data->admin_state = sub_ind->data.admin_state;
-      balIndCfg->terminal_ind->data->has_oper_status = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->data->oper_status = sub_ind->data.oper_status;
-      balIndCfg->terminal_ind->data->has_svc_port_id = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->data->svc_port_id = sub_ind->data.svc_port_id;
-      balIndCfg->terminal_ind->data->has_ds_tm = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->data->ds_tm = sub_ind->data.ds_tm;
-      balIndCfg->terminal_ind->data->has_us_tm = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->data->us_tm = sub_ind->data.us_tm;
-      balIndCfg->terminal_ind->data->has_sub_term_rate = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->data->sub_term_rate = sub_ind->data.sub_term_rate;
-      char *password = malloc(sizeof(char)*MAX_CHAR_LENGTH*2);
-      memset(password, 0, MAX_CHAR_LENGTH*2);
-      strcpy(password,(const char *)sub_ind->data.password.arr);
-      balIndCfg->terminal_ind->data->password = password;
-      char *registration_id = malloc(sizeof(char)*MAX_CHAR_LENGTH*8);
-      memset(registration_id, 0, MAX_CHAR_LENGTH*8);
-      strcpy(registration_id,(const char *)sub_ind->data.registration_id.arr);
-      balIndCfg->terminal_ind->data->registration_id =  registration_id;
+      balIndCfg->terminal_dowi->data->has_dowi_status = BAL_GRPC_PRES;
+      balIndCfg->terminal_dowi->data->dowi_status = sub_dowi_ind->data.dowi_status;
 
-#if 0
-      balIndCfg->terminal_ind->data->has_mac_address = BAL_GRPC_PRES;
-      balIndCfg->terminal_ind->data->mac_address.len =
-                            (BCMOS_ETH_ALEN)*sizeof(sub_ind->data.mac_address.u8);
-      uint8_t mac_address[balIndCfg->terminal_ind->data->mac_address.len];
-      memset(&mac_address, 0 ,balIndCfg->terminal_ind->data->mac_address.len);
-      strcpy((char *)mac_address,(const char *)sub_ind->data.mac_address.u8);
-      balIndCfg->terminal_ind->data->mac_address.data = mac_address;
-#endif
+      balIndCfg->terminal_dowi->data->has_drift_value = BAL_GRPC_PRES;
+      balIndCfg->terminal_dowi->data->drift_value = sub_dowi_ind->data.drift_value;
 
-      BalSerialNumber *serialNum;
-      serialNum = malloc(sizeof(BalSerialNumber));
-      memset(serialNum, 0, sizeof(BalSerialNumber));
-      bal_serial_number__init(serialNum);
-      balIndCfg->terminal_ind->data->serial_number = serialNum;
-
-      //ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:Before decoding:Vendor id is %s", sub_ind->data.serial_number.vendor_id);
-      //ASFVOLT_LOG(ASFVOLT_ERROR, "ONU Activation:Before decoding:Vendor specific is %s", sub_ind->data.serial_number.vendor_specific);
-
-      char *vendor_id = malloc(sizeof(char)*MAX_CHAR_LENGTH);
-      memset(vendor_id, 0, MAX_CHAR_LENGTH);
-      sprintf(vendor_id,"%c%c%c%c",
-		      sub_ind->data.serial_number.vendor_id[0],
-		      sub_ind->data.serial_number.vendor_id[1],
-		      sub_ind->data.serial_number.vendor_id[2],
-		      sub_ind->data.serial_number.vendor_id[3]);
-      balIndCfg->terminal_ind->data->serial_number->vendor_id = vendor_id;
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor id is %s",
-                  balIndCfg->terminal_ind->data->serial_number->vendor_id);
-      char *vendor_specific = malloc(sizeof(char)*MAX_CHAR_LENGTH);
-      memset(vendor_specific, 0, MAX_CHAR_LENGTH);
-      sprintf(vendor_specific,"%1X%1X%1X%1X%1X%1X%1X%1X",
-		      sub_ind->data.serial_number.vendor_specific[0]>>4 & 0x0f,
-		      sub_ind->data.serial_number.vendor_specific[0] & 0x0f,
-		      sub_ind->data.serial_number.vendor_specific[1]>>4 & 0x0f,
-		      sub_ind->data.serial_number.vendor_specific[1] & 0x0f,
-		      sub_ind->data.serial_number.vendor_specific[2]>>4 & 0x0f,
-		      sub_ind->data.serial_number.vendor_specific[2] & 0x0f,
-		      sub_ind->data.serial_number.vendor_specific[3]>>4 & 0x0f,
-		      sub_ind->data.serial_number.vendor_specific[3] & 0x0f);
-      balIndCfg->terminal_ind->data->serial_number->vendor_specific = vendor_specific;
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Vendor specific is %s",
-                  balIndCfg->terminal_ind->data->serial_number->vendor_specific);
-      ASFVOLT_LOG(ASFVOLT_DEBUG, "ONU Activation:After decoding:Registration ID is %s",
-                  balIndCfg->terminal_ind->data->registration_id);
-
-      BalIdList *balAggportList;
-      balAggportList = malloc(sizeof(BalIdList));
-      memset(balAggportList, 0, sizeof(BalIdList));
-      bal_id_list__init(balAggportList);
-      balIndCfg->terminal_ind->data->agg_port_id_list = balAggportList;
-
-#if 0
-      balIndCfg->terminal_ind->data->agg_port_id_list->n_val =  sub_ind->data.agg_port_id_list.len;
-      uint32_t agg_port_id_list[balIndCfg->terminal_ind->data->agg_port_id_list->n_val];
-      memset(&agg_port_id_list, 0, balIndCfg->terminal_ind->data->agg_port_id_list->n_val);
-      strcpy((char *)agg_port_id_list,(const char *)sub_ind->data.agg_port_id_list.val);
-      balIndCfg->terminal_ind->data->agg_port_id_list->val = agg_port_id_list;
-#endif
+       balIndCfg->terminal_dowi->data->has_new_eqd = BAL_GRPC_PRES;
+       balIndCfg->terminal_dowi->data->new_eqd = sub_dowi_ind->data.new_eqd;
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
@@ -1406,39 +882,20 @@ bcmos_errno bal_sub_term_indication_cb(bcmbal_obj *obj)
       add_bal_indication_node(bal_indication_node);
       pthread_mutex_unlock(&bal_ind_queue_lock);
    }
-
    return result;
 }
 
 /********************************************************************\
- * Function    : fill_bal_tm_red                                    *
- * Description : This function will fill grpc-BalTmred struture     *
- *               from bal-bcmbal_tm_red structure                   *
+ * Function    : bal_sub_term_looci_indication_cb                   *
+ * Description : This function will handle looci indication         *
  *                                                                  *
  ********************************************************************/
-void fill_bal_tm_red(BalTmred *grpc_red, bcmbal_tm_red *bal_red)
+bcmos_errno bal_sub_term_looci_indication_cb(bcmbal_obj *obj)
 {
-   grpc_red->has_min_threshold = BAL_GRPC_PRES;
-   grpc_red->min_threshold = bal_red->min_threshold;
-   grpc_red->has_max_threshold = BAL_GRPC_PRES;
-   grpc_red->max_threshold = bal_red->max_threshold;
-   grpc_red->has_max_probability = BAL_GRPC_PRES;
-   grpc_red->max_probability = bal_red->max_probability;
-   return;
-}
+bcmos_errno result = BCM_ERR_OK;
 
-/********************************************************************\
- * Function    : bal_tm_queue_indication_cb                         *
- * Description : This function will handle the indications for      *
- *               TM Queue indication                                *
- *                                                                  *
- ********************************************************************/
-bcmos_errno bal_tm_queue_indication_cb(bcmbal_obj *obj)
-{
-   bcmos_errno result = BCM_ERR_OK;
-
-   if(BCMBAL_OBJ_ID_TM_QUEUE != obj->obj_type ||
-      bcmbal_tm_queue_auto_id_ind != obj->subgroup)
+   if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
+      bcmbal_subscriber_terminal_auto_id_looci != obj->subgroup)
    {
       ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
@@ -1450,148 +907,390 @@ bcmos_errno bal_tm_queue_indication_cb(bcmbal_obj *obj)
       balIndCfg = malloc(sizeof(BalIndications));
       memset(balIndCfg, 0, sizeof(BalIndications));
       bal_indications__init(balIndCfg);
-      balIndCfg->u_case = BAL_INDICATIONS__U_TM_QUEUE__IND;
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_LOOCI;
       balIndCfg->has_objtype = BAL_GRPC_PRES;
       balIndCfg->objtype = obj->obj_type;
       balIndCfg->has_sub_group = BAL_GRPC_PRES;
       balIndCfg->sub_group = obj->subgroup;
       balIndCfg->device_id = voltha_device_id;
 
-      bcmbal_tm_queue_ind *tm_que_ind = (bcmbal_tm_queue_ind *)obj;
+      bcmbal_subscriber_terminal_looci *sub_looci_ind =
+                           (bcmbal_subscriber_terminal_looci *)obj;
 
-      BalTmQueueInd *tmQueInd;
-      tmQueInd = malloc(sizeof(BalTmQueueInd));
-      memset(tmQueInd, 0, sizeof(BalTmQueueInd));
-      bal_tm_queue_ind__init(tmQueInd);
-      balIndCfg->tm_queue_ind = tmQueInd;
+      BalSubscriberTerminalLooci *subLoociInd;
+      subLoociInd = malloc(sizeof(BalSubscriberTerminalLooci));
+      memset(subLoociInd, 0, sizeof(BalSubscriberTerminalLooci));
+      bal_subscriber_terminal_looci__init(subLoociInd);
+      balIndCfg->terminal_looci= subLoociInd;
 
-      BalTmQueueKey *tmQkey;
-      tmQkey = malloc(sizeof(BalTmQueueKey));
-      memset(tmQkey, 0, sizeof(BalTmQueueKey));
-      bal_tm_queue_key__init(tmQkey);
-      balIndCfg->tm_queue_ind->key = tmQkey;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
-      balIndCfg->tm_queue_ind->key->has_sched_id = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->key->sched_id = tm_que_ind->key.sched_id;
-      balIndCfg->tm_queue_ind->key->has_sched_dir = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->key->sched_dir = tm_que_ind->key.sched_dir;
-      balIndCfg->tm_queue_ind->key->has_id = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->key->id = tm_que_ind->key.id;
+      BalSubscriberTerminalKey *subkey;
+      subkey = malloc(sizeof(BalSubscriberTerminalKey));
+      memset(subkey, 0, sizeof(BalSubscriberTerminalKey));
+      bal_subscriber_terminal_key__init(subkey);
+      balIndCfg->terminal_looci->key = subkey;
 
-      BalTmQueueIndData *tmQIndData;
-      tmQIndData = malloc(sizeof(BalTmQueueIndData));
-      memset(tmQIndData, 0, sizeof(BalTmQueueIndData));
-      bal_tm_queue_ind_data__init(tmQIndData);
-      balIndCfg->tm_queue_ind->data = tmQIndData;
+      balIndCfg->terminal_looci->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_looci->key->intf_id = sub_looci_ind->key.intf_id;
+      balIndCfg->terminal_looci->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_looci->key->sub_term_id = sub_looci_ind->key.sub_term_id;
 
-      balIndCfg->tm_queue_ind->data->has_priority = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->priority = tm_que_ind->data.priority;
-      balIndCfg->tm_queue_ind->data->has_weight = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->weight = tm_que_ind->data.weight;
-      balIndCfg->tm_queue_ind->data->has_create_mode = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->create_mode = tm_que_ind->data.create_mode;
-      balIndCfg->tm_queue_ind->data->has_ref_count = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->ref_count = tm_que_ind->data.ref_count;
+      BalSubscriberTerminalLoociData *subLoociIndData;
+      subLoociIndData = malloc(sizeof(BalSubscriberTerminalLoociData));
+      memset(subLoociIndData, 0, sizeof(BalSubscriberTerminalLoociData));
+      bal_subscriber_terminal_looci_data__init(subLoociIndData);
+      balIndCfg->terminal_looci->data = subLoociIndData;
 
-      BalTmShaping *balShape;
-      balShape = malloc(sizeof(BalTmShaping));
-      memset(balShape, 0, sizeof(BalTmShaping));
-      bal_tm_shaping__init(balShape);
-      balIndCfg->tm_queue_ind->data->rate = balShape;
+      balIndCfg->terminal_looci->data->has_looci_status = BAL_GRPC_PRES;
+      balIndCfg->terminal_looci->data->looci_status = sub_looci_ind->data.looci_status;
 
-      balIndCfg->tm_queue_ind->data->rate->has_presence_mask = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->rate->presence_mask = tm_que_ind->data.rate.presence_mask;
-      balIndCfg->tm_queue_ind->data->rate->has_cir = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->rate->cir = tm_que_ind->data.rate.cir;
-      balIndCfg->tm_queue_ind->data->rate->has_pir = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->rate->pir = tm_que_ind->data.rate.pir;
-      balIndCfg->tm_queue_ind->data->rate->has_burst = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->rate->burst = tm_que_ind->data.rate.burst;
+      list_node *bal_indication_node = malloc(sizeof(list_node));
+      bal_indication_node->bal_indication = balIndCfg;
 
-      BalTmBac *balBac;
-      balBac = malloc(sizeof(BalTmBac));
-      memset(balBac, 0, sizeof(BalTmBac));
-      bal_tm_bac__init(balBac);
-      balIndCfg->tm_queue_ind->data->bac = balBac;
+      pthread_mutex_lock(&bal_ind_queue_lock);
+      add_bal_indication_node(bal_indication_node);
+      pthread_mutex_unlock(&bal_ind_queue_lock);
+   }
+   return result;
+}
 
-      balIndCfg->tm_queue_ind->data->bac->has_type = BAL_GRPC_PRES;
-      balIndCfg->tm_queue_ind->data->bac->type = tm_que_ind->data.bac.type;
-      switch(tm_que_ind->data.bac.type)
-      {
-         case BCMBAL_TM_BAC_TYPE_TAILDROP:
-         {
-            balIndCfg->tm_queue_ind->data->bac->u_case = BAL_TM_BAC__U_TAILDROP;
-            BalTMBacTaildrop *balTaildrop;
-            balTaildrop = malloc(sizeof(BalTMBacTaildrop));
-            memset(balTaildrop, 0, sizeof(BalTMBacTaildrop));
-            bal_tmbac_taildrop__init(balTaildrop);
-            balIndCfg->tm_queue_ind->data->bac->taildrop = balTaildrop;
+/********************************************************************\
+ * Function    : bal_sub_term_processing_error_indication_cb        *
+ * Description : This function will handle sub term processing error*
+ *                                                                  *
+ ********************************************************************/
+bcmos_errno bal_sub_term_processing_error_indication_cb(bcmbal_obj *obj)
+{
+bcmos_errno result = BCM_ERR_OK;
 
-            balIndCfg->tm_queue_ind->data->bac->taildrop->has_max_size = BAL_GRPC_PRES;
-            balIndCfg->tm_queue_ind->data->bac->taildrop->max_size =
-                                               tm_que_ind->data.bac.u.taildrop.max_size;
-         }
-         break;
-         case BCMBAL_TM_BAC_TYPE_WTAILDROP:
-         {
-           /* No bal/grpc structure was defined */
-         }
-         break;
-         case BCMBAL_TM_BAC_TYPE_RED:
-         {
-            balIndCfg->tm_queue_ind->data->bac->u_case = BAL_TM_BAC__U_RED;
-            BalTMBacRed *balBacRed;
-            balBacRed = malloc(sizeof(BalTMBacRed));
-            memset(balBacRed, 0, sizeof(BalTMBacRed));
-            bal_tmbac_red__init(balBacRed);
-            balIndCfg->tm_queue_ind->data->bac->red = balBacRed;
+   if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
+      bcmbal_subscriber_terminal_auto_id_processing_error != obj->subgroup)
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
+				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
+      result = BCM_ERR_INTERNAL;
+   }
+   else
+   {
+      BalIndications *balIndCfg;
+      balIndCfg = malloc(sizeof(BalIndications));
+      memset(balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(balIndCfg);
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_PROC_ERR;
+      balIndCfg->has_objtype = BAL_GRPC_PRES;
+      balIndCfg->objtype = obj->obj_type;
+      balIndCfg->has_sub_group = BAL_GRPC_PRES;
+      balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->device_id = voltha_device_id;
 
-            BalTmred *balRed;
-            balRed = malloc(sizeof(BalTmred));
-            memset(balRed, 0, sizeof(BalTmred));
-            bal_tmred__init(balRed);
-            balIndCfg->tm_queue_ind->data->bac->red->red = balRed;
-            fill_bal_tm_red(balIndCfg->tm_queue_ind->data->bac->red->red, &tm_que_ind->data.bac.u.red.red);
-         }
-         break;
-         case BCMBAL_TM_BAC_TYPE_WRED:
-         {
-            balIndCfg->tm_queue_ind->data->bac->u_case = BAL_TM_BAC__U_WRED;
-            BalTMBacWred *balBacWred;
-            balBacWred = malloc(sizeof(BalTMBacWred));
-            memset(balBacWred, 0, sizeof(BalTMBacWred));
-            bal_tmbac_wred__init(balBacWred);
-            balIndCfg->tm_queue_ind->data->bac->wred = balBacWred;
+      bcmbal_subscriber_terminal_processing_error *sub_proc_err_ind =
+                           (bcmbal_subscriber_terminal_processing_error *)obj;
 
-            BalTmred *balGreen;
-            balGreen = malloc(sizeof(BalTmred));
-            memset(balGreen, 0, sizeof(BalTmred));
-            bal_tmred__init(balGreen);
-            balIndCfg->tm_queue_ind->data->bac->wred->green = balGreen;
-            fill_bal_tm_red(balIndCfg->tm_queue_ind->data->bac->wred->green, &tm_que_ind->data.bac.u.wred.green);
+      BalSubscriberTerminalProcessingError *subProcErrInd;
+      subProcErrInd = malloc(sizeof(BalSubscriberTerminalProcessingError));
+      memset(subProcErrInd, 0, sizeof(BalSubscriberTerminalProcessingError));
+      bal_subscriber_terminal_processing_error__init(subProcErrInd);
+      balIndCfg->terminal_proc_err= subProcErrInd;
 
-            BalTmred *balYellow;
-            balYellow = malloc(sizeof(BalTmred));
-            memset(balYellow, 0, sizeof(BalTmred));
-            bal_tmred__init(balYellow);
-            balIndCfg->tm_queue_ind->data->bac->wred->yellow = balYellow;
-            fill_bal_tm_red(balIndCfg->tm_queue_ind->data->bac->wred->yellow, &tm_que_ind->data.bac.u.wred.yellow);
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
-            BalTmred *balRed;
-            balRed = malloc(sizeof(BalTmred));
-            memset(balRed, 0, sizeof(BalTmred));
-            bal_tmred__init(balRed);
-            balIndCfg->tm_queue_ind->data->bac->wred->red = balRed;
-            fill_bal_tm_red(balIndCfg->tm_queue_ind->data->bac->wred->red, &tm_que_ind->data.bac.u.wred.red);
-         }
-         break;
-         default:
-         {
-            balIndCfg->tm_queue_ind->data->bac->u_case = BAL_TM_BAC__U__NOT_SET;
-         }
-         break;
+      BalSubscriberTerminalKey *subkey;
+      subkey = malloc(sizeof(BalSubscriberTerminalKey));
+      memset(subkey, 0, sizeof(BalSubscriberTerminalKey));
+      bal_subscriber_terminal_key__init(subkey);
+      balIndCfg->terminal_proc_err->key = subkey;
 
-      }
+      balIndCfg->terminal_proc_err->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_proc_err->key->intf_id = sub_proc_err_ind->key.intf_id;
+      balIndCfg->terminal_proc_err->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_proc_err->key->sub_term_id = sub_proc_err_ind->key.sub_term_id;
+
+      list_node *bal_indication_node = malloc(sizeof(list_node));
+      bal_indication_node->bal_indication = balIndCfg;
+
+      pthread_mutex_lock(&bal_ind_queue_lock);
+      add_bal_indication_node(bal_indication_node);
+      pthread_mutex_unlock(&bal_ind_queue_lock);
+   }
+   return result;
+}
+
+/********************************************************************\
+ * Function    : bal_sub_term_sdi_indication_cb                     *
+ * Description : This function will handle sdi indication           *
+ *                                                                  *
+ ********************************************************************/
+bcmos_errno bal_sub_term_sdi_indication_cb(bcmbal_obj *obj)
+{
+bcmos_errno result = BCM_ERR_OK;
+
+   if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
+      bcmbal_subscriber_terminal_auto_id_sdi != obj->subgroup)
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
+				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
+      result = BCM_ERR_INTERNAL;
+   }
+   else
+   {
+      BalIndications *balIndCfg;
+      balIndCfg = malloc(sizeof(BalIndications));
+      memset(balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(balIndCfg);
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_SDI;
+      balIndCfg->has_objtype = BAL_GRPC_PRES;
+      balIndCfg->objtype = obj->obj_type;
+      balIndCfg->has_sub_group = BAL_GRPC_PRES;
+      balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->device_id = voltha_device_id;
+
+      bcmbal_subscriber_terminal_sdi *sub_sdi_ind =
+                           (bcmbal_subscriber_terminal_sdi *)obj;
+
+      BalSubscriberTerminalSdi *subSdiInd;
+      subSdiInd = malloc(sizeof(BalSubscriberTerminalSdi));
+      memset(subSdiInd, 0, sizeof(BalSubscriberTerminalSdi));
+      bal_subscriber_terminal_sdi__init(subSdiInd);
+      balIndCfg->terminal_sdi= subSdiInd;
+
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
+
+      BalSubscriberTerminalKey *subkey;
+      subkey = malloc(sizeof(BalSubscriberTerminalKey));
+      memset(subkey, 0, sizeof(BalSubscriberTerminalKey));
+      bal_subscriber_terminal_key__init(subkey);
+      balIndCfg->terminal_sdi->key = subkey;
+
+      balIndCfg->terminal_sdi->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sdi->key->intf_id = sub_sdi_ind->key.intf_id;
+      balIndCfg->terminal_sdi->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sdi->key->sub_term_id = sub_sdi_ind->key.sub_term_id;
+
+      BalSubscriberTerminalSdiData *subSdiIndData;
+      subSdiIndData = malloc(sizeof(BalSubscriberTerminalSdiData));
+      memset(subSdiIndData, 0, sizeof(BalSubscriberTerminalSdiData));
+      bal_subscriber_terminal_sdi_data__init(subSdiIndData);
+      balIndCfg->terminal_sdi->data = subSdiIndData;
+
+      balIndCfg->terminal_sdi->data->has_sdi_status = BAL_GRPC_PRES;
+      balIndCfg->terminal_sdi->data->sdi_status = sub_sdi_ind->data.sdi_status;
+
+      balIndCfg->terminal_sdi->data->has_ber = BAL_GRPC_PRES;
+      balIndCfg->terminal_sdi->data->ber = sub_sdi_ind->data.ber;
+
+      list_node *bal_indication_node = malloc(sizeof(list_node));
+      bal_indication_node->bal_indication = balIndCfg;
+
+      pthread_mutex_lock(&bal_ind_queue_lock);
+      add_bal_indication_node(bal_indication_node);
+      pthread_mutex_unlock(&bal_ind_queue_lock);
+   }
+   return result;
+}
+
+/********************************************************************\
+ * Function    : bal_sub_term_sfi_indication_cb                     *
+ * Description : This function will handle sfi indication           *
+ *                                                                  *
+ ********************************************************************/
+bcmos_errno bal_sub_term_sfi_indication_cb(bcmbal_obj *obj)
+{
+bcmos_errno result = BCM_ERR_OK;
+
+   if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
+      bcmbal_subscriber_terminal_auto_id_sfi != obj->subgroup)
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
+				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
+      result = BCM_ERR_INTERNAL;
+   }
+   else
+   {
+      BalIndications *balIndCfg;
+      balIndCfg = malloc(sizeof(BalIndications));
+      memset(balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(balIndCfg);
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_SFI;
+      balIndCfg->has_objtype = BAL_GRPC_PRES;
+      balIndCfg->objtype = obj->obj_type;
+      balIndCfg->has_sub_group = BAL_GRPC_PRES;
+      balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->device_id = voltha_device_id;
+
+      bcmbal_subscriber_terminal_sfi *sub_sfi_ind =
+                           (bcmbal_subscriber_terminal_sfi *)obj;
+
+      BalSubscriberTerminalSfi *subSfiInd;
+      subSfiInd = malloc(sizeof(BalSubscriberTerminalSfi));
+      memset(subSfiInd, 0, sizeof(BalSubscriberTerminalSfi));
+      bal_subscriber_terminal_sfi__init(subSfiInd);
+      balIndCfg->terminal_sfi= subSfiInd;
+
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
+
+      BalSubscriberTerminalKey *subkey;
+      subkey = malloc(sizeof(BalSubscriberTerminalKey));
+      memset(subkey, 0, sizeof(BalSubscriberTerminalKey));
+      bal_subscriber_terminal_key__init(subkey);
+      balIndCfg->terminal_sfi->key = subkey;
+
+      balIndCfg->terminal_sfi->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sfi->key->intf_id = sub_sfi_ind->key.intf_id;
+      balIndCfg->terminal_sfi->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sfi->key->sub_term_id = sub_sfi_ind->key.sub_term_id;
+
+      BalSubscriberTerminalSfiData *subSfiIndData;
+      subSfiIndData = malloc(sizeof(BalSubscriberTerminalSfiData));
+      memset(subSfiIndData, 0, sizeof(BalSubscriberTerminalSfiData));
+      bal_subscriber_terminal_sfi_data__init(subSfiIndData);
+      balIndCfg->terminal_sfi->data = subSfiIndData;
+
+      balIndCfg->terminal_sfi->data->has_sfi_status = BAL_GRPC_PRES;
+      balIndCfg->terminal_sfi->data->sfi_status = sub_sfi_ind->data.sfi_status;
+
+      balIndCfg->terminal_sfi->data->has_ber = BAL_GRPC_PRES;
+      balIndCfg->terminal_sfi->data->ber = sub_sfi_ind->data.ber;
+
+      list_node *bal_indication_node = malloc(sizeof(list_node));
+      bal_indication_node->bal_indication = balIndCfg;
+
+      pthread_mutex_lock(&bal_ind_queue_lock);
+      add_bal_indication_node(bal_indication_node);
+      pthread_mutex_unlock(&bal_ind_queue_lock);
+   }
+   return result;
+}
+
+/********************************************************************\
+ * Function    : bal_sub_term_act_fail_indication_cb                *
+ * Description : This function will handle sub term activation fail *
+ *               indication                                         *
+ *                                                                  *
+ ********************************************************************/
+bcmos_errno bal_sub_term_act_fail_indication_cb(bcmbal_obj *obj)
+{
+bcmos_errno result = BCM_ERR_OK;
+
+   if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
+      bcmbal_subscriber_terminal_auto_id_sub_term_act_fail != obj->subgroup)
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
+				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
+      result = BCM_ERR_INTERNAL;
+   }
+   else
+   {
+      BalIndications *balIndCfg;
+      balIndCfg = malloc(sizeof(BalIndications));
+      memset(balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(balIndCfg);
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_SUB_TERM_ACT_FAIL;
+      balIndCfg->has_objtype = BAL_GRPC_PRES;
+      balIndCfg->objtype = obj->obj_type;
+      balIndCfg->has_sub_group = BAL_GRPC_PRES;
+      balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->device_id = voltha_device_id;
+
+      bcmbal_subscriber_terminal_sub_term_act_fail *sub_term_act_fail_ind =
+                           (bcmbal_subscriber_terminal_sub_term_act_fail *)obj;
+
+      BalSubscriberTerminalSubTermActFail *subTermActFailInd;
+      subTermActFailInd = malloc(sizeof(BalSubscriberTerminalSubTermActFail));
+      memset(subTermActFailInd, 0, sizeof(BalSubscriberTerminalSubTermActFail));
+      bal_subscriber_terminal_sub_term_act_fail__init(subTermActFailInd);
+      balIndCfg->terminal_sub_term_act_fail= subTermActFailInd;
+
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
+
+      BalSubscriberTerminalKey *subkey;
+      subkey = malloc(sizeof(BalSubscriberTerminalKey));
+      memset(subkey, 0, sizeof(BalSubscriberTerminalKey));
+      bal_subscriber_terminal_key__init(subkey);
+      balIndCfg->terminal_sub_term_act_fail->key = subkey;
+
+      balIndCfg->terminal_sub_term_act_fail->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sub_term_act_fail->key->intf_id = sub_term_act_fail_ind->key.intf_id;
+      balIndCfg->terminal_sub_term_act_fail->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sub_term_act_fail->key->sub_term_id = sub_term_act_fail_ind->key.sub_term_id;
+
+      BalSubscriberTerminalSubTermActFailData *subTermActFailIndData;
+      subTermActFailIndData = malloc(sizeof(BalSubscriberTerminalSubTermActFailData));
+      memset(subTermActFailIndData, 0, sizeof(BalSubscriberTerminalSubTermActFailData));
+      bal_subscriber_terminal_sub_term_act_fail_data__init(subTermActFailIndData);
+      balIndCfg->terminal_sub_term_act_fail->data = subTermActFailIndData;
+
+      balIndCfg->terminal_sub_term_act_fail->data->has_fail_reason = BAL_GRPC_PRES;
+      balIndCfg->terminal_sub_term_act_fail->data->fail_reason = sub_term_act_fail_ind->data.fail_reason;
+
+      list_node *bal_indication_node = malloc(sizeof(list_node));
+      bal_indication_node->bal_indication = balIndCfg;
+
+      pthread_mutex_lock(&bal_ind_queue_lock);
+      add_bal_indication_node(bal_indication_node);
+      pthread_mutex_unlock(&bal_ind_queue_lock);
+   }
+   return result;
+}
+
+/********************************************************************\
+ * Function    : bal_sub_term_sufi_indication_cb                    *
+ * Description : This function will handle sufi indication          *
+ *                                                                  *
+ ********************************************************************/
+bcmos_errno bal_sub_term_sufi_indication_cb(bcmbal_obj *obj)
+{
+   bcmos_errno result = BCM_ERR_OK;
+   if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
+      bcmbal_subscriber_terminal_auto_id_sufi != obj->subgroup)
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
+				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
+      result = BCM_ERR_INTERNAL;
+   }
+   else
+   {
+      BalIndications *balIndCfg;
+      balIndCfg = malloc(sizeof(BalIndications));
+      memset(balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(balIndCfg);
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_SUFI;
+      balIndCfg->has_objtype = BAL_GRPC_PRES;
+      balIndCfg->objtype = obj->obj_type;
+      balIndCfg->has_sub_group = BAL_GRPC_PRES;
+      balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->device_id = voltha_device_id;
+
+      bcmbal_subscriber_terminal_sufi *sub_sufi_ind =
+                           (bcmbal_subscriber_terminal_sufi *)obj;
+
+      BalSubscriberTerminalSufi *subSufiInd;
+      subSufiInd = malloc(sizeof(BalSubscriberTerminalSufi));
+      memset(subSufiInd, 0, sizeof(BalSubscriberTerminalSufi));
+      bal_subscriber_terminal_sufi__init(subSufiInd);
+      balIndCfg->terminal_sufi= subSufiInd;
+
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
+
+      BalSubscriberTerminalKey *subkey;
+      subkey = malloc(sizeof(BalSubscriberTerminalKey));
+      memset(subkey, 0, sizeof(BalSubscriberTerminalKey));
+      bal_subscriber_terminal_key__init(subkey);
+      balIndCfg->terminal_sufi->key = subkey;
+
+      balIndCfg->terminal_sufi->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sufi->key->intf_id = sub_sufi_ind->key.intf_id;
+      balIndCfg->terminal_sufi->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_sufi->key->sub_term_id = sub_sufi_ind->key.sub_term_id;
+
+      BalSubscriberTerminalSufiData *subSufiIndData;
+      subSufiIndData = malloc(sizeof(BalSubscriberTerminalSufiData));
+      memset(subSufiIndData, 0, sizeof(BalSubscriberTerminalSufiData));
+      bal_subscriber_terminal_sufi_data__init(subSufiIndData);
+      balIndCfg->terminal_sufi->data = subSufiIndData;
+
+      balIndCfg->terminal_sufi->data->has_sufi_status = BAL_GRPC_PRES;
+      balIndCfg->terminal_sufi->data->sufi_status = sub_sufi_ind->data.sufi_status;
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
@@ -1605,17 +1304,90 @@ bcmos_errno bal_tm_queue_indication_cb(bcmbal_obj *obj)
 }
 
 /********************************************************************\
- * Function    : bal_tm_sched_indication_cb                         *
- * Description : This function will handle the indications for      *
- *               TM Sched indication                                *
+ * Function    : bal_sub_term_tiwi_indication_cb                    *
+ * Description : This function will handle tiwi indication          *
  *                                                                  *
  ********************************************************************/
-bcmos_errno bal_tm_sched_indication_cb(bcmbal_obj *obj)
+bcmos_errno bal_sub_term_tiwi_indication_cb(bcmbal_obj *obj)
+{
+   bcmos_errno result = BCM_ERR_OK;
+   if(BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL != obj->obj_type ||
+      BCMBAL_SUBSCRIBER_TERMINAL_AUTO_ID_TIWI != obj->subgroup)
+   {
+      ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
+				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
+      result = BCM_ERR_INTERNAL;
+   }
+   else
+   {
+      BalIndications *balIndCfg;
+      balIndCfg = malloc(sizeof(BalIndications));
+      memset(balIndCfg, 0, sizeof(BalIndications));
+      bal_indications__init(balIndCfg);
+      balIndCfg->u_case = BAL_INDICATIONS__U_TERMINAL_TIWI;
+      balIndCfg->has_objtype = BAL_GRPC_PRES;
+      balIndCfg->objtype = obj->obj_type;
+      balIndCfg->has_sub_group = BAL_GRPC_PRES;
+      balIndCfg->sub_group = obj->subgroup;
+      balIndCfg->device_id = voltha_device_id;
+
+      bcmbal_subscriber_terminal_tiwi *sub_term_tiwi =
+                                 (bcmbal_subscriber_terminal_tiwi *)obj;
+
+      BalSubscriberTerminalTiwi *subTermTiwi;
+      subTermTiwi = malloc(sizeof(BalSubscriberTerminalTiwi));
+      memset(subTermTiwi, 0, sizeof(BalSubscriberTerminalTiwi));
+      bal_subscriber_terminal_tiwi__init(subTermTiwi);
+      balIndCfg->terminal_tiwi = subTermTiwi;
+
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
+
+      BalSubscriberTerminalKey *sub_term_key;
+      sub_term_key = malloc(sizeof(BalSubscriberTerminalKey));
+      memset(sub_term_key, 0, sizeof(BalSubscriberTerminalKey));
+      bal_subscriber_terminal_key__init(sub_term_key);
+      balIndCfg->terminal_tiwi->key = sub_term_key;
+
+      balIndCfg->terminal_tiwi->key->has_sub_term_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_tiwi->key->sub_term_id = sub_term_tiwi->key.sub_term_id;
+      balIndCfg->terminal_tiwi->key->has_intf_id = BAL_GRPC_PRES;
+      balIndCfg->terminal_tiwi->key->intf_id = sub_term_tiwi->key.intf_id;
+
+      BalSubscriberTerminalTiwiData *sub_term_tiwi_data;
+      sub_term_tiwi_data = malloc(sizeof(BalSubscriberTerminalTiwiData));
+      memset(sub_term_tiwi_data, 0, sizeof(BalSubscriberTerminalTiwiData));
+      bal_subscriber_terminal_tiwi_data__init(sub_term_tiwi_data);
+      balIndCfg->terminal_tiwi->data = sub_term_tiwi_data;
+
+      balIndCfg->terminal_tiwi->data->has_tiwi_status = BAL_GRPC_PRES;
+      balIndCfg->terminal_tiwi->data->tiwi_status = sub_term_tiwi->data.tiwi_status;
+
+      balIndCfg->terminal_tiwi->data->has_drift_value = BAL_GRPC_PRES;
+      balIndCfg->terminal_tiwi->data->drift_value = sub_term_tiwi->data.drift_value;
+
+      list_node *bal_indication_node = malloc(sizeof(list_node));
+      bal_indication_node->bal_indication = balIndCfg;
+
+      pthread_mutex_lock(&bal_ind_queue_lock);
+      add_bal_indication_node(bal_indication_node);
+      pthread_mutex_unlock(&bal_ind_queue_lock);
+   }
+
+   return result;
+}
+
+/********************************************************************\
+ * Function    : bal_tm_sched_auto_id_oper_status_change_cb         *
+ * Description : This function will handle tm sched operation status*
+ *               change indication                                  *
+ *                                                                  *
+ ********************************************************************/
+bcmos_errno bal_tm_sched_auto_id_oper_status_change_cb(bcmbal_obj *obj)
 {
    bcmos_errno result = BCM_ERR_OK;
 
    if(BCMBAL_OBJ_ID_TM_SCHED != obj->obj_type ||
-      bcmbal_tm_sched_auto_id_ind != obj->subgroup)
+      bcmbal_tm_sched_auto_id_oper_status_change != obj->subgroup)
    {
       ASFVOLT_LOG(ASFVOLT_ERROR, "Processing BAL API '%s' IND callback (status is %s)",
 				  bcmbal_objtype_str(obj->obj_type), bcmos_strerror(obj->status));
@@ -1627,38 +1399,47 @@ bcmos_errno bal_tm_sched_indication_cb(bcmbal_obj *obj)
       balIndCfg = malloc(sizeof(BalIndications));
       memset(balIndCfg, 0, sizeof(BalIndications));
       bal_indications__init(balIndCfg);
-      balIndCfg->u_case = BAL_INDICATIONS__U_TM_SCHED__IND;
+      balIndCfg->u_case = BAL_INDICATIONS__U_TM_SCHED_OPER_STATS_CHANGE;
       balIndCfg->has_objtype = BAL_GRPC_PRES;
       balIndCfg->objtype = obj->obj_type;
       balIndCfg->has_sub_group = BAL_GRPC_PRES;
       balIndCfg->sub_group = obj->subgroup;
       balIndCfg->device_id = voltha_device_id;
 
-      bcmbal_tm_sched_ind *tm_sched_ind = (bcmbal_tm_sched_ind *)obj;
+      bcmbal_tm_sched_oper_status_change *tm_sched_osc =
+                                 (bcmbal_tm_sched_oper_status_change *)obj;
 
-      BalTmSchedInd *tmSchedInd;
-      tmSchedInd = malloc(sizeof(BalTmSchedInd));
-      memset(tmSchedInd, 0, sizeof(BalTmSchedInd));
-      bal_tm_sched_ind__init(tmSchedInd);
-      balIndCfg->tm_sched_ind = tmSchedInd;
+      BalTmSchedOperStatusChange *tmSchedOsc;
+      tmSchedOsc = malloc(sizeof(BalTmSchedOperStatusChange));
+      memset(tmSchedOsc, 0, sizeof(BalTmSchedOperStatusChange));
+      bal_tm_sched_oper_status_change__init(tmSchedOsc);
+      balIndCfg->tm_sched_oper_stats_change = tmSchedOsc;
 
-      BalTmSchedKey *tmSchedkey;
-      tmSchedkey = malloc(sizeof(BalTmSchedKey));
-      memset(tmSchedkey, 0, sizeof(BalTmSchedKey));
-      bal_tm_sched_key__init(tmSchedkey);
-      balIndCfg->tm_sched_ind->key = tmSchedkey;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
-      balIndCfg->tm_sched_ind->key->has_dir = BAL_GRPC_PRES;
-      balIndCfg->tm_sched_ind->key->dir = tm_sched_ind->key.dir;
-      balIndCfg->tm_sched_ind->key->has_id = BAL_GRPC_PRES;
-      balIndCfg->tm_sched_ind->key->id = tm_sched_ind->key.id;
+      BalTmSchedKey *tmSchedKey;
+      tmSchedKey = malloc(sizeof(BalTmSchedKey));
+      memset(tmSchedKey, 0, sizeof(BalTmSchedKey));
+      bal_tm_sched_key__init(tmSchedKey);
+      balIndCfg->tm_sched_oper_stats_change->key = tmSchedKey;
 
-      BalTmSchedIndData *tmSIndData;
-      tmSIndData = malloc(sizeof(BalTmSchedIndData));
-      memset(tmSIndData, 0, sizeof(BalTmSchedIndData));
-      bal_tm_sched_ind_data__init(tmSIndData);
-      balIndCfg->tm_sched_ind->data = tmSIndData;
-      /* TODO: data should be populate */
+      balIndCfg->tm_sched_oper_stats_change->key->has_dir = BAL_GRPC_PRES;
+      balIndCfg->tm_sched_oper_stats_change->key->dir = tm_sched_osc->key.dir;
+      balIndCfg->tm_sched_oper_stats_change->key->has_id = BAL_GRPC_PRES;
+      balIndCfg->tm_sched_oper_stats_change->key->id = tm_sched_osc->key.id;
+
+      BalTmSchedOperStatusChangeData *tmschedOscData;
+      tmschedOscData = malloc(sizeof(BalTmSchedOperStatusChangeData));
+      memset(tmschedOscData, 0, sizeof(BalTmSchedOperStatusChangeData));
+      bal_tm_sched_oper_status_change_data__init(tmschedOscData);
+      balIndCfg->tm_sched_oper_stats_change->data = tmschedOscData;
+
+      balIndCfg->tm_sched_oper_stats_change->data->has_new_oper_status = BAL_GRPC_PRES;
+      balIndCfg->tm_sched_oper_stats_change->data->new_oper_status =
+	                                            tm_sched_osc->data.new_oper_status;
+      balIndCfg->tm_sched_oper_stats_change->data->has_old_oper_status = BAL_GRPC_PRES;
+      balIndCfg->tm_sched_oper_stats_change->data->old_oper_status =
+	                                            tm_sched_osc->data.old_oper_status;
 
       list_node *bal_indication_node = malloc(sizeof(list_node));
       bal_indication_node->bal_indication = balIndCfg;
@@ -1709,11 +1490,7 @@ bcmos_errno bal_packet_data_indication_cb(bcmbal_obj *obj)
       bal_packet_bearer_channel_rx__init(rxChannel);
       balIndCfg->pktdata = rxChannel;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->pktdata->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalPacketKey *packetkey;
       packetkey = malloc(sizeof(BalPacketKey));
@@ -1763,10 +1540,6 @@ bcmos_errno bal_packet_data_indication_cb(bcmbal_obj *obj)
                                                                             BAL_GRPC_PRES;
             balIndCfg->pktdata->key->packet_send_dest->sub_term->sub_term_id =
                                  rx_channel->key.packet_send_dest.u.sub_term.sub_term_id;
-            balIndCfg->pktdata->key->packet_send_dest->sub_term->has_sub_term_uni =
-                                                                            BAL_GRPC_PRES;
-            balIndCfg->pktdata->key->packet_send_dest->sub_term->sub_term_uni =
-                                rx_channel->key.packet_send_dest.u.sub_term.sub_term_uni;
             balIndCfg->pktdata->key->packet_send_dest->sub_term->has_intf_id =
                                                                             BAL_GRPC_PRES;
             balIndCfg->pktdata->key->packet_send_dest->sub_term->intf_id =
@@ -1871,11 +1644,7 @@ bcmos_errno bal_omci_data_indication_cb(bcmbal_obj *obj)
       bal_packet_itu_omci_channel_rx__init(omciChannel);
       balIndCfg->balomciresp = omciChannel;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->balomciresp->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalPacketKey *packetkey;
       packetkey = malloc(sizeof(BalPacketKey));
@@ -1992,11 +1761,7 @@ bcmos_errno bal_oam_data_indication_cb(bcmbal_obj *obj)
       bal_packet_ieee_oam_channel_rx__init(oamChannel);
       balIndCfg->baloamresp = oamChannel;
 
-      BalObj *hdr;
-      hdr = malloc(sizeof(BalObj));
-      memset(hdr, 0, sizeof(BalObj));
-      bal_obj__init(hdr);
-      balIndCfg->baloamresp->hdr = hdr;
+	  /*'hdr' field is not parsed by voltha adapter, hence not filled */
 
       BalPacketKey *packetkey;
       packetkey = malloc(sizeof(BalPacketKey));

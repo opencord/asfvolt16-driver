@@ -228,25 +228,15 @@ uint32_t bal_tm_queue_cfg_clear(BalTmQueueKey *tm_queue_key)
  * Description : Get the OLT device tm queue configuration          *
  ********************************************************************/
 
-uint32_t bal_tm_queue_cfg_get(BalTmQueueKey *tm_queue_key, BalTmQueueCfg *tm_queue_cfg)
+uint32_t bal_tm_queue_cfg_get(BalTmQueueCfg *tm_queue_cfg)
 {
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_tm_queue_cfg tm_queue_obj;   /**< declare main API struct */
     bcmbal_tm_queue_key key = { };      /**< declare key */
 
-    if((tm_queue_key->has_id) && (tm_queue_key->has_sched_id) && (tm_queue_key->has_sched_dir))
-    {
-       key.id = tm_queue_key->id;
-       key.sched_id = tm_queue_key->sched_id;
-       key.sched_dir = tm_queue_key->sched_dir;
-    }
-    else
-    {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "Failed to get the tm queue cfg(OLT): Missing Key values "
-                                  "Received key values Id(%d), Sched-Dir(%d), Sched-Id(%d)",
-                                   tm_queue_key->sched_id, tm_queue_key->sched_dir, tm_queue_key->id);
-       return BAL_ERRNO__BAL_ERR_NOENT;
-    }
+    key.id = tm_queue_cfg->key->id;
+    key.sched_id = tm_queue_cfg->key->sched_id;
+    key.sched_dir = tm_queue_cfg->key->sched_dir;
 
     ASFVOLT_LOG(ASFVOLT_DEBUG, "Get tm queue cfg(for OLT) starts");
 
@@ -267,6 +257,10 @@ uint32_t bal_tm_queue_cfg_get(BalTmQueueKey *tm_queue_key, BalTmQueueCfg *tm_que
     ASFVOLT_LOG(ASFVOLT_INFO, "Get tm Queue sent to OLT. "
                               "Queue ID(%d) Sched ID(%d) Sched Dir(%d)",
                                key.id, key.sched_id, key.sched_dir );
+
+    memcpy(tm_queue_cfg->key, &key, sizeof(BalTmQueueKey));
+    memcpy(tm_queue_cfg->data, &tm_queue_obj, sizeof(BalTmQueueCfgData));
+
     return err;
 }
 

@@ -54,12 +54,32 @@ uint32_t bal_register_indication_cbs()
 
     cb_cfg.module = BCMOS_MODULE_ID_NONE;
 
-    /* Access Terminal Operational State Change */
+    /* Register to get indications for access terminal objects
+     */
     cb_cfg.obj_type = BCMBAL_OBJ_ID_ACCESS_TERMINAL;
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_acc_term_osc_indication_cb;
-    ind_subgroup = bcmbal_access_terminal_auto_id_oper_status_change;
+
+
+    /* Access Terminal processing error */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_acc_term_processing_error_indication_cb;
+    ind_subgroup = bcmbal_access_terminal_auto_id_processing_error;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Register to get indication callbacks for flow objects
+     */
+    cb_cfg.obj_type = BCMBAL_OBJ_ID_FLOW;
+
+    /* Flow Operational State Change */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_flow_osc_indication_cb;
+    ind_subgroup = bcmbal_flow_auto_id_oper_status_change;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Flow processing error */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_flow_processing_error_indication_cb;
+    ind_subgroup = bcmbal_flow_auto_id_processing_error;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
     /* Register to get indications for interface objects
      */
@@ -71,49 +91,9 @@ uint32_t bal_register_indication_cbs()
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
-    /* Interface Indication */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_interface_indication_cb;
-    ind_subgroup = bcmbal_interface_auto_id_ind;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
     /* Interface Operational State Change */
     cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_interface_osc_indication_cb;
     ind_subgroup = bcmbal_interface_auto_id_oper_status_change;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Register to get indications for subscriber terminal objects
-     */
-    cb_cfg.obj_type = BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL;
-
-    /* Subscriber Terminal Alarm */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_alarm_indication_cb;
-    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sub_term_alarm;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Subscriber Terminal dgi */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_dgi_indication_cb;
-    ind_subgroup = bcmbal_subscriber_terminal_auto_id_dgi;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Subscriber Terminal Discovery */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_disc_indication_cb;
-    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sub_term_disc;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Subscriber Terminal Indication */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_indication_cb;
-    ind_subgroup = bcmbal_subscriber_terminal_auto_id_ind;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Subscriber Terminal Operational State Change */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_osc_indication_cb;
-    ind_subgroup = bcmbal_subscriber_terminal_auto_id_oper_status_change;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
@@ -132,6 +112,9 @@ uint32_t bal_register_indication_cbs()
     ind_subgroup = bcmbal_packet_auto_id_bearer_channel_rx;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    // On registering for OAM Channel Data, voltha_bal_driver crashes.
+    // This is not important/necessary right now, hence bypassing this.
 #if 0
     /* OAM Channel Data - oam response indication */
     cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_oam_data_indication_cb;
@@ -139,45 +122,95 @@ uint32_t bal_register_indication_cbs()
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 #endif
-    /* Register to get indication callbacks for flow objects
+
+    /* Register to get indications for subscriber terminal objects
      */
-    cb_cfg.obj_type = BCMBAL_OBJ_ID_FLOW;
+    cb_cfg.obj_type = BCMBAL_OBJ_ID_SUBSCRIBER_TERMINAL;
 
-    /* Flow Operational State Change */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_flow_osc_indication_cb;
-    ind_subgroup = bcmbal_flow_auto_id_oper_status_change;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Flow Indication */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_flow_indication_cb;
-    ind_subgroup = bcmbal_flow_auto_id_ind;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = bcmbal_subscribe_ind(access_term_id, &cb_cfg);
-
-    /* Register to get indication callbacks for tm queue objects
-     */
-    cb_cfg.obj_type = BCMBAL_OBJ_ID_TM_QUEUE;
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_tm_queue_indication_cb;
-    ind_subgroup = bcmbal_tm_queue_auto_id_ind;
+    /* Subscriber Terminal dgi */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_dgi_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_dgi;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
-    /* Register to get indication callbacks for tm sched objects
+    /* Subscriber Terminal dowi*/
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_dowi_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_dowi;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal looci*/
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_looci_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_looci;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal Operational State Change */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_osc_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_oper_status_change;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal processing error*/
+    cb_cfg.ind_cb_hdlr = \
+	(f_bcmbal_ind_handler)bal_sub_term_processing_error_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_processing_error;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal sdi */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_sdi_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sdi;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal sfi */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_sfi_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sfi;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal activation fail */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_act_fail_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sub_term_act_fail;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal Alarm */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_alarm_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sub_term_alarm;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal Discovery */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_disc_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sub_term_disc;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal sufi */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_sufi_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_sufi;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Subscriber Terminal tiwi */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_sub_term_tiwi_indication_cb;
+    ind_subgroup = bcmbal_subscriber_terminal_auto_id_tiwi;
+    cb_cfg.p_subgroup = &ind_subgroup;
+    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
+
+    /* Register to get indication callbacks for Tm Sched Objects
      */
     cb_cfg.obj_type = BCMBAL_OBJ_ID_TM_SCHED;
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_tm_sched_indication_cb;
-    ind_subgroup = bcmbal_tm_sched_auto_id_ind;
+
+    /* TM Sched operation status change */
+    cb_cfg.ind_cb_hdlr = \
+	(f_bcmbal_ind_handler)bal_tm_sched_auto_id_oper_status_change_cb;
+    ind_subgroup = bcmbal_tm_sched_auto_id_oper_status_change;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
-    /* Register to get indication callbacks for group objects
-     */
-    cb_cfg.obj_type = BCMBAL_OBJ_ID_GROUP;
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_group_indication_cb;
-    ind_subgroup = bcmbal_group_auto_id_ind;
-    cb_cfg.p_subgroup = &ind_subgroup;
-    err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
     return err;
 }
 
@@ -208,17 +241,15 @@ uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo)
        ip_and_port = bal_init->voltha_adapter_ip_port;
        ASFVOLT_LOG(ASFVOLT_DEBUG,"Received Adapter IP and Port from VOLTHA is %s",ip_and_port);
     }
-    char *argv[6];
+    char *argv[4];
     /* Initialize BAL */
     argv[1] = coreInfo->bal_core_arg1;
     argv[2] = coreInfo->bal_core_ip_port;
-    argv[3] = coreInfo->bal_core_arg2;
-    argv[4] = coreInfo->bal_shared_lib_ip_port;
-    int argc = 5;
+    int argc = 3;
     client = grpc_c_client_init(ip_and_port, "bal_client", NULL);
 
     /* Init BAL */
-    err = bcmbal_apiend_init_all(argc, argv, NULL,3);
+    err = bcmbal_apiend_init_all(argc, argv, NULL, 3);
     if(err != BCM_ERR_OK)
     {
       printf("\n Failed in bcmbal_init \n");
@@ -236,26 +267,26 @@ uint32_t asfvolt16_bal_init(BalInit *bal_init, balCoreIpInfo *coreInfo)
     }
 #endif
 
-    /* Register the call back functions to handle any
-     * indications from the BAL */
-    bcmbal_cb_cfg cb_cfg = {};
-    uint16_t ind_subgroup;
+	/* Register the call back functions to handle access term oper change
+	 * indications from the BAL */
+	bcmbal_cb_cfg cb_cfg = {};
+	uint16_t ind_subgroup;
 
-    cb_cfg.module = BCMOS_MODULE_ID_NONE;
-    /* Register to get indications for access terminal objects
-     */
-    cb_cfg.obj_type = BCMBAL_OBJ_ID_ACCESS_TERMINAL;
+	cb_cfg.module = BCMOS_MODULE_ID_NONE;
+	/* Register to get indications for access terminal objects
+	 */
+	cb_cfg.obj_type = BCMBAL_OBJ_ID_ACCESS_TERMINAL;
 
-    /* Access Terminal Indication */
-    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_acc_term_indication_cb;
-    ind_subgroup = bcmbal_access_terminal_auto_id_ind;
+    /* Access Terminal Operational State Change */
+    cb_cfg.ind_cb_hdlr = (f_bcmbal_ind_handler)bal_acc_term_osc_indication_cb;
+    ind_subgroup = bcmbal_access_terminal_auto_id_oper_status_change;
     cb_cfg.p_subgroup = &ind_subgroup;
     err = err ? err : bcmbal_subscribe_ind(access_term_id, &cb_cfg);
 
-    if (err)
-    {
-      ASFVOLT_LOG(ASFVOLT_ERROR, "failed to register call back functions to BAL");
-    }
+	if (err)
+	{
+		ASFVOLT_LOG(ASFVOLT_ERROR, "failed to register call back functions to BAL");
+	}
 
     return err;
 }
@@ -421,51 +452,45 @@ uint32_t asfvolt16_bal_cfg_clear(BalKey *key)
  *               4) Flow Cfg                                        *
  *               5) Group Cfg (In case of Multicast)                *
  ********************************************************************/
-uint32_t asfvolt16_bal_cfg_get(BalKey *key, BalCfg *cfg)
+uint32_t asfvolt16_bal_cfg_get(BalCfg *cfg)
 {
     bcmos_errno err = BCM_ERR_OK;
 
-    if(!key->hdr->has_obj_type)
-    {
-       ASFVOLT_LOG(ASFVOLT_ERROR, "object type is not present for get");
-       return BAL_ERRNO__BAL_ERR_INVALID_OP;
-    }
-
-    switch(key->hdr->obj_type)
+    switch(cfg->hdr->obj_type)
     {
        case BAL_OBJ_ID__BAL_OBJ_ID_ACCESS_TERMINAL:
        {
-          err = bal_access_terminal_cfg_get(key->access_term_key, cfg->cfg );
+          err = bal_access_terminal_cfg_get(cfg->cfg);
           break;
        }
        case BAL_OBJ_ID__BAL_OBJ_ID_INTERFACE:
        {
-          err = bal_interface_cfg_get(key->interface_key, cfg->interface);
+          err = bal_interface_cfg_get(cfg->interface);
           break;
        }
        case BAL_OBJ_ID__BAL_OBJ_ID_SUBSCRIBER_TERMINAL:
        {
-          err = bal_subscriber_terminal_cfg_get(key->terminal_key, cfg->terminal);
+          err = bal_subscriber_terminal_cfg_get(cfg->terminal);
           break;
        }
        case BAL_OBJ_ID__BAL_OBJ_ID_FLOW:
        {
-          err = bal_flow_cfg_get(key->flow_key, cfg->flow);
+          err = bal_flow_cfg_get(cfg->flow);
           break;
        }
        case BAL_OBJ_ID__BAL_OBJ_ID_GROUP:
        {
-          err = bal_group_cfg_get(key->group_key, cfg->group);
+          err = bal_group_cfg_get(cfg->group);
           break;
        }
        case BAL_OBJ_ID__BAL_OBJ_ID_TM_QUEUE:
        {
-          err = bal_tm_queue_cfg_get(key->tm_queue_key, cfg->tm_queue_cfg);
+          err = bal_tm_queue_cfg_get(cfg->tm_queue_cfg);
           break;
        }
        case BAL_OBJ_ID__BAL_OBJ_ID_TM_SCHED:
        {
-          err = bal_tm_sched_cfg_get(key->tm_sched_key, cfg->tm_sched_cfg);
+          err = bal_tm_sched_cfg_get(cfg->tm_sched_cfg);
           break;
        }
        case BAL_OBJ_ID__BAL_OBJ_ID_PACKET:

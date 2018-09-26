@@ -15,7 +15,7 @@
 */
 
 extern uint32_t bal_tm_sched_cfg_set(BalTmSchedCfg *tm_sched_cfg);
-extern uint32_t bal_tm_sched_cfg_get(BalTmSchedKey *tm_sched_key, BalTmSchedCfg *tm_sched_cfg);
+extern uint32_t bal_tm_sched_cfg_get(BalTmSchedCfg *tm_sched_cfg);
 extern uint32_t bal_tm_sched_cfg_clear(BalTmSchedKey *tm_sched_key);
 extern bcmos_errno bal_tm_sched_cfg_indication_cb(bcmbal_obj *obj);
 

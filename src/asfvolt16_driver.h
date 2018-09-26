@@ -36,7 +36,10 @@
 #define ASFVOLT_MAX_PKT_SIZE 500
 #define ASFVOLT_MAX_DEVICE_ID_SIZE 50
 #define MAX_CHAR_LENGTH  20
+#define MAX_REGID_LENGTH  36
 #define MAX_OMCI_MSG_LENGTH 44
+
+#define BAL_ELEMENT_PRES 1
 
 char voltha_device_id[ASFVOLT_MAX_DEVICE_ID_SIZE];
 unsigned int is_reboot;
@@ -97,7 +100,7 @@ extern uint32_t asfvolt16_bal_finish(void);
 extern uint32_t bal_register_indication_cbs(void);
 extern uint32_t asfvolt16_bal_cfg_set(BalCfg *cfg);
 extern uint32_t asfvolt16_bal_cfg_clear(BalKey *key);
-extern uint32_t asfvolt16_bal_cfg_get(BalKey *key, BalCfg *cfg);
+extern uint32_t asfvolt16_bal_cfg_get(BalCfg *cfg);
 extern void asfvolt16_send_omci_msg(uint16_t olt_no, uint32_t onu_nu, char* packet_to_send);
 extern uint32_t asfvolt16_bal_stats_get(BalIntfType intf_type, uint32_t intf_id, BalInterfaceStatData *statData,
                                         BalInterfaceKey *statKey);

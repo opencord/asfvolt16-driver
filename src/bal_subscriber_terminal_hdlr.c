@@ -49,17 +49,10 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
     {
        bcmbal_serial_number serial_num = {} ;
        bcmbal_serial_number zero_serial_num =  {};
-       bcmbal_registration_id registration_id =  {};
        int has_serial_num = BCMOS_FALSE;
-       int has_registration_id = BCMOS_FALSE;
        char two_digit_buf[3];
 
        two_digit_buf[2] = 0;
-
-       ASFVOLT_LOG(ASFVOLT_DEBUG, "Before encoding,Vendor Id(%s),Vendor Specific Id(%s), Registration Id(%s)",
-		       onu_cfg->data->serial_number->vendor_id,
-		       onu_cfg->data->serial_number->vendor_specific,
-		       onu_cfg->data->registration_id);
 
        char vendor_id[20];
        memset(&vendor_id, 0, 20);
@@ -69,11 +62,6 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
 		       onu_cfg->data->serial_number->vendor_id[2],
 		       onu_cfg->data->serial_number->vendor_id[3]);
        onu_cfg->data->serial_number->vendor_id = vendor_id;
-       ASFVOLT_LOG(ASFVOLT_DEBUG, "After encoding,Vendor Id(%s),Vendor Specific Id(%s), Registration Id(%s)",
-		       onu_cfg->data->serial_number->vendor_id,
-		       onu_cfg->data->serial_number->vendor_specific,
-		       onu_cfg->data->registration_id);
-
        /* Vendor Id is totally 16 byte string and should be
           send in hexadecimmal format */
        for(idx=0; idx<2*sizeof(serial_num.vendor_id); idx+=2)
@@ -91,17 +79,6 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
        ASFVOLT_CFG_PROP_SET(sub_term_obj, subscriber_terminal, serial_number,
                   has_serial_num, serial_num);
 
-       /* Registration ID is a string and should be given in hexadecimal format */
-       for(idx=0; idx<strlen(onu_cfg->data->registration_id) && idx<2*sizeof(registration_id.arr); idx+=2)
-       {
-          memcpy(two_digit_buf, &onu_cfg->data->registration_id[idx], 2);
-          registration_id.arr[idx>>1] = strtol(two_digit_buf, NULL, 16);
-          has_registration_id = BCMOS_TRUE;
-       }
-
-       ASFVOLT_CFG_PROP_SET(sub_term_obj, subscriber_terminal, registration_id,
-                  has_registration_id, registration_id);
-
        if (!memcmp(&serial_num, &zero_serial_num, sizeof(serial_num)))
           skip_onu = BCMOS_TRUE;
     }
@@ -111,14 +88,6 @@ uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg)
 
     if (!skip_onu)
     {
-
-       /*ASFVOLT_LOG(ASFVOLT_DEBUG, "Onu's(%d) Serial number %02x%02x%02x%2x%02x%02x%02x%02x",
-             onu_cfg->key->sub_term_id,
-             sub_term_obj.data->serial_number.vendor_id[0], sub_term_obj.data->serial_number.vendor_id[1],
-             sub_term_obj.data->serial_number.vendor_id[2], sub_term_obj.data->serial_number.vendor_id[3],
-             sub_term_obj.data->serial_number.vendor_specific[0], sub_term_obj.data->serial_number.vendor_specific[1],
-             sub_term_obj.data->serial_number.vendor_specific[2], sub_term_obj.data->serial_number.vendor_specific[3]);*/
-
        err = bcmbal_cfg_set(DEFAULT_ATERM_ID, &(sub_term_obj.hdr));
 
        ASFVOLT_LOG(ASFVOLT_DEBUG,
@@ -255,8 +224,7 @@ uint32_t bal_subscriber_terminal_cfg_clear(BalSubscriberTerminalKey *terminal_ke
  * Function    : bal_subscriber_terminal_cfg_get                    *
  * Description : Get the subscriber terminal(ONU) configuration     *
  ********************************************************************/
-uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
-                                         BalSubscriberTerminalCfg *onu_cfg)
+uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalCfg *onu_cfg)
 {
 
     bcmos_errno err = BCM_ERR_OK;
@@ -268,20 +236,8 @@ uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
                     "Processing subscriber terminal cfg get: %d",
                      onu_cfg->key->sub_term_id);
 
-    if (terminal_key->has_sub_term_id &&
-                    terminal_key->has_intf_id)
-    {
-        key.sub_term_id = terminal_key->sub_term_id ;
-        key.intf_id = terminal_key->intf_id ;
-    }
-    else
-    {
-       ASFVOLT_LOG(ASFVOLT_ERROR,
-                   "Invalid Key to handle subscriber terminal Cfg Get subscriber_terminal_id(%d), Interface ID(%d)",
-                   key.sub_term_id, key.intf_id);
-
-        return BAL_ERRNO__BAL_ERR_PARM;
-    }
+    key.sub_term_id = onu_cfg->key->sub_term_id ;
+    key.intf_id = onu_cfg->key->intf_id ;
 
     /* init the API struct */
     BCMBAL_CFG_INIT(&cfg, subscriber_terminal, key);
@@ -312,7 +268,73 @@ uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
         return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO,
-                  "To-Do. Send subscriber terminal details to Adapter");
+    ASFVOLT_LOG(ASFVOLT_INFO, "Get Subscriber cfg sent to OLT for Subscriber Id(%d) on Interface(%d)",
+                               key.sub_term_id, key.intf_id);
+	
+    onu_cfg->key->has_sub_term_id = BAL_ELEMENT_PRES;
+    onu_cfg->key->sub_term_id = cfg.key.sub_term_id;
+
+    onu_cfg->key->has_intf_id = BAL_ELEMENT_PRES;
+    onu_cfg->key->intf_id = cfg.key.intf_id;
+
+    onu_cfg->data->has_admin_state = BAL_ELEMENT_PRES;
+    onu_cfg->data->admin_state = cfg.data.admin_state;
+
+    onu_cfg->data->has_oper_status = BAL_ELEMENT_PRES;
+    onu_cfg->data->oper_status = cfg.data.oper_status;
+
+    onu_cfg->data->has_svc_port_id = BAL_ELEMENT_PRES;
+    onu_cfg->data->svc_port_id = cfg.data.svc_port_id;
+
+    onu_cfg->data->has_ds_tm = BAL_ELEMENT_PRES;
+    onu_cfg->data->ds_tm = cfg.data.ds_tm;
+
+    onu_cfg->data->has_us_tm = BAL_ELEMENT_PRES;
+    onu_cfg->data->us_tm = cfg.data.us_tm;
+
+    onu_cfg->data->has_sub_term_rate = BAL_ELEMENT_PRES;
+    onu_cfg->data->sub_term_rate = cfg.data.sub_term_rate;
+
+    char *password = malloc(sizeof(char)*MAX_CHAR_LENGTH*2);
+    memset(password, 0, MAX_CHAR_LENGTH*2);
+    strcpy(password,(const char *)cfg.data.password.arr);
+    onu_cfg->data->password = password;
+
+    char *registration_id = malloc(sizeof(char)*MAX_REGID_LENGTH);
+    memset(registration_id, 0, MAX_REGID_LENGTH);
+    strcpy(registration_id,(const char *)cfg.data.registration_id.arr);
+    onu_cfg->data->registration_id =  registration_id;
+
+    BalSerialNumber *serialNum;
+    serialNum = malloc(sizeof(BalSerialNumber));
+    memset(serialNum, 0, sizeof(BalSerialNumber));
+    bal_serial_number__init(serialNum);
+    onu_cfg->data->serial_number = serialNum;
+
+    char *vendor_id = malloc(sizeof(char)*MAX_CHAR_LENGTH);
+    memset(vendor_id, 0, MAX_CHAR_LENGTH);
+    sprintf(vendor_id,"%c%c%c%c",
+        cfg.data.serial_number.vendor_id[0],
+	cfg.data.serial_number.vendor_id[1],
+	cfg.data.serial_number.vendor_id[2],
+	cfg.data.serial_number.vendor_id[3]);
+
+    onu_cfg->data->serial_number->vendor_id = vendor_id;
+
+    char *vendor_specific = malloc(sizeof(char)*MAX_CHAR_LENGTH);
+    memset(vendor_specific, 0, MAX_CHAR_LENGTH);
+    sprintf(vendor_specific,"%1X%1X%1X%1X%1X%1X%1X%1X",
+        cfg.data.serial_number.vendor_specific[0]>>4 & 0x0f,
+	cfg.data.serial_number.vendor_specific[0] & 0x0f,
+	cfg.data.serial_number.vendor_specific[1]>>4 & 0x0f,
+	cfg.data.serial_number.vendor_specific[1] & 0x0f,
+	cfg.data.serial_number.vendor_specific[2]>>4 & 0x0f,
+	cfg.data.serial_number.vendor_specific[2] & 0x0f,
+	cfg.data.serial_number.vendor_specific[3]>>4 & 0x0f,
+	cfg.data.serial_number.vendor_specific[3] & 0x0f);
+    onu_cfg->data->serial_number->vendor_specific = vendor_specific;
+
+    free(list_mem);
+
     return BAL_ERRNO__BAL_ERR_OK;
 }

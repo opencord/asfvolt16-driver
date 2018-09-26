@@ -272,8 +272,14 @@ uint32_t bal_flow_cfg_set(BalFlowCfg *flow_cfg)
       return BAL_ERRNO__BAL_ERR_PARM;
    }
 
-
-   ASFVOLT_LOG(ASFVOLT_INFO, "Adding the flow to OLT. FlowID(%d)", flow_cfg->key->flow_id);
+   if (flow_cfg->data->admin_state == BAL_STATE__BAL_STATE_UP )
+   {
+       ASFVOLT_LOG(ASFVOLT_INFO, "Adding the flow to OLT. FlowID(%d)", flow_cfg->key->flow_id);
+   }
+   else
+   {
+       ASFVOLT_LOG(ASFVOLT_INFO, "Deleting the flow at OLT. FlowID(%d)", flow_cfg->key->flow_id);
+   }
 
    if (!flow_cfg->key->has_flow_type &&
          ((flow_cfg->key->flow_type < BAL_FLOW_TYPE__BAL_FLOW_TYPE_UPSTREAM) ||
@@ -294,7 +300,7 @@ uint32_t bal_flow_cfg_set(BalFlowCfg *flow_cfg)
    /* decode API parameters from grpc-c */
    /* Admin State */
    ASFVOLT_CFG_PROP_SET(cfg, flow, admin_state,
-                        flow_cfg->data->has_admin_state,
+                        BCMOS_TRUE,
                         flow_cfg->data->admin_state);
    ASFVOLT_LOG(ASFVOLT_DEBUG, "admin state = %d",  flow_cfg->data->admin_state);
 
@@ -302,7 +308,7 @@ uint32_t bal_flow_cfg_set(BalFlowCfg *flow_cfg)
    ASFVOLT_CFG_PROP_SET(cfg, flow, oper_status,
                         flow_cfg->data->has_oper_status,
                         flow_cfg->data->oper_status);
-   ASFVOLT_LOG(ASFVOLT_DEBUG, "Oper. status = %d",  flow_cfg->data->oper_status);
+   ASFVOLT_LOG(ASFVOLT_DEBUG, "Oper.status = %d",  flow_cfg->data->oper_status);
 
    /* Access Side interface ID */
    ASFVOLT_CFG_PROP_SET(cfg, flow, access_int_id,
@@ -332,12 +338,6 @@ uint32_t bal_flow_cfg_set(BalFlowCfg *flow_cfg)
                             flow_cfg->data->group_id);
       ASFVOLT_LOG(ASFVOLT_DEBUG, "group_id = %d",  flow_cfg->data->group_id);
    }
-
-   /*Subscriber Terminal UNI index*/
-   ASFVOLT_CFG_PROP_SET(cfg, flow, sub_term_uni_idx,
-                         flow_cfg->data->has_sub_term_uni_idx,
-                         flow_cfg->data->sub_term_uni_idx);
-   ASFVOLT_LOG(ASFVOLT_DEBUG, "sub_term_uni_idx = %d",  flow_cfg->data->sub_term_uni_idx);
 
    /*Resolve MAC*/
    ASFVOLT_CFG_PROP_SET(cfg, flow, resolve_mac,
@@ -402,7 +402,7 @@ uint32_t bal_flow_cfg_set(BalFlowCfg *flow_cfg)
    ASFVOLT_CFG_PROP_SET(cfg, flow, cookie,
                         flow_cfg->data->has_cookie,
                         flow_cfg->data->cookie);
-   ASFVOLT_LOG(ASFVOLT_DEBUG, "priority = %lx",flow_cfg->data->cookie);
+   ASFVOLT_LOG(ASFVOLT_DEBUG, "cookie = %lx",flow_cfg->data->cookie);
 
    /*Egress queue*/
    BalTmQueueRef *tmp_que = (BalTmQueueRef*)(flow_cfg->data->queue);
@@ -486,17 +486,17 @@ uint32_t bal_flow_cfg_clear(BalFlowKey *flow_key)
  * Function    : bal_flow_cfg_get                                   *
  * Description : Get flow information from BAL.                     *
  ********************************************************************/
-uint32_t bal_flow_cfg_get(BalFlowKey *flow_key, BalFlowCfg *flow_cfg)
+uint32_t bal_flow_cfg_get(BalFlowCfg *flow_cfg)
 {
 
    bcmos_errno err = BCM_ERR_OK;
    bcmbal_flow_cfg cfg;        /**< declare main API struct */
    bcmbal_flow_key key = { };  /**< declare key */
 
-   if (flow_key->has_flow_id && flow_key->has_flow_type)
+   if (flow_cfg->key->has_flow_id && flow_cfg->key->has_flow_type)
    {
-      key.flow_id = flow_key->flow_id;
-      key.flow_type = flow_key->flow_type;
+      key.flow_id = flow_cfg->key->flow_id;
+      key.flow_type = flow_cfg->key->flow_type;
    }
    else
    {
@@ -520,8 +520,11 @@ uint32_t bal_flow_cfg_get(BalFlowKey *flow_key, BalFlowCfg *flow_cfg)
       return BAL_ERRNO__BAL_ERR_INTERNAL;
    }
 
-   ASFVOLT_LOG(ASFVOLT_INFO,
-                  "To-Do. Send Flow details to Adapter");
+   ASFVOLT_LOG(ASFVOLT_INFO, "Get Group cfg sent to OLT for Flow Id(%d)",
+                               key.flow_id);
+
+   memcpy(flow_cfg->key, &key, sizeof(BalFlowKey));
+   memcpy(flow_cfg->data, &cfg, sizeof(BalFlowCfgData));
 
    return BAL_ERRNO__BAL_ERR_OK;
 }

@@ -17,7 +17,6 @@
 extern uint32_t bal_subscriber_terminal_cfg_set(BalSubscriberTerminalCfg *onu_cfg);
 extern bcmos_errno bal_subscriber_terminal_indication_cb(bcmbal_obj *obj);
 extern uint32_t bal_subscriber_terminal_cfg_clear(BalSubscriberTerminalKey *terminal_key);
-extern uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalKey *terminal_key,
-                                                BalSubscriberTerminalCfg *onu_cfg);
+extern uint32_t bal_subscriber_terminal_cfg_get(BalSubscriberTerminalCfg *onu_cfg);
 
 #define BAL_DYNAMIC_LIST_BUFFER_SIZE (32 * 1024)

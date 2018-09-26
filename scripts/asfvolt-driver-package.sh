@@ -24,10 +24,10 @@ ASFVOLT_REPO_NAME=asfvolt16-driver
 # override shell variables to match custom local build environment
 : ${ONL_TOPDIR:=`pwd`}
 : ${BALSRC_RELEASE:=bal_src_release}
-: ${BALREL_TOPDIR:=${ONL_TOPDIR}/${BALSRC_RELEASE}}
-: ${BALSRC_TOPDIR:=${ONL_TOPDIR}/${BALSRC_RELEASE}/bal_release}
-: ${ASFSCR_TOPDIR:=${ONL_TOPDIR}/${ASFVOLT_REPO_NAME}/scripts}
-: ${ASFDRVR_PKGDIR:=${ONL_TOPDIR}/asfdrvr-package-dir}
+: ${BALREL_TOPDIR:=${BROADCOM_DOWNLOAD_DIR}/${BALSRC_RELEASE}}
+: ${BALSRC_TOPDIR:=${EDGECORE_DOWNLOAD_DIR}/${BALSRC_RELEASE}/bal_release}
+: ${ASFSCR_TOPDIR:=${EDGECORE_DOWNLOAD_DIR}/${ASFVOLT_REPO_NAME}/scripts}
+: ${ASFDRVR_PKGDIR:=${EDGECORE_DOWNLOAD_DIR}/asfdrvr-package-dir}
 : ${ASFDVR_TARBALL_NAME:=asfvolt16-voltha-bal}
 : ${BUILD_FILENAME_TAG:=`date +%Y%m%d%H%M`}
 : ${ASFDVR_TARBALL_FNAME:=${ASFDVR_TARBALL_NAME}-${BUILD_FILENAME_TAG}.tgz}
@@ -42,7 +42,8 @@ echo ASFDVR_TARBALL_NAME=${ASFDVR_TARBALL_NAME}
 echo BUILD_FILENAME_TAG=${BUILD_FILENAME_TAG}
 echo ASFDVR_TARBALL_FNAME=${ASFDVR_TARBALL_FNAME}
 
-# Note: removes existing directories: asfvolt16-driver, grpc, protobuf
+# Note: removes existing directories: asfvolt16-driver
+cd ${EDGECORE_DOWNLOAD_DIR}
 rm -rf ${ASFDRVR_PKGDIR}
 
 
@@ -56,25 +57,25 @@ tar zxf ${BALREL_TOPDIR}/bcm68620_release/asfvolt16/release/release_asfvolt16_V*
 cd broadcom
 
 # add grpc-c libs
-cp -pR ${ONL_TOPDIR}/grpc-c/build/lib/.libs/libgrpc-c.so.0.0.0 .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc-c/build/lib/.libs/libgrpc-c.so.0.0.0 .
 ln -s /broadcom/libgrpc-c.so.0.0.0 libgrpc-c.so.0
 ln -s /broadcom/libgrpc-c.so.0.0.0 libgrpc-c.so
 
 # add grpc libs
-cp -pR ${ONL_TOPDIR}/grpc/libs/opt/libgrp*.so* .
-cp -pR ${ONL_TOPDIR}/grpc/libs/opt/libgpr*.so* .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc/libs/opt/libgrp*.so* .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc/libs/opt/libgpr*.so* .
 
 # add protobuf-c libs
-cp -pR ${ONL_TOPDIR}/grpc-c/third_party/protobuf-c/protobuf-c/.libs/libprotobuf-c.so* .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc-c/third_party/protobuf-c/protobuf-c/.libs/libprotobuf-c.so* .
 
 # add protobuf libs
-cp -pR ${ONL_TOPDIR}/grpc/thirdparty/protobuf/src/.libs/libprotobuf.so* .
-cp -pR ${ONL_TOPDIR}/grpc/thirdparty/protobuf/src/.libs/libprotobuf-lite.so* .
-cp -pR ${ONL_TOPDIR}/grpc/thirdparty/protobuf/src/.libs/libprotoc.so* .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc/thirdparty/protobuf/src/.libs/libprotobuf.so* .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc/thirdparty/protobuf/src/.libs/libprotobuf-lite.so* .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc/thirdparty/protobuf/src/.libs/libprotoc.so* .
 rm *.0T
 
 # add voltha_bal_driver
-cp -pR ${ONL_TOPDIR}/grpc-c/build/examples/.libs/voltha_bal_driver .
+cp -pR ${EDGECORE_DOWNLOAD_DIR}/grpc-c/build/examples/.libs/voltha_bal_driver .
 
 # add voltha driver startup scripts
 cp -p ${ASFSCR_TOPDIR}/voltha_init_sh voltha_init.sh

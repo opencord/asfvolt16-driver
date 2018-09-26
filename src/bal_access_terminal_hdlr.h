@@ -16,5 +16,5 @@
 
 extern uint32_t bal_access_terminal_cfg_set(BalAccessTerminalCfg *access_term_cfg);
 extern uint32_t bal_access_terminal_cfg_clear(BalAccessTerminalKey *access_term_key);
-extern uint32_t bal_access_terminal_cfg_get (BalAccessTerminalKey *access_term_key, BalAccessTerminalCfg *access_term_cfg);
+extern uint32_t bal_access_terminal_cfg_get (BalAccessTerminalCfg *access_term_cfg);
 extern bcmos_errno bal_access_term_indication_cb(bcmbal_obj *obj);

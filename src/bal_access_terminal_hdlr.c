@@ -110,14 +110,16 @@ uint32_t bal_access_terminal_cfg_clear(BalAccessTerminalKey *access_term_key)
  * Function    : bal_access_terminal_cfg_get                        *
  * Description : Handles the clear/Delete of access terminal        *
  ********************************************************************/
-uint32_t bal_access_terminal_cfg_get (BalAccessTerminalKey *access_term_key,
-                                      BalAccessTerminalCfg *access_term_cfg)
+uint32_t bal_access_terminal_cfg_get (BalAccessTerminalCfg *access_term_cfg)
 {
     bcmos_errno err = BCM_ERR_OK;
     bcmbal_access_terminal_cfg cfg;         /**< declare main API struct */
     bcmbal_access_terminal_key key = { };   /**< declare key */
 
     ASFVOLT_LOG(ASFVOLT_INFO, "processing the get request on access terminal");
+
+    key.access_term_id = access_term_cfg->key->access_term_id;
+
     /* init the API struct */
     BCMBAL_CFG_INIT(&cfg, access_terminal, key);
 
@@ -131,8 +133,56 @@ uint32_t bal_access_terminal_cfg_get (BalAccessTerminalKey *access_term_key,
        return BAL_ERRNO__BAL_ERR_INTERNAL;
     }
 
-    ASFVOLT_LOG(ASFVOLT_INFO,
-                  "To-Do. Send access terminal details to Adapter");
+   access_term_cfg->key->has_access_term_id = BAL_ELEMENT_PRES;
+   access_term_cfg->key->access_term_id = cfg.key.access_term_id;
 
-    return BAL_ERRNO__BAL_ERR_OK;
+   access_term_cfg->data->has_admin_state = BAL_ELEMENT_PRES;
+   access_term_cfg->data->admin_state = cfg.data.admin_state;
+
+   access_term_cfg->data->has_oper_status = BAL_ELEMENT_PRES;
+   access_term_cfg->data->oper_status = cfg.data.oper_status;
+
+   access_term_cfg->data->has_iwf_mode = BAL_ELEMENT_PRES;
+   access_term_cfg->data->iwf_mode = cfg.data.iwf_mode;
+
+   access_term_cfg->data->topology->has_num_of_nni_ports = BAL_ELEMENT_PRES;
+   access_term_cfg->data->topology->num_of_nni_ports = cfg.data.topology.num_of_nni_ports;
+
+   access_term_cfg->data->topology->has_num_of_pon_ports = BAL_ELEMENT_PRES;
+   access_term_cfg->data->topology->num_of_pon_ports = cfg.data.topology.num_of_pon_ports;
+
+   access_term_cfg->data->topology->has_num_of_mac_devs = BAL_ELEMENT_PRES;
+   access_term_cfg->data->topology->num_of_mac_devs = cfg.data.topology.num_of_mac_devs;
+
+   access_term_cfg->data->topology->has_num_of_pons_per_mac_dev = BAL_ELEMENT_PRES;
+   access_term_cfg->data->topology->num_of_pons_per_mac_dev = cfg.data.topology.num_of_pons_per_mac_dev;
+
+   access_term_cfg->data->topology->has_pon_family = BAL_ELEMENT_PRES;
+   access_term_cfg->data->topology->pon_family = cfg.data.topology.pon_family;
+
+   access_term_cfg->data->topology->has_pon_sub_family = BAL_ELEMENT_PRES;
+   access_term_cfg->data->topology->pon_sub_family = cfg.data.topology.pon_sub_family;
+
+   access_term_cfg->data->sw_version->has_version_type = BAL_ELEMENT_PRES;
+   access_term_cfg->data->sw_version->version_type = cfg.data.sw_version.version_type;
+
+   access_term_cfg->data->sw_version->has_major_rev = BAL_ELEMENT_PRES;
+   access_term_cfg->data->sw_version->major_rev = cfg.data.sw_version.major_rev;
+
+   access_term_cfg->data->sw_version->has_minor_rev = BAL_ELEMENT_PRES;
+   access_term_cfg->data->sw_version->minor_rev = cfg.data.sw_version.minor_rev;
+
+   access_term_cfg->data->sw_version->has_release_rev = BAL_ELEMENT_PRES;
+   access_term_cfg->data->sw_version->release_rev = cfg.data.sw_version.release_rev;
+
+   access_term_cfg->data->sw_version->has_om_version = BAL_ELEMENT_PRES;
+   access_term_cfg->data->sw_version->om_version = cfg.data.sw_version.om_version;
+
+   access_term_cfg->data->sw_version->has_dev_point = BAL_ELEMENT_PRES;
+   access_term_cfg->data->sw_version->dev_point = cfg.data.sw_version.dev_point;
+
+   access_term_cfg->data->has_conn_id = BAL_ELEMENT_PRES;
+   access_term_cfg->data->conn_id = cfg.data.conn_id;
+
+   return BAL_ERRNO__BAL_ERR_OK;
 }
